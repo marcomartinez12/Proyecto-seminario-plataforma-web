@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+python-multipart
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+reportlab
+openpyxl
+aiofiles
+jinja2
+requests
+psutil

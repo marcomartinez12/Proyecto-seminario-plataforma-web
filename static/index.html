@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Detección de Enfermedades Crónicas</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-heartbeat"></i> Plataforma de Detección de Enfermedades Crónicas</h1>
+            <p>Análisis inteligente de datos médicos con Machine Learning</p>
+        </header>
+
+        <main>
+            <!-- Sección de subida de archivos -->
+            <section class="upload-section">
+                <div class="upload-card">
+                    <h2><i class="fas fa-upload"></i> Subir Archivo Excel</h2>
+                    <p>Sube un archivo Excel con los datos médicos para análisis</p>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Arrastra tu archivo Excel aquí o <span class="browse-link">haz clic para seleccionar</span></p>
+                            <p class="file-info">Formatos soportados: .xlsx, .xls</p>
+                        </div>
+                        <input type="file" id="fileInput" accept=".xlsx,.xls" hidden>
+                    </div>
+                    
+                    <div class="upload-progress" id="uploadProgress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <p id="progressText">Subiendo archivo...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección de archivos subidos -->
+            <section class="files-section">
+                <div class="files-card">
+                    <h2><i class="fas fa-file-alt"></i> Archivos Subidos</h2>
+                    <div class="files-list" id="filesList">
+                        <div class="no-files" id="noFiles">
+                            <i class="fas fa-folder-open"></i>
+                            <p>No hay archivos subidos aún</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección de análisis -->
+            <section class="analysis-section" id="analysisSection" style="display: none;">
+                <div class="analysis-card">
+                    <h2><i class="fas fa-chart-line"></i> Análisis en Progreso</h2>
+                    <div class="analysis-status" id="analysisStatus">
+                        <div class="spinner"></div>
+                        <p>Procesando datos con Machine Learning...</p>
+                        <div class="analysis-steps">
+                            <div class="step active" id="step1">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Validando datos</span>
+                            </div>
+                            <div class="step" id="step2">
+                                <i class="fas fa-cog fa-spin"></i>
+                                <span>Entrenando modelo ML</span>
+                            </div>
+                            <div class="step" id="step3">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Generando gráficos</span>
+                            </div>
+                            <div class="step" id="step4">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>Creando reporte PDF</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal de información -->
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h3 id="modalTitle">Información</h3>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <i class="toast-icon"></i>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

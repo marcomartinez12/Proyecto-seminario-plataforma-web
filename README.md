@@ -1,1 +1,0 @@
-# Proyecto-seminario-plataforma-web

@@ -1,0 +1,13 @@
+[
+  {
+    "id": "527fb9c7-fdec-4bcb-8526-193a2db7607f",
+    "file_id": "6424181b-6b31-4d84-bd32-344084516a03",
+    "analysis_date": "2025-08-31T15:46:58.658141",
+    "report_path": "downloads\\reporte_6424181b-6b31-4d84-bd32-344084516a03_20250831_154655.pdf",
+    "hypertension_cases": 0,
+    "diabetes_cases": 2,
+    "total_records": 10,
+    "accuracy_score": 1.0,
+    "summary": "Análisis completado con 100.00% de precisión. Se identificaron 0 casos de hipertensión y 2 casos de diabetes."
+  }
+]
