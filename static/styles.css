@@ -1344,3 +1344,620 @@ header p {
         font-size: 0.9rem;
     }
 }
+
+/* ===== ANIMACIONES ULTRA FLUIDAS - NUEVAS ===== */
+
+/* Animación de subida con efectos de partículas mejorada */
+.upload-progress-fluid {
+    display: none;
+    background: linear-gradient(135deg, 
+        rgba(17, 17, 17, 0.95) 0%, 
+        rgba(26, 26, 26, 0.9) 50%, 
+        rgba(17, 17, 17, 0.95) 100%);
+    backdrop-filter: blur(25px);
+    border-radius: 24px;
+    padding: 3rem;
+    margin: 2rem 0;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(139, 92, 246, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: uploadFluidAppear 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Efecto de ondas de energía */
+.upload-progress-fluid::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, 
+        rgba(139, 92, 246, 0.1) 0%, 
+        transparent 30%,
+        rgba(6, 182, 212, 0.08) 60%,
+        transparent 100%);
+    animation: energyWaves 6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.upload-progress-fluid::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        transparent 30%, 
+        rgba(139, 92, 246, 0.05) 50%, 
+        transparent 70%);
+    animation: scanLine 4s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes uploadFluidAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(60px) scale(0.8) rotateX(15deg);
+        filter: blur(20px);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translateY(10px) scale(0.95) rotateX(5deg);
+        filter: blur(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotateX(0deg);
+        filter: blur(0);
+    }
+}
+
+@keyframes energyWaves {
+    0%, 100% { 
+        transform: translate(0, 0) rotate(0deg) scale(1);
+        opacity: 0.3;
+    }
+    25% { 
+        transform: translate(20px, -30px) rotate(90deg) scale(1.1);
+        opacity: 0.6;
+    }
+    50% { 
+        transform: translate(-10px, -40px) rotate(180deg) scale(1.2);
+        opacity: 0.8;
+    }
+    75% { 
+        transform: translate(-30px, -20px) rotate(270deg) scale(1.1);
+        opacity: 0.6;
+    }
+}
+
+@keyframes scanLine {
+    0% { transform: translateX(-100%) skewX(-15deg); }
+    100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+/* Barra de progreso ultra fluida */
+.progress-container-fluid {
+    background: linear-gradient(135deg, 
+        rgba(0, 0, 0, 0.8) 0%, 
+        rgba(17, 17, 17, 0.9) 100%);
+    border-radius: 30px;
+    overflow: hidden;
+    height: 24px;
+    margin: 2.5rem 0;
+    position: relative;
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    box-shadow: 
+        inset 0 4px 12px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.progress-fill-fluid {
+    height: 100%;
+    background: linear-gradient(90deg, 
+        #8b5cf6 0%, 
+        #a855f7 20%, 
+        #c084fc 40%, 
+        #e879f9 60%, 
+        #a855f7 80%, 
+        #8b5cf6 100%);
+    background-size: 200% 100%;
+    border-radius: 30px;
+    position: relative;
+    transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation: fluidFlow 3s ease-in-out infinite;
+    box-shadow: 
+        0 0 30px rgba(139, 92, 246, 0.8),
+        inset 0 2px 8px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.progress-fill-fluid::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.6) 30%, 
+        rgba(255, 255, 255, 0.8) 50%, 
+        rgba(255, 255, 255, 0.6) 70%, 
+        transparent 100%);
+    animation: fluidShine 2s ease-in-out infinite;
+    border-radius: 30px;
+}
+
+.progress-fill-fluid::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 32px;
+    height: 32px;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 1) 0%, 
+        rgba(139, 92, 246, 0.9) 40%, 
+        rgba(139, 92, 246, 0.6) 70%, 
+        transparent 100%);
+    border-radius: 50%;
+    animation: fluidGlow 1.5s ease-in-out infinite alternate;
+    filter: blur(1px);
+}
+
+@keyframes fluidFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes fluidShine {
+    0% { transform: translateX(-150%) skewX(-20deg); }
+    100% { transform: translateX(250%) skewX(-20deg); }
+}
+
+@keyframes fluidGlow {
+    0% { 
+        transform: scale(1) rotate(0deg);
+        opacity: 0.8;
+        filter: blur(1px);
+    }
+    100% { 
+        transform: scale(1.4) rotate(180deg);
+        opacity: 1;
+        filter: blur(2px);
+    }
+}
+
+/* Texto de progreso con efectos cuánticos */
+.progress-text-fluid {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 1.5rem;
+    position: relative;
+    animation: textQuantum 3s ease-in-out infinite;
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+}
+
+.progress-text-fluid::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(139, 92, 246, 0.8) 50%, 
+        transparent 100%);
+    animation: quantumUnderline 3s ease-in-out infinite;
+    border-radius: 2px;
+}
+
+@keyframes textQuantum {
+    0%, 100% { 
+        color: var(--text-primary);
+        text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        transform: translateY(0);
+    }
+    25% {
+        color: #c084fc;
+        text-shadow: 0 0 30px rgba(192, 132, 252, 0.7);
+        transform: translateY(-2px);
+    }
+    50% { 
+        color: #a855f7;
+        text-shadow: 0 0 40px rgba(168, 85, 247, 0.8);
+        transform: translateY(0);
+    }
+    75% {
+        color: #8b5cf6;
+        text-shadow: 0 0 30px rgba(139, 92, 246, 0.7);
+        transform: translateY(-1px);
+    }
+}
+
+@keyframes quantumUnderline {
+    0%, 100% { width: 0; opacity: 0; }
+    25% { width: 60px; opacity: 0.6; }
+    50% { width: 120px; opacity: 1; }
+    75% { width: 80px; opacity: 0.8; }
+}
+
+/* Análisis con efectos holográficos mejorados */
+.analysis-section-fluid {
+    display: none;
+    background: linear-gradient(135deg, 
+        rgba(17, 17, 17, 0.95) 0%, 
+        rgba(26, 26, 26, 0.9) 30%, 
+        rgba(17, 17, 17, 0.95) 100%);
+    backdrop-filter: blur(30px);
+    border-radius: 28px;
+    padding: 4rem;
+    margin: 3rem 0;
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.9),
+        0 0 50px rgba(139, 92, 246, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    position: relative;
+    overflow: hidden;
+    animation: analysisFluidReveal 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.analysis-section-fluid::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(139, 92, 246, 0.15) 60deg,
+        transparent 120deg,
+        rgba(6, 182, 212, 0.1) 180deg,
+        transparent 240deg,
+        rgba(34, 197, 94, 0.08) 300deg,
+        transparent 360deg
+    );
+    animation: holographicFluidSpin 12s linear infinite;
+    pointer-events: none;
+}
+
+.analysis-section-fluid::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        transparent 20%, 
+        rgba(139, 92, 246, 0.03) 40%, 
+        transparent 60%, 
+        rgba(6, 182, 212, 0.02) 80%, 
+        transparent 100%);
+    animation: holographicScan 8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes analysisFluidReveal {
+    0% {
+        opacity: 0;
+        transform: perspective(1200px) rotateX(-45deg) translateY(80px) scale(0.8);
+        filter: blur(25px);
+    }
+    30% {
+        opacity: 0.3;
+        transform: perspective(1200px) rotateX(-20deg) translateY(40px) scale(0.9);
+        filter: blur(10px);
+    }
+    70% {
+        opacity: 0.8;
+        transform: perspective(1200px) rotateX(-5deg) translateY(10px) scale(0.98);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 1;
+        transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes holographicFluidSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes holographicScan {
+    0%, 100% { transform: translateX(-100%) skewX(-10deg); }
+    50% { transform: translateX(100%) skewX(-10deg); }
+}
+
+/* Pasos de análisis ultra fluidos */
+.analysis-steps-fluid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 3rem;
+    position: relative;
+    z-index: 2;
+}
+
+.step-fluid {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem 2.5rem;
+    background: linear-gradient(135deg, 
+        rgba(17, 17, 17, 0.9) 0%, 
+        rgba(26, 26, 26, 0.7) 50%, 
+        rgba(17, 17, 17, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    opacity: 0.3;
+    transform: translateX(-80px) scale(0.95) rotateY(-5deg);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.step-fluid::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(139, 92, 246, 0.3) 30%, 
+        rgba(139, 92, 246, 0.5) 50%, 
+        rgba(139, 92, 246, 0.3) 70%, 
+        transparent 100%);
+    transition: left 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.step-fluid.active {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotateY(0deg);
+    background: linear-gradient(135deg, 
+        rgba(139, 92, 246, 0.2) 0%, 
+        rgba(26, 26, 26, 0.9) 30%, 
+        rgba(139, 92, 246, 0.15) 100%);
+    border-color: rgba(139, 92, 246, 0.6);
+    box-shadow: 
+        0 15px 40px rgba(139, 92, 246, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 30px rgba(139, 92, 246, 0.3);
+    animation: stepFluidMatrix 4s ease-in-out infinite;
+}
+
+.step-fluid.active::before {
+    left: 100%;
+}
+
+.step-fluid.completed {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotateY(0deg);
+    background: linear-gradient(135deg, 
+        rgba(34, 197, 94, 0.2) 0%, 
+        rgba(26, 26, 26, 0.9) 30%, 
+        rgba(34, 197, 94, 0.15) 100%);
+    border-color: rgba(34, 197, 94, 0.6);
+    box-shadow: 
+        0 15px 40px rgba(34, 197, 94, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 30px rgba(34, 197, 94, 0.3);
+}
+
+@keyframes stepFluidMatrix {
+    0%, 100% {
+        box-shadow: 
+            0 15px 40px rgba(139, 92, 246, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            0 0 30px rgba(139, 92, 246, 0.3);
+    }
+    25% {
+        box-shadow: 
+            0 20px 50px rgba(139, 92, 246, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 0 40px rgba(139, 92, 246, 0.5);
+    }
+    50% {
+        box-shadow: 
+            0 25px 60px rgba(139, 92, 246, 0.7),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4),
+            0 0 50px rgba(139, 92, 246, 0.6);
+    }
+    75% {
+        box-shadow: 
+            0 20px 50px rgba(139, 92, 246, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 0 40px rgba(139, 92, 246, 0.5);
+    }
+}
+
+/* Iconos con efectos cuánticos mejorados */
+.step-icon-fluid {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.15) 0%, 
+        rgba(255, 255, 255, 0.05) 50%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.step-icon-fluid::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(139, 92, 246, 0.4) 60deg,
+        transparent 120deg,
+        rgba(139, 92, 246, 0.6) 180deg,
+        transparent 240deg
+    );
+    animation: quantumFluidSpin 4s linear infinite;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.step-fluid.active .step-icon-fluid {
+    background: linear-gradient(135deg, 
+        rgba(139, 92, 246, 0.4) 0%, 
+        rgba(139, 92, 246, 0.2) 50%, 
+        rgba(139, 92, 246, 0.3) 100%);
+    border-color: rgba(139, 92, 246, 0.8);
+    color: var(--primary);
+    transform: scale(1.15) rotateY(0deg);
+    animation: iconFluidQuantum 3s ease-in-out infinite;
+    box-shadow: 
+        0 0 30px rgba(139, 92, 246, 0.6),
+        inset 0 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+.step-fluid.active .step-icon-fluid::before {
+    opacity: 1;
+}
+
+.step-fluid.completed .step-icon-fluid {
+    background: linear-gradient(135deg, 
+        rgba(34, 197, 94, 0.4) 0%, 
+        rgba(34, 197, 94, 0.2) 50%, 
+        rgba(34, 197, 94, 0.3) 100%);
+    border-color: rgba(34, 197, 94, 0.8);
+    color: var(--success);
+    transform: scale(1) rotateY(0deg);
+    box-shadow: 
+        0 0 30px rgba(34, 197, 94, 0.6),
+        inset 0 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+@keyframes quantumFluidSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes iconFluidQuantum {
+    0%, 100% {
+        transform: scale(1.15) rotateY(0deg) rotateZ(0deg);
+        filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.6));
+    }
+    25% {
+        transform: scale(1.25) rotateY(90deg) rotateZ(90deg);
+        filter: drop-shadow(0 0 25px rgba(139, 92, 246, 0.8));
+    }
+    50% {
+        transform: scale(1.3) rotateY(180deg) rotateZ(180deg);
+        filter: drop-shadow(0 0 30px rgba(139, 92, 246, 1));
+    }
+    75% {
+        transform: scale(1.25) rotateY(270deg) rotateZ(270deg);
+        filter: drop-shadow(0 0 25px rgba(139, 92, 246, 0.8));
+    }
+}
+
+/* Texto con efectos de resplandor mejorados */
+.step-text-fluid {
+    flex: 1;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+}
+
+.step-fluid.active .step-text-fluid {
+    color: var(--text-primary);
+    font-weight: 700;
+    animation: textFluidGlow 3s ease-in-out infinite;
+    text-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+}
+
+.step-fluid.completed .step-text-fluid {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+}
+
+@keyframes textFluidGlow {
+    0%, 100% {
+        text-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        transform: translateY(0);
+    }
+    25% {
+        text-shadow: 0 0 25px rgba(139, 92, 246, 0.7);
+        transform: translateY(-1px);
+    }
+    50% {
+        text-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
+        transform: translateY(0);
+    }
+    75% {
+        text-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        transform: translateY(-0.5px);
+    }
+}
+
+/* Responsive para animaciones fluidas */
+@media (max-width: 768px) {
+    .upload-progress-fluid {
+        padding: 2rem 1.5rem;
+    }
+    
+    .progress-container-fluid {
+        height: 20px;
+        margin: 2rem 0;
+    }
+    
+    .analysis-section-fluid {
+        padding: 2.5rem 1.5rem;
+    }
+    
+    .step-fluid {
+        padding: 1.5rem 1.5rem;
+        gap: 1.5rem;
+        transform: translateX(-40px) scale(0.95);
+    }
+    
+    .step-icon-fluid {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    .step-text-fluid {
+        font-size: 1.1rem;
+    }
+}

@@ -1,36 +1,47 @@
-// Configuración de la API
 const API_BASE_URL = 'http://localhost:8000/api';
 
 // Variables globales
 let uploadedFiles = [];
 let currentAnalysis = null;
-let isAnalyzing = false; // Nueva variable para controlar el estado
+let isAnalyzing = false;
+let currentCharts = [];
 
-// Cargar archivos subidos con mejor control de debounce
+// Control estricto de carga de archivos
 let loadFilesTimeout;
 let lastLoadTime = 0;
+let isLoadingFiles = false;
 
+// FUNCIÓN ÚNICA DE CARGA CON CONTROL ESTRICTO
 async function loadUploadedFiles(force = false) {
     const now = Date.now();
+    
+    // Prevenir múltiples ejecuciones simultáneas
+    if (isLoadingFiles && !force) {
+        return;
+    }
     
     // Si estamos analizando y no es forzado, no recargar
     if (isAnalyzing && !force) {
         return;
     }
     
-    // Evitar llamadas muy frecuentes (mínimo 2 segundos entre llamadas)
-    if (!force && (now - lastLoadTime) < 2000) { // Aumentado de 1000 a 2000
+    // Control de tiempo mínimo entre llamadas
+    if (!force && (now - lastLoadTime) < 3000) {
         return;
     }
     
-    // Debounce para evitar llamadas múltiples
+    // Limpiar timeout anterior
     if (loadFilesTimeout) {
         clearTimeout(loadFilesTimeout);
     }
     
     loadFilesTimeout = setTimeout(async () => {
+        if (isLoadingFiles) return;
+        
         try {
+            isLoadingFiles = true;
             lastLoadTime = Date.now();
+            
             const response = await fetch(`${API_BASE_URL}/files/list`);
             if (!response.ok) throw new Error('Error al cargar archivos');
             
@@ -39,126 +50,13 @@ async function loadUploadedFiles(force = false) {
             
         } catch (error) {
             console.error('Error loading files:', error);
+        } finally {
+            isLoadingFiles = false;
         }
-    }, force ? 0 : 800); // Aumentado el delay
+    }, force ? 0 : 1000);
 }
 
-// Analizar archivo - versión optimizada
-// Función analyzeFile optimizada (líneas 50-100)
-async function analyzeFile(fileId) {
-    try {
-        if (isAnalyzing) {
-            showToast('Ya hay un análisis en progreso', 'warning');
-            return;
-        }
-        
-        isAnalyzing = true;
-        showAnalysisProgress();
-        
-        const response = await fetch(`${API_BASE_URL}/analysis/analyze`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ file_id: fileId })
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Error en el análisis');
-        }
-        
-        const result = await response.json();
-        currentAnalysis = result;
-        
-        // Simular progreso de análisis con animaciones mejoradas
-        await simulateAnalysisSteps();
-        
-        // Esperar para que el usuario vea la animación completa
-        await new Promise(resolve => setTimeout(resolve, 2500));
-        
-        hideAnalysisProgress();
-        showToast('Análisis completado. Descargando reporte...', 'success');
-        
-        // Descargar automáticamente el reporte
-        await downloadReport(result.id, true);
-        
-        // OPTIMIZADO: Solo actualizar el estado del archivo específico
-        updateFileStatus(fileId, 'completed');
-        
-    } catch (error) {
-        hideAnalysisProgress();
-        showToast(`Error en el análisis: ${error.message}`, 'error');
-        console.error('Error analyzing file:', error);
-    } finally {
-        isAnalyzing = false;
-        // ELIMINADO: No más refrescos automáticos
-    }
-}
-
-// Función deleteFile optimizada (líneas 105-125)
-async function deleteFile(fileId) {
-    if (!confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
-            method: 'DELETE'
-        });
-        
-        if (!response.ok) throw new Error('Error al eliminar archivo');
-        
-        showToast('Archivo eliminado correctamente', 'success');
-        
-        // OPTIMIZADO: Actualización local sin refresco
-        uploadedFiles = uploadedFiles.filter(file => file.id !== fileId);
-        renderFilesList();
-        
-    } catch (error) {
-        showToast(`Error: ${error.message}`, 'error');
-        console.error('Error deleting file:', error);
-    }
-}
-
-// Función uploadFile optimizada (líneas 130-165)
-async function uploadFile(file) {
-    try {
-        showUploadProgress();
-        
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        const response = await fetch(`${API_BASE_URL}/files/upload`, {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Error al subir archivo');
-        }
-        
-        const result = await response.json();
-        
-        updateProgress(100, 'Archivo subido correctamente');
-        setTimeout(() => {
-            hideUploadProgress();
-            showToast('Archivo subido correctamente', 'success');
-            
-            // OPTIMIZADO: Agregar solo el nuevo archivo
-            uploadedFiles.push(result);
-            renderFilesList();
-        }, 1000);
-        
-    } catch (error) {
-        hideUploadProgress();
-        showToast(`Error: ${error.message}`, 'error');
-        console.error('Error uploading file:', error);
-    }
-}
-
-// Nueva función para actualizar estado específico
+// ACTUALIZACIÓN LOCAL SIN REFRESCOS
 function updateFileStatus(fileId, newStatus) {
     const fileIndex = uploadedFiles.findIndex(file => file.id === fileId);
     if (fileIndex !== -1) {
@@ -167,101 +65,7 @@ function updateFileStatus(fileId, newStatus) {
     }
 }
 
-// Función simulateAnalysisSteps mejorada (líneas 510-540)
-async function simulateAnalysisSteps() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    const stepTimes = [800, 2500, 3000, 2000];
-    
-    for (let i = 0; i < steps.length; i++) {
-        // Esperar antes de activar el siguiente paso
-        if (i > 0) {
-            await new Promise(resolve => setTimeout(resolve, stepTimes[i]));
-        }
-        
-        // Activar paso actual con animación
-        const currentStep = document.getElementById(steps[i]);
-        currentStep.classList.add('active');
-        
-        // Cambiar icono a completado después de la animación
-        setTimeout(() => {
-            const icon = currentStep.querySelector('i');
-            icon.className = 'fas fa-check-circle';
-        }, 600);
-        
-        // Mantener pasos anteriores completados
-        if (i > 0) {
-            const prevStep = document.getElementById(steps[i-1]);
-            const prevIcon = prevStep.querySelector('i');
-            prevIcon.className = 'fas fa-check-circle';
-        }
-    }
-    
-    // Esperar para mostrar todos los pasos completados
-    await new Promise(resolve => setTimeout(resolve, 1500));
-}
-
-// ELIMINAR completamente la función duplicada de deleteFile (líneas 590-600)
-async function deleteFile(fileId) {
-    if (!confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
-            method: 'DELETE'
-        });
-        
-        if (!response.ok) throw new Error('Error al eliminar archivo');
-        
-        showToast('Archivo eliminado correctamente', 'success');
-        
-        // OPTIMIZADO: Actualización local sin refresco
-        uploadedFiles = uploadedFiles.filter(file => file.id !== fileId);
-        renderFilesList();
-        
-    } catch (error) {
-        showToast(`Error: ${error.message}`, 'error');
-        console.error('Error deleting file:', error);
-    }
-}
-
-// Subir archivo - versión optimizada
-async function uploadFile(file) {
-    try {
-        showUploadProgress();
-        
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        const response = await fetch(`${API_BASE_URL}/files/upload`, {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Error al subir archivo');
-        }
-        
-        const result = await response.json();
-        
-        updateProgress(100, 'Archivo subido correctamente');
-        setTimeout(() => {
-            hideUploadProgress();
-            showToast('Archivo subido correctamente', 'success');
-            
-            // Recargar lista solo una vez
-            loadUploadedFiles(true);
-        }, 1000);
-        
-    } catch (error) {
-        hideUploadProgress();
-        showToast(`Error: ${error.message}`, 'error');
-        console.error('Error uploading file:', error);
-    }
-}
-
-// Elementos del DOM
+// ELEMENTOS DOM
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
 const uploadProgress = document.getElementById('uploadProgress');
@@ -270,20 +74,19 @@ const progressText = document.getElementById('progressText');
 const filesList = document.getElementById('filesList');
 const noFiles = document.getElementById('noFiles');
 const analysisSection = document.getElementById('analysisSection');
-const analysisStatus = document.getElementById('analysisStatus');
 const infoModal = document.getElementById('infoModal');
 const modalTitle = document.getElementById('modalTitle');
 const modalMessage = document.getElementById('modalMessage');
 const closeModal = document.getElementById('closeModal');
 const toast = document.getElementById('toast');
 
-// Inicialización
+// INICIALIZACIÓN ÚNICA
 document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners();
-    loadUploadedFiles(); // SOLO esta llamada inicial
+    loadUploadedFiles(); // ÚNICA llamada inicial
 });
 
-// Event Listeners - versión corregida
+// EVENT LISTENERS ÚNICOS
 function initializeEventListeners() {
     // Upload area events
     uploadArea.addEventListener('click', () => fileInput.click());
@@ -291,17 +94,28 @@ function initializeEventListeners() {
     uploadArea.addEventListener('dragleave', handleDragLeave);
     uploadArea.addEventListener('drop', handleDrop);
     
-    // File input change - SIN preventDefault para permitir diálogo de archivos
+    // File input
     fileInput.addEventListener('change', handleFileSelect);
     
     // Modal events
     closeModal.addEventListener('click', hideModal);
+    
+    // Charts modal
+    const closeChartsModal = document.getElementById('closeChartsModal');
+    if (closeChartsModal) {
+        closeChartsModal.addEventListener('click', hideChartsModal);
+    }
+    
+    // Window click events
     window.addEventListener('click', (e) => {
         if (e.target === infoModal) hideModal();
+        
+        const chartsModal = document.getElementById('chartsModal');
+        if (e.target === chartsModal) hideChartsModal();
     });
 }
 
-// Drag and Drop handlers
+// DRAG AND DROP
 function handleDragOver(e) {
     e.preventDefault();
     uploadArea.classList.add('dragover');
@@ -322,21 +136,16 @@ function handleDrop(e) {
     }
 }
 
-// File selection handler - versión corregida sin preventDefault
 function handleFileSelect(e) {
-    // NO usar preventDefault() aquí - bloquea el diálogo de archivos
     const file = e.target.files[0];
     if (file) {
         handleFileUpload(file);
     }
-    
-    // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
     e.target.value = '';
 }
 
-// File upload handler
+// SUBIDA DE ARCHIVOS SIN REFRESCOS
 async function handleFileUpload(file) {
-    // Validar tipo de archivo
     const allowedTypes = ['.xlsx', '.xls'];
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
     
@@ -345,10 +154,9 @@ async function handleFileUpload(file) {
         return;
     }
     
-    // Mostrar progreso
-    showUploadProgress();
-    
     try {
+        showUploadProgress();
+        
         const formData = new FormData();
         formData.append('file', file);
         
@@ -364,14 +172,22 @@ async function handleFileUpload(file) {
         
         const result = await response.json();
         
-        // Actualizar progreso al 100%
-        updateProgress(100, 'Archivo subido correctamente');
+        updateProgressFluid(100, 'Archivo subido correctamente');
         
         setTimeout(() => {
             hideUploadProgress();
-            showToast('Archivo subido exitosamente', 'success');
-            // COMENTAR ESTA LÍNEA COMPLETAMENTE
-            // loadUploadedFiles(); 
+            showToast('Archivo subido correctamente', 'success');
+
+            // SOLO ACTUALIZACIÓN LOCAL - NO MÁS REFRESCOS
+            if (result) {
+                const exists = uploadedFiles.some(f => f.id === result.id);
+                if (!exists) {
+                    uploadedFiles.push(result);
+                } else {
+                    uploadedFiles = uploadedFiles.map(f => f.id === result.id ? { ...f, ...result } : f);
+                }
+                renderFilesList();
+            }
         }, 1000);
         
     } catch (error) {
@@ -381,35 +197,224 @@ async function handleFileUpload(file) {
     }
 }
 
-// Mostrar/ocultar progreso de subida
+// PROGRESO DE SUBIDA
 function showUploadProgress() {
-    uploadProgress.style.display = 'block';
-    updateProgress(0, 'Preparando subida...');
+    if (!uploadProgress || !progressFill || !progressText) return;
     
-    // Simular progreso
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += Math.random() * 30;
-        if (progress >= 90) {
-            clearInterval(interval);
-            updateProgress(90, 'Procesando archivo...');
-        } else {
-            updateProgress(progress, 'Subiendo archivo...');
-        }
-    }, 200);
+    // Mostrar inmediatamente el div de progreso
+    uploadProgress.style.display = 'block';
+    progressFill.style.width = '0%';
+    progressText.textContent = 'Iniciando subida...';
+}
+
+function updateProgressFluid(percent, text) {
+    if (progressFill) {
+        progressFill.style.width = `${percent}%`;
+        // Añadir transición suave
+        progressFill.style.transition = 'width 0.3s ease';
+    }
+    if (progressText) progressText.textContent = text;
 }
 
 function hideUploadProgress() {
-    uploadProgress.style.display = 'none';
-    progressFill.style.width = '0%';
+    if (!uploadProgress) return;
+    
+    setTimeout(() => {
+        uploadProgress.style.display = 'none';
+        if (progressFill) {
+            progressFill.style.width = '0%';
+            progressFill.style.transition = 'none'; // Resetear transición
+        }
+        if (progressText) progressText.textContent = 'Iniciando subida...';
+    }, 1000);
 }
 
-function updateProgress(percent, text) {
-    progressFill.style.width = `${percent}%`;
-    progressText.textContent = text;
+// ANÁLISIS ÚNICO SIN REFRESCOS
+async function analyzeFile(fileId) {
+    try {
+        if (isAnalyzing) {
+            showToast('Ya hay un análisis en progreso', 'warning');
+            return;
+        }
+
+        isAnalyzing = true;
+        showAnalysisProgress();
+
+        const response = await fetch(`${API_BASE_URL}/analysis/analyze`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file_id: fileId })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Error en el análisis');
+        }
+
+        const result = await response.json();
+        currentAnalysis = result;
+
+        await simulateAnalysisStepsFluid();
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        hideAnalysisProgress();
+        showToast('Análisis completado. Descargando reporte...', 'success');
+        await downloadReport(result.id, true);
+
+        // SOLO ACTUALIZACIÓN LOCAL - CERO REFRESCOS
+        updateFileStatus(fileId, 'completed');
+
+    } catch (error) {
+        hideAnalysisProgress();
+        showToast(`Error en el análisis: ${error.message}`, 'error');
+    } finally {
+        isAnalyzing = false;
+    }
 }
 
-// Renderizar lista de archivos
+// ANIMACIONES FLUIDAS
+function showAnalysisProgress() {
+    const analysisSection = document.getElementById('analysisSection');
+    const analysisSteps = analysisSection.querySelector('.analysis-steps');
+    
+    analysisSection.className = 'analysis-section-fluid';
+    analysisSteps.className = 'analysis-steps-fluid';
+    
+    const steps = analysisSteps.querySelectorAll('.step');
+    steps.forEach(step => {
+        step.className = 'step-fluid';
+        
+        const icon = step.querySelector('.step-icon');
+        const text = step.querySelector('.step-text');
+        
+        if (icon) icon.className = 'step-icon-fluid';
+        if (text) text.className = 'step-text-fluid';
+    });
+    
+    resetAnalysisStepsFluid();
+    analysisSection.style.display = 'block';
+    analysisSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function simulateAnalysisStepsFluid() {
+    const steps = ['step1', 'step2', 'step3', 'step4'];
+    const stepTimes = [500, 2500, 3500, 3000];
+    const stepTexts = [
+        'Cargando y validando archivo...',
+        'Procesando datos y estadísticas...',
+        'Generando gráficas y visualizaciones...',
+        'Creando reporte PDF final...'
+    ];
+    
+    for (let i = 0; i < steps.length; i++) {
+        if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, stepTimes[i]));
+        }
+        
+        const currentStep = document.getElementById(steps[i]);
+        if (currentStep) {
+            steps.forEach(stepId => {
+                const step = document.getElementById(stepId);
+                if (step && step !== currentStep) {
+                    step.classList.remove('active');
+                    step.classList.add('completed');
+                }
+            });
+            
+            currentStep.classList.add('active');
+            
+            const stepText = currentStep.querySelector('.step-text-fluid');
+            if (stepText) {
+                stepText.textContent = stepTexts[i];
+            }
+            
+            setTimeout(() => {
+                const icon = currentStep.querySelector('i');
+                if (icon && i < steps.length - 1) {
+                    icon.className = 'fas fa-check-circle';
+                }
+            }, stepTimes[i] * 0.8);
+        }
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    const lastStep = document.getElementById(steps[steps.length - 1]);
+    if (lastStep) {
+        lastStep.classList.remove('active');
+        lastStep.classList.add('completed');
+        const icon = lastStep.querySelector('i');
+        if (icon) {
+            icon.className = 'fas fa-check-circle';
+        }
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 2000));
+}
+
+function resetAnalysisStepsFluid() {
+    const steps = ['step1', 'step2', 'step3', 'step4'];
+    const originalIcons = ['fas fa-upload', 'fas fa-cog fa-spin', 'fas fa-chart-bar', 'fas fa-file-pdf'];
+    const originalTexts = [
+        'Subiendo archivo',
+        'Procesando datos',
+        'Generando gráficas',
+        'Creando reporte'
+    ];
+    
+    steps.forEach((stepId, index) => {
+        const step = document.getElementById(stepId);
+        if (step) {
+            const icon = step.querySelector('i');
+            const text = step.querySelector('.step-text-fluid');
+            
+            step.classList.remove('active', 'completed');
+            
+            if (icon) icon.className = originalIcons[index];
+            if (text) text.textContent = originalTexts[index];
+        }
+    });
+}
+
+function hideAnalysisProgress() {
+    const analysisSection = document.getElementById('analysisSection');
+    
+    analysisSection.style.opacity = '0';
+    analysisSection.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        analysisSection.style.display = 'none';
+        analysisSection.style.opacity = '1';
+        analysisSection.style.transform = 'translateY(0)';
+        analysisSection.className = 'analysis-section';
+    }, 600);
+}
+
+// ELIMINAR ARCHIVO SIN REFRESCOS
+async function deleteFile(fileId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error('Error al eliminar archivo');
+        
+        showToast('Archivo eliminado correctamente', 'success');
+
+        // SOLO ACTUALIZACIÓN LOCAL - CERO REFRESCOS
+        uploadedFiles = uploadedFiles.filter(file => file.id !== fileId);
+        renderFilesList();
+
+    } catch (error) {
+        showToast(`Error: ${error.message}`, 'error');
+        console.error('Error deleting file:', error);
+    }
+}
+
+// RENDERIZAR LISTA
 function renderFilesList() {
     if (uploadedFiles.length === 0) {
         noFiles.style.display = 'block';
@@ -457,199 +462,14 @@ function renderFilesList() {
     filesList.innerHTML = filesHTML;
 }
 
-// Analizar archivo
-async function analyzeFile(fileId) {
-    try {
-        showAnalysisProgress();
-        
-        const response = await fetch(`${API_BASE_URL}/analysis/analyze`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ file_id: fileId })
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Error en el análisis');
-        }
-        
-        const result = await response.json();
-        currentAnalysis = result;
-        
-        // Simular progreso de análisis
-        await simulateAnalysisSteps();
-        
-        // Esperar más tiempo antes de ocultar para que el usuario vea todos los pasos completados
-        await new Promise(resolve => setTimeout(resolve, 2500)); // Aumentado de 1000 a 2500ms
-        
-        hideAnalysisProgress();
-        showToast('Análisis completado. Descargando reporte...', 'success');
-        
-        // Descargar automáticamente el reporte
-        await downloadReport(result.id, true);
-        
-        // Recargar lista de archivos
-        loadUploadedFiles();
-        
-    } catch (error) {
-        hideAnalysisProgress();
-        showToast(`Error en el análisis: ${error.message}`, 'error');
-        console.error('Error analyzing file:', error);
-    }
-}
-
-// Mostrar progreso de análisis
-// Función mejorada para simular pasos del análisis
-async function simulateAnalysisSteps() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    const stepTimes = [0, 2000, 3000, 2500]; // Primer paso inmediato, luego delays
-    
-    for (let i = 0; i < steps.length; i++) {
-        // Esperar antes de activar el siguiente paso (excepto el primero)
-        if (i > 0) {
-            await new Promise(resolve => setTimeout(resolve, stepTimes[i]));
-        }
-        
-        // Activar paso actual
-        const currentStep = document.getElementById(steps[i]);
-        if (currentStep) {
-            currentStep.classList.add('active');
-            
-            // Cambiar icono a completado después de un breve delay
-            setTimeout(() => {
-                const icon = currentStep.querySelector('i');
-                if (icon) {
-                    icon.className = 'fas fa-check-circle';
-                }
-            }, 800);
-        }
-    }
-    
-    // Esperar un poco más al final para que el usuario vea todos los pasos completados
-    await new Promise(resolve => setTimeout(resolve, 2000));
-}
-
-// Función mejorada para reiniciar los pasos del análisis
-function resetAnalysisSteps() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    const originalIcons = ['fas fa-upload', 'fas fa-cog fa-spin', 'fas fa-chart-bar', 'fas fa-file-pdf'];
-    
-    steps.forEach((stepId, index) => {
-        const step = document.getElementById(stepId);
-        if (step) {
-            const icon = step.querySelector('i');
-            
-            // Remover clase active de todos los pasos
-            step.classList.remove('active');
-            
-            // Restaurar iconos originales
-            if (icon) {
-                icon.className = originalIcons[index];
-            }
-        }
-    });
-    
-    // Activar solo el primer paso inicialmente
-    const firstStep = document.getElementById('step1');
-    if (firstStep) {
-        firstStep.classList.add('active');
-    }
-}
-
-// Función mejorada para mostrar el progreso del análisis
-function showAnalysisProgress() {
-    console.log('Mostrando progreso de análisis...'); // Para debug
-    
-    // Reiniciar todos los pasos antes de mostrar
-    resetAnalysisSteps();
-    
-    const analysisSection = document.getElementById('analysisSection');
-    if (analysisSection) {
-        analysisSection.style.display = 'block';
-        analysisSection.scrollIntoView({ behavior: 'smooth' });
-    } else {
-        console.error('No se encontró analysisSection');
-    }
-}
-
-function hideAnalysisProgress() {
-    const analysisSection = document.getElementById('analysisSection');
-    if (analysisSection) {
-        analysisSection.style.display = 'none';
-    }
-}
-
-// Nueva función para reiniciar los pasos del análisis
-function resetAnalysisSteps() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    
-    steps.forEach((stepId, index) => {
-        const step = document.getElementById(stepId);
-        const icon = step.querySelector('i');
-        
-        // Remover clase active de todos los pasos
-        step.classList.remove('active');
-        
-        // Restaurar iconos originales
-        if (index === 0) {
-            icon.className = 'fas fa-check-circle';
-            step.classList.add('active'); // Solo el primer paso activo inicialmente
-        } else if (index === 1) {
-            icon.className = 'fas fa-cog fa-spin';
-        } else if (index === 2) {
-            icon.className = 'fas fa-chart-bar';
-        } else if (index === 3) {
-            icon.className = 'fas fa-file-pdf';
-        }
-    });
-}
-
-// Función mejorada para simular pasos del análisis con tiempos más realistas
-async function simulateAnalysisSteps() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    const stepTimes = [1000, 3000, 4000, 2500]; // Tiempos más realistas para cada paso
-    
-    for (let i = 0; i < steps.length; i++) {
-        // Esperar antes de activar el siguiente paso
-        if (i > 0) {
-            await new Promise(resolve => setTimeout(resolve, stepTimes[i]));
-        }
-        
-        // Activar paso actual
-        const currentStep = document.getElementById(steps[i]);
-        currentStep.classList.add('active');
-        
-        // Cambiar icono a completado después de un breve delay
-        setTimeout(() => {
-            const icon = currentStep.querySelector('i');
-            icon.className = 'fas fa-check-circle';
-        }, 500);
-        
-        // Desactivar el paso anterior (excepto el primero)
-        if (i > 0) {
-            const prevStep = document.getElementById(steps[i-1]);
-            // Mantener el icono de check pero quitar el spinning
-            const prevIcon = prevStep.querySelector('i');
-            prevIcon.className = 'fas fa-check-circle';
-        }
-    }
-    
-    // Esperar un poco más al final para que el usuario vea todos los pasos completados
-    await new Promise(resolve => setTimeout(resolve, 1500));
-}
-
-// Descargar reporte
+// DESCARGAR REPORTE
 async function downloadReport(analysisId, isAutoDownload = false) {
     try {
-        // Si es descarga automática, buscar el análisis por file_id
         let downloadUrl;
         
         if (isAutoDownload && currentAnalysis) {
             downloadUrl = `${API_BASE_URL}/analysis/download/${currentAnalysis.id}`;
         } else {
-            // Buscar análisis por file_id
             const response = await fetch(`${API_BASE_URL}/analysis/results/${analysisId}`);
             if (!response.ok) throw new Error('No se encontró el análisis');
             
@@ -660,7 +480,6 @@ async function downloadReport(analysisId, isAutoDownload = false) {
             downloadUrl = `${API_BASE_URL}/analysis/download/${latestAnalysis.id}`;
         }
         
-        // Crear enlace de descarga
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.download = `reporte_medico_${new Date().toISOString().split('T')[0]}.pdf`;
@@ -678,106 +497,17 @@ async function downloadReport(analysisId, isAutoDownload = false) {
     }
 }
 
-// Eliminar archivo
-async function deleteFile(fileId) {
-    if (!confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
-            method: 'DELETE'
-        });
-        
-        if (!response.ok) throw new Error('Error al eliminar archivo');
-        
-        showToast('Archivo eliminado correctamente', 'success');
-        loadUploadedFiles();
-        
-    } catch (error) {
-        showToast(`Error: ${error.message}`, 'error');
-        console.error('Error deleting file:', error);
-    }
-}
-
-// Utilidades
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-function getStatusText(status) {
-    const statusMap = {
-        'uploaded': 'Subido',
-        'processing': 'Procesando',
-        'completed': 'Completado',
-        'error': 'Error'
-    };
-    return statusMap[status] || status;
-}
-
-// Modal functions
-function showModal(title, message) {
-    modalTitle.textContent = title;
-    modalMessage.textContent = message;
-    infoModal.style.display = 'block';
-}
-
-function hideModal() {
-    infoModal.style.display = 'none';
-}
-
-// Toast notifications
-function showToast(message, type = 'info') {
-    const toastContent = toast.querySelector('.toast-content');
-    const toastIcon = toast.querySelector('.toast-icon');
-    const toastMessage = toast.querySelector('.toast-message');
-    
-    // Configurar icono según tipo
-    const icons = {
-        'success': 'fas fa-check-circle',
-        'error': 'fas fa-exclamation-circle',
-        'info': 'fas fa-info-circle'
-    };
-    
-    toastIcon.className = `toast-icon ${icons[type] || icons.info}`;
-    toastMessage.textContent = message;
-    
-    // Aplicar clase de tipo
-    toast.className = `toast ${type}`;
-    toast.classList.add('show');
-    
-    // Auto-hide después de 4 segundos
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
-}
-
-// Función global para hacer disponibles las funciones en el HTML
-window.analyzeFile = analyzeFile;
-window.downloadReport = downloadReport;
-window.deleteFile = deleteFile;
-
-// Variables globales para las gráficas
-let currentCharts = [];
-
-// Función para ver gráficas
+// VER GRÁFICAS
 async function viewCharts(fileId) {
     try {
         showToast('Cargando gráficas...', 'info');
         
-        // Obtener datos de las gráficas para este archivo
         const response = await fetch(`${API_BASE_URL}/analysis/charts/${fileId}`);
         if (!response.ok) {
             throw new Error('No se pudieron cargar las gráficas');
         }
         
         const chartsData = await response.json();
-        
-        // Mostrar modal
         showChartsModal(chartsData, fileId);
         
     } catch (error) {
@@ -786,26 +516,18 @@ async function viewCharts(fileId) {
     }
 }
 
-// Mostrar modal de gráficas
 function showChartsModal(chartsData, fileId) {
     const modal = document.getElementById('chartsModal');
     const title = document.getElementById('chartsModalTitle');
     
-    // Encontrar el archivo para mostrar su nombre
     const file = uploadedFiles.find(f => f.id === fileId);
     title.textContent = `Gráficas del Análisis - ${file ? file.original_filename : 'Archivo'}`;
     
-    // Limpiar gráficas anteriores
     destroyCurrentCharts();
-    
-    // Crear nuevas gráficas
     createCharts(chartsData);
-    
-    // Mostrar modal
     modal.style.display = 'block';
 }
 
-// Crear gráficas con Chart.js
 function createCharts(data) {
     // Gráfica de distribución de diagnósticos
     const diagnosticCtx = document.getElementById('diagnosticChart').getContext('2d');
@@ -923,7 +645,6 @@ function createCharts(data) {
     currentCharts.push(correlationChart);
 }
 
-// Destruir gráficas actuales
 function destroyCurrentCharts() {
     currentCharts.forEach(chart => {
         if (chart) {
@@ -933,41 +654,65 @@ function destroyCurrentCharts() {
     currentCharts = [];
 }
 
-// Cerrar modal de gráficas
 function hideChartsModal() {
     const modal = document.getElementById('chartsModal');
     modal.style.display = 'none';
     destroyCurrentCharts();
 }
 
-// Event listeners para el modal de gráficas
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
-    
-    // Agregar event listener para cerrar modal de gráficas
-    const closeChartsModal = document.getElementById('closeChartsModal');
-    if (closeChartsModal) {
-        closeChartsModal.addEventListener('click', hideChartsModal);
-    }
-    
-    // Cerrar modal al hacer clic fuera
-    window.addEventListener('click', (e) => {
-        const chartsModal = document.getElementById('chartsModal');
-        if (e.target === chartsModal) {
-            hideChartsModal();
-        }
-        // ... existing modal close code ...
-    });
-});
-
-// Hacer la función disponible globalmente
-window.viewCharts = viewCharts;
-
-// Función para refrescar manualmente
-function refreshFilesList() {
-    loadUploadedFiles(true);
-    showToast('Lista actualizada', 'info');
+// UTILIDADES
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// En initializeEventListeners, agregar:
-// document.getElementById('refresh-btn')?.addEventListener('click', refreshFilesList);
+function getStatusText(status) {
+    const statusMap = {
+        'uploaded': 'Subido',
+        'processing': 'Procesando',
+        'completed': 'Completado',
+        'error': 'Error'
+    };
+    return statusMap[status] || status;
+}
+
+function showModal(title, message) {
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    infoModal.style.display = 'block';
+}
+
+function hideModal() {
+    infoModal.style.display = 'none';
+}
+
+function showToast(message, type = 'info') {
+    const toastContent = toast.querySelector('.toast-content');
+    const toastIcon = toast.querySelector('.toast-icon');
+    const toastMessage = toast.querySelector('.toast-message');
+    
+    const icons = {
+        'success': 'fas fa-check-circle',
+        'error': 'fas fa-exclamation-circle',
+        'info': 'fas fa-info-circle'
+    };
+    
+    toastIcon.className = `toast-icon ${icons[type] || icons.info}`;
+    toastMessage.textContent = message;
+    
+    toast.className = `toast ${type}`;
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4000);
+}
+
+// FUNCIONES GLOBALES
+window.analyzeFile = analyzeFile;
+window.downloadReport = downloadReport;
+window.deleteFile = deleteFile;
+window.viewCharts = viewCharts;

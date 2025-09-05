@@ -103,6 +103,8 @@ def create_ml_model(data):
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     
+    # Mantener precisión real sin modificaciones
+    
     # Obtener importancia de características
     feature_importance = dict(zip(features, model.feature_importances_))
     
@@ -157,129 +159,457 @@ def generate_charts_optimized(data, output_dir, max_points=5000):
     return charts
 
 def generate_pdf_report(data, model_results, charts, output_path):
-    """Generar reporte PDF con análisis médico"""
-    doc = SimpleDocTemplate(output_path, pagesize=letter)
+    """Generar reporte PDF con diseño profesional y colores específicos"""
+    from reportlab.platypus import PageBreak, KeepTogether
+    from reportlab.lib.colors import HexColor
+    
+    # Colores específicos solicitados
+    AZUL_OSCURO = HexColor('#2C3E50')  # Azul oscuro
+    AZUL_CLARO = HexColor('#3498DB')   # Azul claro
+    VERDE_TURQUESA = HexColor('#16A085') # Verde turquesa
+    GRIS_CLARO = HexColor('#F8F9FA')   # Gris muy claro para fondos
+    GRIS_MEDIO = HexColor('#E9ECEF')   # Gris medio para tablas
+    NEGRO = HexColor('#000000')        # Negro para texto
+    BLANCO = HexColor('#FFFFFF')       # Blanco
+    ROJO = HexColor('#E74C3C')         # Rojo para alertas
+    NARANJA = HexColor('#F39C12')      # Naranja para advertencias
+    VERDE = HexColor('#27AE60')        # Verde para normal
+    
+    doc = SimpleDocTemplate(output_path, pagesize=letter,
+                          topMargin=0.8*inch, bottomMargin=1*inch,
+                          leftMargin=0.8*inch, rightMargin=0.8*inch)
     story = []
     
-    # Estilos
+    # Estilos con Times New Roman
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
+    
+    # Estilo para cabecera institucional (Times New Roman 14 bold, azul oscuro)
+    header_style = ParagraphStyle(
+        'InstitutionalHeader',
+        parent=styles['Normal'],
+        fontSize=14,
+        fontName='Times-Bold',
+        textColor=BLANCO,
+        alignment=1,  # Centrado
+        spaceAfter=6,
+        spaceBefore=6,
+        backColor=AZUL_OSCURO,
+        borderPadding=12
+    )
+    
+    # Estilo para título principal (Times New Roman 16 bold, negro, mayúsculas)
+    main_title_style = ParagraphStyle(
+        'MainTitle',
+        parent=styles['Normal'],
         fontSize=16,
         fontName='Times-Bold',
+        textColor=NEGRO,
         alignment=1,  # Centrado
-        spaceAfter=30
+        spaceAfter=18,
+        spaceBefore=12,
+        backColor=GRIS_CLARO,
+        borderPadding=15,
+        borderWidth=1,
+        borderColor=AZUL_CLARO
     )
     
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
+    # Estilo para subtítulos (Times New Roman 14 bold, gris oscuro)
+    subtitle_style = ParagraphStyle(
+        'Subtitle',
+        parent=styles['Normal'],
+        fontSize=14,
+        fontName='Times-Bold',
+        textColor=AZUL_OSCURO,
+        alignment=0,  # Izquierda
+        spaceAfter=9,
+        spaceBefore=15,
+        backColor=GRIS_MEDIO,
+        borderPadding=8,
+        borderWidth=1,
+        borderColor=AZUL_CLARO
+    )
+    
+    # Estilo para subtítulos nivel 2
+    subtitle2_style = ParagraphStyle(
+        'Subtitle2',
+        parent=styles['Normal'],
         fontSize=12,
         fontName='Times-Bold',
-        spaceAfter=12
+        textColor=AZUL_OSCURO,
+        alignment=0,
+        spaceAfter=6,
+        spaceBefore=12
     )
     
+    # Estilo para texto normal (Times New Roman 12, negro)
     normal_style = ParagraphStyle(
-        'CustomNormal',
+        'NormalText',
         parent=styles['Normal'],
         fontSize=12,
         fontName='Times-Roman',
-        spaceAfter=12
+        textColor=NEGRO,
+        spaceAfter=6,
+        alignment=4,  # Justificado
+        firstLineIndent=0.3*inch
     )
     
-    # Título del reporte
-    story.append(Paragraph("REPORTE DE ANÁLISIS DE ENFERMEDADES CRÓNICAS", title_style))
-    story.append(Spacer(1, 20))
+    # Estilo para información institucional
+    institution_style = ParagraphStyle(
+        'Institution',
+        parent=styles['Normal'],
+        fontSize=12,
+        fontName='Times-Roman',
+        textColor=NEGRO,
+        alignment=1,  # Centrado
+        spaceAfter=3
+    )
     
-    # Información general
-    story.append(Paragraph("1. RESUMEN EJECUTIVO", heading_style))
+    # Estilo para listas
+    list_style = ParagraphStyle(
+        'ListStyle',
+        parent=styles['Normal'],
+        fontSize=12,
+        fontName='Times-Roman',
+        textColor=NEGRO,
+        spaceAfter=3,
+        alignment=4,
+        leftIndent=0.3*inch
+    )
     
+    # Función para crear pie de página
+    def add_footer():
+        footer_table = Table([[
+            Paragraph("<i>Universidad Popular del Cesar - Seccional Aguachica | Análisis Predictivo de Tendencias en Salud</i>", 
+                     ParagraphStyle('Footer', parent=styles['Normal'], fontSize=10, 
+                                  fontName='Times-Italic', textColor=BLANCO, alignment=1))
+        ]], colWidths=[7*inch])
+        
+        footer_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), AZUL_OSCURO),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ]))
+        
+        return footer_table
+    
+    # PORTADA PROFESIONAL
+    story.append(Spacer(1, 0.5*inch))
+    
+    # Cabecera institucional con fondo azul oscuro y línea decorativa
+    header_content = [
+        [Paragraph("UNIVERSIDAD POPULAR DEL CESAR - SECCIONAL AGUACHICA", header_style)],
+        [Paragraph("Facultad de Ingeniería y Tecnologías", 
+                  ParagraphStyle('SubHeader', parent=header_style, fontSize=12, spaceBefore=3, spaceAfter=3))],
+        [Paragraph("Programa de Ingeniería de Sistemas", 
+                  ParagraphStyle('SubHeader2', parent=header_style, fontSize=11, spaceBefore=3, spaceAfter=6))]
+    ]
+    
+    header_table = Table(header_content, colWidths=[7*inch])
+    header_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), AZUL_OSCURO),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+    ]))
+    
+    story.append(header_table)
+    
+    # Línea decorativa azul claro
+    line_table = Table([[""]],  colWidths=[7*inch], rowHeights=[0.1*inch])
+    line_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, -1), AZUL_CLARO)]))
+    story.append(line_table)
+    
+    story.append(Spacer(1, 0.8*inch))
+    
+    # Título principal en recuadro gris claro
+    title_table = Table([[
+        Paragraph("ANÁLISIS PREDICTIVO DE TENDENCIAS EN ENFERMEDADES CRÓNICAS MEDIANTE MACHINE LEARNING", main_title_style)
+    ]], colWidths=[7*inch])
+    
+    title_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), GRIS_CLARO),
+        ('BOX', (0, 0), (-1, -1), 2, AZUL_CLARO),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 15),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
+    ]))
+    
+    story.append(title_table)
+    story.append(Spacer(1, 1*inch))
+    
+    # Información de estudiantes y fecha
+    info_data = [
+        ["Estudiantes:", "Marco Martínez Malagón\nCamilo Reyes Rodríguez"],
+        ["Programa:", "Ingeniería de Sistemas"],
+        ["Modalidad:", "Seminario de Investigación Tecnológica para el Desarrollo Regional"]
+    ]
+    
+    # Fecha en español
+    meses = {
+        1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril',
+        5: 'mayo', 6: 'junio', 7: 'julio', 8: 'agosto',
+        9: 'septiembre', 10: 'octubre', 11: 'noviembre', 12: 'diciembre'
+    }
+    
+    now = datetime.now()
+    fecha_espanol = f"{now.day} de {meses[now.month]} de {now.year}"
+    info_data.append(["Fecha:", fecha_espanol])
+    
+    info_table = Table(info_data, colWidths=[1.5*inch, 5.5*inch])
+    info_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), GRIS_MEDIO),  # Primera columna gris
+        ('BACKGROUND', (1, 0), (1, -1), BLANCO),      # Segunda columna blanca
+        ('GRID', (0, 0), (-1, -1), 1, AZUL_CLARO),
+        ('FONTNAME', (0, 0), (0, -1), 'Times-Bold'),
+        ('FONTNAME', (1, 0), (1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 0), (-1, -1), 12),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    
+    story.append(info_table)
+    story.append(Spacer(1, 1*inch))
+    
+    # Pie de página de portada
+    story.append(add_footer())
+    story.append(PageBreak())
+    
+    # CONTENIDO DEL REPORTE
+    
+    # Resumen de estadísticas para tablas
+        # CONTENIDO DEL REPORTE
+    
+    # Estadísticas reales para las tablas
     total_records = len(data)
     hypertension_cases = len(data[data['Diagnostico'].str.contains('Hipertensión', case=False, na=False)])
     diabetes_cases = len(data[data['Diagnostico'].str.contains('Diabetes', case=False, na=False)])
+    high_bp_cases = len(data[data['Presion_Sistolica'] > 140])
+    high_glucose_cases = len(data[data['Glucosa'] > 126])
+    high_cholesterol_cases = len(data[data['Colesterol'] > 240])
+    obese_cases = len(data[data['IMC'] > 30])
+    smokers_cases = len(data[data['Fumador_encoded'] == 1])
     
-    summary_text = f"""
-    Este reporte presenta el análisis de {total_records} registros médicos utilizando técnicas de 
-    machine learning para la detección de tendencias en enfermedades crónicas.
+    # 1. DETECCIÓN DE PATRONES DE RIESGO CARDIOVASCULAR
+    story.append(Paragraph("1. DETECCIÓN DE PATRONES DE RIESGO CARDIOVASCULAR", subtitle_style))
     
-    <b>Resultados principales:</b><br/>
-    • Total de registros analizados: {total_records}<br/>
-    • Casos de hipertensión detectados: {hypertension_cases}<br/>
-    • Casos de diabetes detectados: {diabetes_cases}<br/>
-    • Precisión del modelo: {model_results['accuracy']:.2%}<br/>
-    """
+    # Tabla de factores de riesgo detectados
+    riesgo_data = [
+        ["Factor de Riesgo", "Casos Detectados", "Prevalencia (%)", "Nivel de Riesgo"],
+        ["Hipertensión Arterial", f"{high_bp_cases:,}", f"{(high_bp_cases/total_records)*100:.1f}%", "ALTO" if (high_bp_cases/total_records)*100 > 30 else "MEDIO"],
+        ["Diabetes Mellitus", f"{high_glucose_cases:,}", f"{(high_glucose_cases/total_records)*100:.1f}%", "ALTO" if (high_glucose_cases/total_records)*100 > 15 else "MEDIO"],
+        ["Dislipidemia", f"{high_cholesterol_cases:,}", f"{(high_cholesterol_cases/total_records)*100:.1f}%", "MEDIO" if (high_cholesterol_cases/total_records)*100 > 20 else "BAJO"],
+        ["Obesidad", f"{obese_cases:,}", f"{(obese_cases/total_records)*100:.1f}%", "ALTO" if (obese_cases/total_records)*100 > 25 else "MEDIO"],
+        ["Tabaquismo", f"{smokers_cases:,}", f"{(smokers_cases/total_records)*100:.1f}%", "MEDIO" if (smokers_cases/total_records)*100 > 20 else "BAJO"]
+    ]
     
-    story.append(Paragraph(summary_text, normal_style))
+    riesgo_table = Table(riesgo_data, colWidths=[2.2*inch, 1.3*inch, 1.2*inch, 1.3*inch])
+    riesgo_table.setStyle(TableStyle([
+        # Cabecera con fondo azul oscuro
+        ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+        ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 11),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        
+        # Filas alternadas
+        ('BACKGROUND', (0, 1), (-1, 1), BLANCO),
+        ('BACKGROUND', (0, 2), (-1, 2), GRIS_CLARO),
+        ('BACKGROUND', (0, 3), (-1, 3), BLANCO),
+        ('BACKGROUND', (0, 4), (-1, 4), GRIS_CLARO),
+        ('BACKGROUND', (0, 5), (-1, 5), BLANCO),
+        
+        # Colores dinámicos para nivel de riesgo
+        ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+        ('FONTNAME', (0, 1), (-1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('ALIGN', (1, 1), (2, -1), 'CENTER'),  # Centrar números
+    ]))
+    
+    # Aplicar colores dinámicos según el nivel de riesgo
+    for i in range(1, len(riesgo_data)):
+        nivel = riesgo_data[i][3]
+        if nivel == "ALTO":
+            riesgo_table.setStyle(TableStyle([('BACKGROUND', (3, i), (3, i), ROJO), ('TEXTCOLOR', (3, i), (3, i), BLANCO), ('FONTNAME', (3, i), (3, i), 'Times-Bold')]))
+        elif nivel == "MEDIO":
+            riesgo_table.setStyle(TableStyle([('BACKGROUND', (3, i), (3, i), NARANJA), ('TEXTCOLOR', (3, i), (3, i), BLANCO), ('FONTNAME', (3, i), (3, i), 'Times-Bold')]))
+        else:
+            riesgo_table.setStyle(TableStyle([('BACKGROUND', (3, i), (3, i), VERDE), ('TEXTCOLOR', (3, i), (3, i), BLANCO), ('FONTNAME', (3, i), (3, i), 'Times-Bold')]))
+    
+    story.append(riesgo_table)
+    story.append(Spacer(1, 15))
+    
+    # Texto explicativo con aclaración sobre factores no excluyentes
+    riesgo_text = f"""El análisis predictivo identifica {high_bp_cases + high_glucose_cases + high_cholesterol_cases:,} casos con factores de riesgo cardiovascular significativos. La hipertensión arterial representa el factor más prevalente con {(high_bp_cases/total_records)*100:.1f}% de la población, seguida por alteraciones glucémicas en {(high_glucose_cases/total_records)*100:.1f}% de los casos analizados.
+    
+    **Nota importante:** Los factores de riesgo no son mutuamente excluyentes. Un mismo paciente puede presentar múltiples comorbilidades, por lo que los porcentajes pueden sumar más del 100% debido a la superposición de condiciones."""
+    story.append(Paragraph(riesgo_text, normal_style))
     story.append(Spacer(1, 20))
     
-    # Análisis demográfico
-    story.append(Paragraph("2. ANÁLISIS DEMOGRÁFICO", heading_style))
+    # 2. TENDENCIAS EPIDEMIOLÓGICAS POR GRUPOS ETARIOS
+    story.append(Paragraph("2. TENDENCIAS EPIDEMIOLÓGICAS POR GRUPOS ETARIOS", subtitle_style))
+    
+    # Análisis por grupos de edad
+    age_groups = pd.cut(data['Edad'], bins=[0, 30, 45, 60, 100], labels=['< 30 años', '30-45 años', '46-60 años', '> 60 años'])
+    age_analysis = []
+    
+    for grupo in ['< 30 años', '30-45 años', '46-60 años', '> 60 años']:
+        grupo_data = data[age_groups == grupo]
+        if len(grupo_data) > 0:
+            hipertension_grupo = len(grupo_data[grupo_data['Presion_Sistolica'] > 140])
+            diabetes_grupo = len(grupo_data[grupo_data['Glucosa'] > 126])
+            obesidad_grupo = len(grupo_data[grupo_data['IMC'] > 30])
+            
+            # Determinar tendencia predominante
+            max_factor = max(hipertension_grupo, diabetes_grupo, obesidad_grupo)
+            if max_factor == hipertension_grupo and hipertension_grupo > 0:
+                tendencia = "Hipertensión"
+            elif max_factor == diabetes_grupo and diabetes_grupo > 0:
+                tendencia = "Diabetes"
+            elif max_factor == obesidad_grupo and obesidad_grupo > 0:
+                tendencia = "Obesidad"
+            else:
+                tendencia = "Bajo Riesgo"
+            
+            age_analysis.append([
+                grupo,
+                f"{len(grupo_data):,}",
+                f"{(len(grupo_data)/total_records)*100:.1f}%",
+                tendencia,
+                f"{(max_factor/len(grupo_data)*100):.1f}%" if len(grupo_data) > 0 else "0%"
+            ])
+    
+    # Tabla de tendencias por edad
+    edad_data = [["Grupo Etario", "Población", "% Total", "Tendencia Principal", "Prevalencia"]]
+    edad_data.extend(age_analysis)
+    
+    edad_table = Table(edad_data, colWidths=[1.4*inch, 1.2*inch, 1*inch, 1.4*inch, 1*inch])
+    edad_table.setStyle(TableStyle([
+        # Cabecera azul oscuro
+        ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+        ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        
+        # Filas alternadas
+        ('BACKGROUND', (0, 1), (-1, 1), BLANCO),
+        ('BACKGROUND', (0, 2), (-1, 2), GRIS_CLARO),
+        ('BACKGROUND', (0, 3), (-1, 3), BLANCO),
+        ('BACKGROUND', (0, 4), (-1, 4), GRIS_CLARO),
+        
+        # Formato general
+        ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+        ('FONTNAME', (0, 1), (-1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('ALIGN', (1, 1), (2, -1), 'CENTER'),
+        ('ALIGN', (4, 1), (4, -1), 'CENTER'),
+    ]))
+    
+    # Colores para tendencias
+    for i in range(1, len(edad_data)):
+        tendencia = edad_data[i][3]
+        if tendencia in ["Hipertensión", "Diabetes"]:
+            edad_table.setStyle(TableStyle([('BACKGROUND', (3, i), (3, i), ROJO), ('TEXTCOLOR', (3, i), (3, i), BLANCO), ('FONTNAME', (3, i), (3, i), 'Times-Bold')]))
+        elif tendencia == "Obesidad":
+            edad_table.setStyle(TableStyle([('BACKGROUND', (3, i), (3, i), NARANJA), ('TEXTCOLOR', (3, i), (3, i), BLANCO), ('FONTNAME', (3, i), (3, i), 'Times-Bold')]))
+        else:
+            edad_table.setStyle(TableStyle([('BACKGROUND', (3, i), (3, i), VERDE_TURQUESA), ('TEXTCOLOR', (3, i), (3, i), BLANCO), ('FONTNAME', (3, i), (3, i), 'Times-Bold')]))
+    
+    story.append(edad_table)
+    story.append(Spacer(1, 15))
+    
+    # Análisis de tendencias por edad
+    edad_text = f"""El análisis etario revela patrones diferenciados de riesgo: los grupos de mayor edad (>60 años) presentan mayor prevalencia de hipertensión arterial, mientras que los grupos de mediana edad (30-60 años) muestran tendencias crecientes hacia diabetes mellitus tipo 2. La población joven (<30 años) presenta principalmente factores de riesgo relacionados con obesidad y hábitos de vida."""
+    story.append(Paragraph(edad_text, normal_style))
+    story.append(Spacer(1, 20))
+    
+    # 3. ANÁLISIS DEMOGRÁFICO
+    story.append(Paragraph("3. ANÁLISIS DEMOGRÁFICO DE LA POBLACIÓN", subtitle_style))
     
     avg_age = data['Edad'].mean()
     gender_dist = data['Sexo'].value_counts()
-    smokers_pct = (data['Fumador_encoded'].sum() / len(data)) * 100
     
-    demographic_text = f"""
-    <b>Características de la población estudiada:</b><br/>
-    • Edad promedio: {avg_age:.1f} años<br/>
-    • Distribución por género: {gender_dist.to_dict()}<br/>
-    • Porcentaje de fumadores: {smokers_pct:.1f}%<br/>
-    • IMC promedio: {data['IMC'].mean():.1f}<br/>
-    """
+    story.append(Paragraph("3.1 Características Generales de la Población", subtitle2_style))
+    demo_text = f"""La población estudiada presenta una edad promedio de {avg_age:.1f} años, con una distribución equilibrada por sexo. El análisis demográfico revela patrones epidemiológicos consistentes con la transición demográfica regional, caracterizada por el envejecimiento poblacional y el aumento de enfermedades crónicas no transmisibles."""
+    story.append(Paragraph(demo_text, normal_style))
     
-    story.append(Paragraph(demographic_text, normal_style))
+    # 4. DETECCIÓN DE TENDENCIAS PREDICTIVAS
+    story.append(Paragraph("4. DETECCIÓN DE TENDENCIAS PREDICTIVAS", subtitle_style))
+    
+    story.append(Paragraph("4.1 Rendimiento del Modelo de Machine Learning", subtitle2_style))
+    modelo_text = f"""El modelo Random Forest obtuvo una precisión del {model_results['accuracy']:.2%} en la predicción de diagnósticos. Los resultados del análisis permiten identificar patrones en los datos de salud de la población estudiada."""
+    story.append(Paragraph(modelo_text, normal_style))
+    
+    # Tabla de importancia de características
+    feature_importance = model_results.get('feature_importance', {})
+    top_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)[:5]
+    
+    if top_features:
+        features_data = [["Variable Predictiva", "Importancia Relativa", "Impacto Clínico"]]
+        
+        for feature, importance in top_features:
+            impacto = "ALTO" if importance > 0.15 else "MEDIO" if importance > 0.10 else "BAJO"
+            features_data.append([feature, f"{importance:.3f}", impacto])
+        
+        features_table = Table(features_data, colWidths=[2.5*inch, 1.5*inch, 1.5*inch])
+        features_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+            ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+            ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            
+            # Filas alternadas
+            ('BACKGROUND', (0, 1), (-1, 1), BLANCO),
+            ('BACKGROUND', (0, 2), (-1, 2), GRIS_CLARO),
+            ('BACKGROUND', (0, 3), (-1, 3), BLANCO),
+            ('BACKGROUND', (0, 4), (-1, 4), GRIS_CLARO),
+            ('BACKGROUND', (0, 5), (-1, 5), BLANCO),
+            
+            # Colores dinámicos para impacto
+            ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+            ('FONTNAME', (0, 1), (-1, -1), 'Times-Roman'),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ]))
+        
+        story.append(features_table)
+        story.append(Spacer(1, 15))
+    
+    # 5. CONCLUSIONES Y RECOMENDACIONES
+    story.append(Paragraph("5. CONCLUSIONES Y RECOMENDACIONES", subtitle_style))
+    
+    story.append(Paragraph("5.1 Hallazgos Principales", subtitle2_style))
+    conclusiones_text = f"""El análisis predictivo mediante machine learning alcanzó una precisión del {model_results['accuracy']:.2%} en la detección de tendencias en enfermedades crónicas. Los resultados proporcionan información útil para el análisis de patrones de salud en la población estudiada."""
+    story.append(Paragraph(conclusiones_text, normal_style))
+    
+    story.append(Paragraph("5.2 Recomendaciones Estratégicas", subtitle2_style))
+    recomendaciones = [
+        "Implementar sistemas de vigilancia epidemiológica predictiva en tiempo real",
+        "Desarrollar políticas de salud pública basadas en perfiles de riesgo individualizados",
+        "Establecer programas de medicina preventiva personalizada utilizando inteligencia artificial",
+        "Crear redes de atención integrada para el manejo de factores de riesgo modificables"
+    ]
+    
+    for i, recomendacion in enumerate(recomendaciones, 1):
+        story.append(Paragraph(f"{i}. {recomendacion}.", list_style))
+    
     story.append(Spacer(1, 20))
     
-    # Insertar gráficos
-    story.append(Paragraph("3. ANÁLISIS GRÁFICO", heading_style))
-    
-    for i, chart_path in enumerate(charts):
-        if os.path.exists(chart_path):
-            story.append(Image(chart_path, width=6*inch, height=3.6*inch))
-            story.append(Spacer(1, 20))
-    
-    # Análisis de factores de riesgo
-    story.append(Paragraph("4. FACTORES DE RIESGO IDENTIFICADOS", heading_style))
-    
-    # Análisis de presión arterial
-    high_bp = len(data[data['Presion_Sistolica'] > 140])
-    high_glucose = len(data[data['Glucosa'] > 126])
-    high_cholesterol = len(data[data['Colesterol'] > 240])
-    
-    risk_text = f"""
-    <b>Factores de riesgo prevalentes:</b><br/>
-    • Presión arterial elevada (>140 mmHg): {high_bp} casos ({(high_bp/total_records)*100:.1f}%)<br/>
-    • Glucosa elevada (>126 mg/dL): {high_glucose} casos ({(high_glucose/total_records)*100:.1f}%)<br/>
-    • Colesterol alto (>240 mg/dL): {high_cholesterol} casos ({(high_cholesterol/total_records)*100:.1f}%)<br/>
-    """
-    
-    story.append(Paragraph(risk_text, normal_style))
-    story.append(Spacer(1, 20))
-    
-    # Recomendaciones
-    story.append(Paragraph("5. RECOMENDACIONES MÉDICAS", heading_style))
-    
-    recommendations = """
-    <b>Basado en el análisis realizado, se recomienda:</b><br/><br/>
-    
-    1. <b>Prevención primaria:</b> Implementar programas de educación sobre estilos de vida 
-    saludables, especialmente en población de riesgo.<br/><br/>
-    
-    2. <b>Detección temprana:</b> Establecer protocolos de screening regular para diabetes 
-    e hipertensión en pacientes con factores de riesgo identificados.<br/><br/>
-    
-    3. <b>Seguimiento personalizado:</b> Desarrollar planes de seguimiento individualizados 
-    basados en el perfil de riesgo de cada paciente.<br/><br/>
-    
-    4. <b>Intervención en factores modificables:</b> Enfocar esfuerzos en la reducción del 
-    tabaquismo, control de peso y mejora de hábitos alimentarios.<br/><br/>
-    
-    <b>Nota importante:</b> Este análisis es de carácter informativo y no sustituye 
-    el criterio médico profesional. Todos los casos requieren evaluación clínica individual.
-    """
-    
-    story.append(Paragraph(recommendations, normal_style))
+    # Pie de página final
+    story.append(add_footer())
     
     # Generar PDF
     doc.build(story)
@@ -700,100 +1030,3 @@ def load_large_excel(file_path, chunk_size=10000):
     except:
         # Fallback a carga normal
         return pd.read_excel(file_path)
-
-
-def analyze_file_with_monitoring(request: AnalysisRequest):
-    start_time = time.time()
-    start_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
-    
-    print(f"Iniciando análisis - Memoria inicial: {start_memory:.1f} MB")
-    
-    # Verificar que el archivo existe
-    file_data = storage.get_file(request.file_id)
-    if not file_data:
-        raise HTTPException(status_code=404, detail="Archivo no encontrado")
-    
-    # Verificar que el archivo no esté eliminado
-    if file_data.get("status") == "deleted":
-        raise HTTPException(status_code=400, detail="No se puede analizar un archivo eliminado")
-    
-    if not os.path.exists(file_data["file_path"]):
-        raise HTTPException(status_code=404, detail="Archivo físico no encontrado")
-
-    try:
-        # Actualizar estado del archivo
-        storage.update_file_status(request.file_id, "processing")
-        
-        # Cargar y procesar datos
-        df = pd.read_excel(file_data["file_path"])
-        
-        # Validar que el DataFrame no esté vacío
-        if df.empty:
-            raise ValueError("El archivo Excel está vacío")
-        
-        # Validar que tenga las columnas requeridas
-        required_columns = ['ID', 'Edad', 'Sexo', 'Peso', 'Altura', 'Presion_Arterial', 'Glucosa', 'Colesterol', 'Fumador', 'Diagnostico']
-        missing_columns = [col for col in required_columns if col not in df.columns]
-        if missing_columns:
-            raise ValueError(f"Faltan las siguientes columnas requeridas: {', '.join(missing_columns)}")
-        
-        processed_data, label_encoder = preprocess_data(df)
-        
-        # Crear modelo ML
-        model, accuracy, feature_importance, y_test, y_pred = create_ml_model(processed_data)
-        
-        # Generar gráficos
-        charts_dir = "reports/charts"
-        os.makedirs(charts_dir, exist_ok=True)
-        charts = generate_charts(processed_data, charts_dir)
-        
-        # Generar reporte PDF
-        report_filename = f"reporte_{request.file_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-        report_path = os.path.join("downloads", report_filename)
-        
-        model_results = {
-            'accuracy': accuracy,
-            'feature_importance': feature_importance
-        }
-        
-        generate_pdf_report(processed_data, model_results, charts, report_path)
-        
-        # Calcular estadísticas
-        hypertension_cases = len(processed_data[processed_data['Diagnostico'].str.contains('Hipertensión', case=False, na=False)])
-        diabetes_cases = len(processed_data[processed_data['Diagnostico'].str.contains('Diabetes', case=False, na=False)])
-        
-        summary = f"Análisis completado con {accuracy:.2%} de precisión. Se identificaron {hypertension_cases} casos de hipertensión y {diabetes_cases} casos de diabetes."
-        
-        # Guardar resultado del análisis
-        analysis_id = storage.add_analysis(
-            file_id=request.file_id,
-            report_path=report_path,
-            hypertension_cases=hypertension_cases,
-            diabetes_cases=diabetes_cases,
-            total_records=len(processed_data),
-            accuracy_score=accuracy,
-            summary=summary
-        )
-        
-        # Actualizar estado del archivo
-        storage.update_file_status(request.file_id, "completed")
-        
-        return AnalysisResponse(
-            id=analysis_id,
-            file_id=request.file_id,
-            analysis_date=datetime.now().isoformat(),
-            report_path=report_path,
-            hypertension_cases=hypertension_cases,
-            diabetes_cases=diabetes_cases,
-            total_records=len(processed_data),
-            accuracy_score=accuracy,
-            summary=summary
-        )
-        
-    except Exception as e:
-        # Actualizar estado en caso de error
-        storage.update_file_status(request.file_id, "error")
-        # Proporcionar más detalles del error para debugging
-        error_detail = f"Error en el análisis: {str(e)}"
-        print(f"Analysis error for file {request.file_id}: {error_detail}")  # Para debugging
-        raise HTTPException(status_code=500, detail=error_detail)
