@@ -92,6 +92,32 @@
         </div>
     </div>
 
+    <!-- Modal de gráficas -->
+    <div class="modal" id="chartsModal">
+        <div class="modal-content charts-modal-content">
+            <span class="close" id="closeChartsModal">&times;</span>
+            <h3 id="chartsModalTitle">Gráficas del Análisis</h3>
+            <div class="charts-container">
+                <div class="chart-item">
+                    <h4>Distribución de Diagnósticos</h4>
+                    <canvas id="diagnosticChart"></canvas>
+                </div>
+                <div class="chart-item">
+                    <h4>Edad por Diagnóstico</h4>
+                    <canvas id="ageChart"></canvas>
+                </div>
+                <div class="chart-item">
+                    <h4>Factores de Riesgo</h4>
+                    <canvas id="riskChart"></canvas>
+                </div>
+                <div class="chart-item">
+                    <h4>Correlación de Variables</h4>
+                    <canvas id="correlationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast notifications -->
     <div class="toast" id="toast">
         <div class="toast-content">
@@ -100,6 +126,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -9,5 +9,16 @@
     "total_records": 10,
     "accuracy_score": 1.0,
     "summary": "Análisis completado con 100.00% de precisión. Se identificaron 0 casos de hipertensión y 2 casos de diabetes."
+  },
+  {
+    "id": "cb3bd383-3658-4cf3-8173-502dd133a495",
+    "file_id": "0b9e8480-cbeb-49c8-9f69-7bfb0c245bb5",
+    "analysis_date": "2025-09-04T18:59:13.189875",
+    "report_path": "downloads\\reporte_0b9e8480-cbeb-49c8-9f69-7bfb0c245bb5_20250904_185912.pdf",
+    "hypertension_cases": 0,
+    "diabetes_cases": 324,
+    "total_records": 1010,
+    "accuracy_score": 0.3118811881188119,
+    "summary": "Análisis completado con 31.19% de precisión. Se identificaron 0 casos de hipertensión y 324 casos de diabetes."
   }
 ]

@@ -330,32 +330,6 @@ async def analyze_file(request: AnalysisRequest, background_tasks: BackgroundTas
         # Generar reporte PDF
         report_filename = f"reporte_{request.file_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         report_path = os.path.join("downloads", report_filename)
-
-# Line 328 - Fix first occurrence
-        # Generar gráficos
-        charts_dir = "reports/charts"
-        os.makedirs(charts_dir, exist_ok=True)
-        charts = generate_charts_optimized(processed_data, charts_dir)
-        
-        # Generar reporte PDF
-        report_filename = f"reporte_{request.file_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-        report_path = os.path.join("downloads", report_filename)
-
-# Line 471 - Fix second occurrence
-        # Generar gráficos
-        charts_dir = "reports/charts"
-        os.makedirs(charts_dir, exist_ok=True)
-        charts = generate_charts_optimized(processed_data, charts_dir)
-        
-        # Generar reporte PDF
-        report_filename = f"reporte_{request.file_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-        report_path = os.path.join("downloads", report_filename)
-
-# Line 614 - Fix third occurrence
-        charts = generate_charts_optimized(processed_data, charts_dir)
-
-# Line 757 - Fix fourth occurrence
-        charts = generate_charts_optimized(processed_data, charts_dir)
         
         model_results = {
             'accuracy': accuracy,
@@ -403,6 +377,140 @@ async def analyze_file(request: AnalysisRequest, background_tasks: BackgroundTas
         error_detail = f"Error en el análisis: {str(e)}"
         print(f"Analysis error for file {request.file_id}: {error_detail}")  # Para debugging
         raise HTTPException(status_code=500, detail=error_detail)
+
+@router.get("/charts/{file_id}")
+async def get_charts_data(file_id: str):
+    """Obtener datos para generar gráficas de un archivo específico"""
+    try:
+        # Cargar datos de análisis REALES usando el método correcto
+        file_analyses = storage.get_analyses_by_file(file_id)
+        
+        if not file_analyses:
+            raise HTTPException(status_code=404, detail="No se encontró análisis para este archivo")
+        
+        # Obtener el análisis más reciente
+        latest_analysis = max(file_analyses, key=lambda x: x['analysis_date'])
+        
+        # Usar los datos REALES del análisis
+        total_records = latest_analysis.get('total_records', 0)
+        diabetes_cases = latest_analysis.get('diabetes_cases', 0)
+        hypertension_cases = latest_analysis.get('hypertension_cases', 0)
+        healthy_cases = total_records - diabetes_cases - hypertension_cases
+        
+        # Cargar el archivo Excel para obtener más detalles
+        file_data = storage.get_file(file_id)
+        if file_data and os.path.exists(file_data["file_path"]):
+            df = pd.read_excel(file_data["file_path"])
+            
+            # Datos REALES basados en tu archivo de 10 registros
+            diagnosis_counts = df['Diagnostico'].value_counts() if 'Diagnostico' in df.columns else {}
+            age_data = df['Edad'].describe() if 'Edad' in df.columns else {}
+            
+            charts_data = {
+                "diagnostic_distribution": {
+                    "labels": [f"{diag} ({count} de {total_records})" for diag, count in diagnosis_counts.items()],
+                    "values": diagnosis_counts.values.tolist(),
+                    "backgroundColor": ["#e74c3c", "#3498db", "#f39c12", "#2ecc71"][:len(diagnosis_counts)]
+                },
+                "age_by_diagnosis": {
+                    "labels": [f"Edad promedio: {age_data.get('mean', 0):.1f} años"],
+                    "values": [age_data.get('mean', 0)] if 'mean' in age_data else [0],
+                    "backgroundColor": "#3498db"
+                },
+                "risk_factors": {
+                    "labels": [
+                        f"Casos de Diabetes: {diabetes_cases}",
+                        f"Casos de Hipertensión: {hypertension_cases}", 
+                        f"Casos Saludables: {healthy_cases}"
+                    ],
+                    "values": [diabetes_cases, hypertension_cases, healthy_cases],
+                    "backgroundColor": ["#e74c3c", "#f39c12", "#2ecc71"]
+                },
+                "correlation": {
+                    "points": [
+                        {"x": i+1, "y": row.get('Edad', 0), "label": f"Paciente {i+1}"} 
+                        for i, (_, row) in enumerate(df.iterrows())
+                    ] if len(df) > 0 else [{"x": 0, "y": 0}],
+                    "x_label": "Número de Paciente",
+                    "y_label": "Edad (años)"
+                }
+            }
+        else:
+            # Si no se puede leer el archivo, usar datos del análisis guardado
+            charts_data = {
+                "diagnostic_distribution": {
+                    "labels": [f"Diabetes ({diabetes_cases} casos)", f"Hipertensión ({hypertension_cases} casos)", f"Otros ({healthy_cases} casos)"],
+                    "values": [diabetes_cases, hypertension_cases, healthy_cases],
+                    "backgroundColor": ["#e74c3c", "#3498db", "#2ecc71"]
+                },
+                "age_by_diagnosis": {
+                    "labels": [f"Total de registros: {total_records}"],
+                    "values": [total_records],
+                    "backgroundColor": "#3498db"
+                },
+                "risk_factors": {
+                    "labels": [f"Diabetes: {diabetes_cases}", f"Hipertensión: {hypertension_cases}", f"Total: {total_records}"],
+                    "values": [diabetes_cases, hypertension_cases, total_records],
+                    "backgroundColor": ["#e74c3c", "#f39c12", "#2ecc71"]
+                },
+                "correlation": {
+                    "points": [{"x": total_records, "y": diabetes_cases + hypertension_cases}],
+                    "x_label": "Total Registros",
+                    "y_label": "Casos con Diagnóstico"
+                }
+            }
+        
+        return charts_data
+        
+    except Exception as e:
+        print(f"Error getting charts data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener datos de gráficas: {str(e)}")
+
+@router.get("/download/{analysis_id}")
+async def download_report(analysis_id: str):
+    """Descargar reporte PDF generado"""
+    
+    analysis_data = storage.get_analysis(analysis_id)
+    if not analysis_data:
+        raise HTTPException(status_code=404, detail="Análisis no encontrado")
+    
+    report_path = analysis_data["report_path"]
+    if not os.path.exists(report_path):
+        raise HTTPException(status_code=404, detail="Reporte no encontrado")
+    
+    return FileResponse(
+        path=report_path,
+        filename=os.path.basename(report_path),
+        media_type="application/pdf"
+    )
+
+@router.get("/results/{file_id}")
+async def get_analysis_results(file_id: str):
+    """Obtener resultados de análisis de un archivo"""
+    
+    analyses = storage.get_analyses_by_file(file_id)
+    if not analyses:
+        raise HTTPException(status_code=404, detail="No se encontraron análisis para este archivo")
+    
+    return analyses
+
+
+# Para archivos extremadamente grandes (>50,000 registros)
+def load_large_excel(file_path, chunk_size=10000):
+    """Cargar Excel en chunks para archivos muy grandes"""
+    try:
+        # Primero verificar el tamaño
+        df_info = pd.read_excel(file_path, nrows=0)  # Solo headers
+        
+        # Si es muy grande, usar chunks
+        chunks = []
+        for chunk in pd.read_excel(file_path, chunksize=chunk_size):
+            chunks.append(chunk)
+        
+        return pd.concat(chunks, ignore_index=True)
+    except:
+        # Fallback a carga normal
+        return pd.read_excel(file_path)
 
 @router.get("/download/{analysis_id}")
 async def download_report(analysis_id: str):
@@ -689,49 +797,3 @@ def analyze_file_with_monitoring(request: AnalysisRequest):
         error_detail = f"Error en el análisis: {str(e)}"
         print(f"Analysis error for file {request.file_id}: {error_detail}")  # Para debugging
         raise HTTPException(status_code=500, detail=error_detail)
-
-@router.get("/download/{analysis_id}")
-async def download_report(analysis_id: str):
-    """Descargar reporte PDF generado"""
-    
-    analysis_data = storage.get_analysis(analysis_id)
-    if not analysis_data:
-        raise HTTPException(status_code=404, detail="Análisis no encontrado")
-    
-    report_path = analysis_data["report_path"]
-    if not os.path.exists(report_path):
-        raise HTTPException(status_code=404, detail="Reporte no encontrado")
-    
-    return FileResponse(
-        path=report_path,
-        filename=os.path.basename(report_path),
-        media_type="application/pdf"
-    )
-
-@router.get("/results/{file_id}")
-async def get_analysis_results(file_id: str):
-    """Obtener resultados de análisis de un archivo"""
-    
-    analyses = storage.get_analyses_by_file(file_id)
-    if not analyses:
-        raise HTTPException(status_code=404, detail="No se encontraron análisis para este archivo")
-    
-    return analyses
-
-
-# Para archivos extremadamente grandes (>50,000 registros)
-def load_large_excel(file_path, chunk_size=10000):
-    """Cargar Excel en chunks para archivos muy grandes"""
-    try:
-        # Primero verificar el tamaño
-        df_info = pd.read_excel(file_path, nrows=0)  # Solo headers
-        
-        # Si es muy grande, usar chunks
-        chunks = []
-        for chunk in pd.read_excel(file_path, chunksize=chunk_size):
-            chunks.append(chunk)
-        
-        return pd.concat(chunks, ignore_index=True)
-    except:
-        # Fallback a carga normal
-        return pd.read_excel(file_path)

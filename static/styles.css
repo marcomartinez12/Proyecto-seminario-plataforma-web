@@ -818,3 +818,529 @@ header p {
     --shadow-colored: rgba(37, 99, 235, 0.3);
     --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.4);
 }
+
+/* Modal de gráficas */
+.charts-modal-content {
+    max-width: 90%;
+    width: 1200px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.chart-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.chart-item h4 {
+    margin: 0 0 15px 0;
+    color: #495057;
+    font-size: 16px;
+    text-align: center;
+}
+
+.chart-item canvas {
+    max-height: 300px;
+}
+
+@media (max-width: 768px) {
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .charts-modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+}
+
+/* Estilos para los pasos de análisis */
+.analysis-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.6;
+    transform: translateX(-10px);
+}
+
+.step.active {
+    opacity: 1;
+    transform: translateX(0);
+    background: var(--bg-quaternary);
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+}
+
+.step i {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+    min-width: 24px;
+}
+
+.step.active i {
+    color: var(--primary);
+    filter: drop-shadow(0 0 10px rgba(37, 99, 235, 0.6));
+}
+
+.step span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.step.active span {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Animación para los pasos completados */
+.step i.fa-check-circle {
+    color: var(--success);
+    animation: checkPulse 0.6s ease-out;
+}
+
+@keyframes checkPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Efecto de carga para iconos giratorios */
+.step i.fa-spin {
+    color: var(--warning);
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.6));
+}
+
+/* Responsive para pasos de análisis */
+@media (max-width: 768px) {
+    .analysis-steps {
+        padding: 1rem;
+        gap: 1rem;
+    }
+    
+    .step {
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+    }
+    
+    .step i {
+        font-size: 1.25rem;
+    }
+    
+    .step span {
+        font-size: 0.9rem;
+    }
+}
+
+/* Estilos base para modales */
+.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--bg-secondary);
+    margin: 5% auto;
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+    box-shadow: var(--shadow-xl);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.close {
+    color: var(--text-secondary);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+/* Responsive para modales */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 1.5rem;
+    }
+}
+
+/* Estilos mejorados para modales */
+.modal {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-content {
+    animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.close {
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close:hover,
+.close:focus {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+    transform: rotate(90deg);
+}
+
+/* Estilos para los pasos de análisis */
+.analysis-steps {
+    display: none;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: var(--shadow-lg);
+    animation: slideInUp 0.5s ease-out;
+    backdrop-filter: blur(20px);
+}
+
+.analysis-steps.show {
+    display: block;
+}
+
+.analysis-steps h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+}
+
+.analysis-steps h3::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: var(--primary-gradient);
+    border-radius: 1px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    margin: 0.75rem 0;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0.6;
+    transform: translateX(-10px);
+}
+
+.step.active {
+    opacity: 1;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(37, 99, 235, 0.1) 100%);
+    border-color: var(--primary);
+    color: var(--text-primary);
+    transform: translateX(10px);
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+    animation: stepPulse 2s ease-in-out infinite;
+}
+
+.step.completed {
+    opacity: 1;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(34, 197, 94, 0.1) 100%);
+    border-color: var(--success);
+    color: var(--text-primary);
+    transform: translateX(0);
+}
+
+.step-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.step.active .step-icon {
+    background: rgba(37, 99, 235, 0.2);
+    color: var(--primary);
+    transform: scale(1.1);
+    animation: iconBounce 0.6s ease-out;
+}
+
+.step.completed .step-icon {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--success);
+    transform: scale(1);
+}
+
+.step-text {
+    flex: 1;
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.step.active .step-text,
+.step.completed .step-text {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Animaciones mejoradas para pasos de análisis */
+@keyframes stepPulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2); }
+    50% { box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4); }
+}
+
+@keyframes iconBounce {
+    0% { transform: scale(1.1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1.1); }
+}
+
+@keyframes stepActivate {
+    0% {
+        transform: translateX(-10px) scale(1);
+    }
+    50% {
+        transform: translateX(15px) scale(1.02);
+    }
+    100% {
+        transform: translateX(10px) scale(1);
+    }
+}
+
+.step.active {
+    animation: stepActivate 0.4s ease-out, stepPulse 2s ease-in-out infinite 0.4s;
+}
+
+.step.active .step-icon {
+    animation: pulse 1.5s infinite, iconBounce 0.6s ease-out;
+}
+
+/* Animaciones para progreso de subida */
+.upload-progress {
+    animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0;
+    position: relative;
+}
+
+.progress-fill::after {
+    animation: progressShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes progressShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    animation: textFade 0.3s ease-in-out;
+}
+
+@keyframes textFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Animaciones mejoradas para botones */
+.btn {
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.btn::before {
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+    transition: transform 0.1s;
+}
+
+/* Animaciones para elementos de archivo */
+.file-item {
+    animation: fileSlideIn 0.4s ease-out;
+}
+
+@keyframes fileSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.file-item:hover {
+    transform: translateY(-2px);
+}
+
+/* Animaciones para toast */
+.toast {
+    animation: toastSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.toast.show {
+    animation: toastSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Responsive para pasos de análisis */
+@media (max-width: 768px) {
+    .analysis-steps {
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+    
+    .step {
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 0;
+    }
+    
+    .step.active {
+        transform: translateX(5px);
+    }
+    
+    .step-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .step-text {
+        font-size: 0.9rem;
+    }
+}
