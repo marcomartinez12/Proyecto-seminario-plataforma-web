@@ -342,7 +342,9 @@ def generate_pdf_report(data, model_results, charts, output_path):
     info_data = [
         ["Estudiantes:", "Marco Martínez Malagón\nCamilo Reyes Rodríguez"],
         ["Programa:", "Ingeniería de Sistemas"],
-        ["Modalidad:", "Seminario de Investigación Tecnológica para el Desarrollo Regional"]
+        ["Asignatura:", "Seminario de Investigación"],
+        ["Docente:", "Luis Palmera Quintero"]
+        
     ]
     
     # Fecha en español
