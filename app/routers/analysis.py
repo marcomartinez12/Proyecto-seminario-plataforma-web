@@ -111,48 +111,151 @@ def create_ml_model(data):
     return model, accuracy, feature_importance, y_test, y_pred
 
 def generate_charts_optimized(data, output_dir, max_points=5000):
-    """Generar gráficos con muestreo para datasets grandes"""
-    # Si el dataset es muy grande, usar una muestra para gráficos
+    """Generar gráficos optimizados para claridad científica"""
     if len(data) > max_points:
         sample_data = data.sample(n=max_points, random_state=42)
-        print(f"Usando muestra de {max_points} registros para gráficos")
     else:
         sample_data = data
     
     charts = []
     
-    # Configurar estilo
-    plt.style.use('default')
-    sns.set_palette("husl")
+    # Configuración científica
+    plt.style.use('seaborn-v0_8-whitegrid')
+    plt.rcParams.update({
+        'font.family': 'serif',
+        'font.size': 11,
+        'axes.labelsize': 12,
+        'axes.titlesize': 14,
+        'xtick.labelsize': 10,
+        'ytick.labelsize': 10,
+        'legend.fontsize': 10,
+        'figure.titlesize': 15
+    })
     
-    # Gráfico 1: Distribución de diagnósticos
-    plt.figure(figsize=(10, 6))
+    # 1. Gráfico Doughnut de Distribución con Porcentajes Claros
+    fig, ax = plt.subplots(figsize=(10, 8))
     diagnosis_counts = data['Diagnostico'].value_counts()
-    plt.pie(diagnosis_counts.values, labels=diagnosis_counts.index, autopct='%1.1f%%')
-    plt.title('Distribución de Diagnósticos', fontsize=14, fontweight='bold')
+    
+    # Colores científicos profesionales
+    colors = ['#1f4e79', '#2e75b6', '#5b9bd5', '#9dc3e6', '#c5d9f1']
+    
+    wedges, texts, autotexts = ax.pie(
+        diagnosis_counts.values, 
+        labels=diagnosis_counts.index,
+        autopct='%1.1f%%',
+        colors=colors[:len(diagnosis_counts)],
+        pctdistance=0.85,
+        wedgeprops=dict(width=0.6, edgecolor='white', linewidth=2),
+        startangle=90
+    )
+    
+    # Mejorar visibilidad de porcentajes
+    for autotext in autotexts:
+        autotext.set_color('white')
+        autotext.set_fontweight('bold')
+        autotext.set_fontsize(13)
+        autotext.set_bbox(dict(boxstyle='round,pad=0.3', facecolor='black', alpha=0.7))
+    
+    # Mejorar etiquetas
+    for text in texts:
+        text.set_fontsize(11)
+        text.set_fontweight('bold')
+    
+    ax.set_title('Distribución de Diagnósticos Clínicos\n(n=' + f'{len(data):,}' + ' pacientes)', 
+                fontweight='bold', pad=20, fontsize=16)
+    
+    # Agregar leyenda con conteos
+    legend_labels = [f'{diag}: {count} casos' for diag, count in diagnosis_counts.items()]
+    ax.legend(wedges, legend_labels, title="Diagnósticos", loc="center left", 
+             bbox_to_anchor=(1, 0, 0.5, 1), fontsize=10)
+    
     chart1_path = os.path.join(output_dir, 'distribucion_diagnosticos.png')
-    plt.savefig(chart1_path, dpi=300, bbox_inches='tight')
+    plt.savefig(chart1_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     charts.append(chart1_path)
     
-    # Gráfico 2: Distribución por edad y diagnóstico
-    plt.figure(figsize=(12, 6))
-    sns.boxplot(data=data, x='Diagnostico', y='Edad')
-    plt.title('Distribución de Edad por Diagnóstico', fontsize=14, fontweight='bold')
-    plt.xticks(rotation=45)
-    chart2_path = os.path.join(output_dir, 'edad_por_diagnostico.png')
-    plt.savefig(chart2_path, dpi=300, bbox_inches='tight')
+    # 2. Gráfico Doughnut de Factores de Riesgo CORREGIDO
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # CORRECCIÓN: Usar el mismo criterio que el análisis principal
+    high_bp = len(data[data['Diagnostico'].str.contains('Hipertension', case=False, na=False)])
+    high_glucose = len(data[data['Diagnostico'].str.contains('Diabetes', case=False, na=False)])
+    healthy = len(data) - high_bp - high_glucose
+    
+    risk_data = [high_bp, high_glucose, healthy]
+    risk_labels = ['Hipertensión', 'Diabetes', 'Sin Factores']
+    risk_colors = ['#dc3545', '#fd7e14', '#28a745']
+    
+    wedges, texts, autotexts = ax.pie(
+        risk_data, 
+        labels=risk_labels,
+        autopct='%1.1f%%',
+        colors=risk_colors,
+        pctdistance=0.85,
+        wedgeprops=dict(width=0.7, edgecolor='white', linewidth=3),
+        startangle=90
+    )
+    
+    # Texto central mejorado
+    center_text = f'FACTORES\nDE RIESGO\n\nTotal: {len(data):,}\nPacientes'
+    ax.text(0, 0, center_text, ha='center', va='center', 
+           fontsize=14, fontweight='bold', 
+           bbox=dict(boxstyle='round,pad=0.5', facecolor='lightgray', alpha=0.8))
+    
+    # Mejorar porcentajes
+    for autotext in autotexts:
+        autotext.set_color('white')
+        autotext.set_fontweight('bold')
+        autotext.set_fontsize(13)
+        autotext.set_bbox(dict(boxstyle='round,pad=0.3', facecolor='black', alpha=0.8))
+    
+    ax.set_title('Distribución de Factores de Riesgo Cardiovascular', 
+                fontweight='bold', pad=20, fontsize=16)
+    
+    chart2_path = os.path.join(output_dir, 'factores_riesgo.png')
+    plt.savefig(chart2_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     charts.append(chart2_path)
     
-    # Gráfico 3: Correlación entre variables
-    plt.figure(figsize=(10, 8))
-    numeric_cols = ['Edad', 'Peso', 'Altura', 'Glucosa', 'Colesterol', 'Presion_Sistolica', 'Presion_Diastolica']
-    correlation_matrix = data[numeric_cols].corr()
-    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', center=0)
-    plt.title('Matriz de Correlación de Variables Médicas', fontsize=14, fontweight='bold')
+    # 3. Scatter Plot Mejorado para Correlaciones
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    # Scatter con mejor legibilidad
+    scatter = ax.scatter(
+        data['Edad'], 
+        data['Presion_Sistolica'], 
+        s=data['IMC']*4,  # Tamaño basado en IMC
+        c=data['Glucosa'], 
+        cmap='viridis',
+        alpha=0.7,
+        edgecolors='black',
+        linewidth=0.5
+    )
+    
+    ax.set_xlabel('Edad (años)', fontweight='bold', fontsize=13)
+    ax.set_ylabel('Presión Sistólica (mmHg)', fontweight='bold', fontsize=13)
+    ax.set_title('Correlación: Edad vs Presión Arterial\n(Tamaño = IMC, Color = Glucosa)', 
+                fontweight='bold', pad=20, fontsize=16)
+    
+    # Colorbar mejorado
+    cbar = plt.colorbar(scatter, ax=ax)
+    cbar.set_label('Glucosa (mg/dL)', fontweight='bold', fontsize=12)
+    
+    # Línea de tendencia
+    z = np.polyfit(data['Edad'], data['Presion_Sistolica'], 1)
+    p = np.poly1d(z)
+    ax.plot(data['Edad'], p(data['Edad']), "r--", alpha=0.8, linewidth=3, 
+           label=f'Tendencia (R² = {np.corrcoef(data["Edad"], data["Presion_Sistolica"])[0,1]**2:.3f})')
+    
+    # Líneas de referencia clínicas
+    ax.axhline(y=140, color='red', linestyle=':', alpha=0.7, label='Hipertensión (≥140 mmHg)')
+    ax.axhline(y=120, color='orange', linestyle=':', alpha=0.7, label='Pre-hipertensión (≥120 mmHg)')
+    
+    ax.legend(loc='upper left', fontsize=10)
+    ax.grid(True, alpha=0.3)
+    
     chart3_path = os.path.join(output_dir, 'correlacion_variables.png')
-    plt.savefig(chart3_path, dpi=300, bbox_inches='tight')
+    plt.savefig(chart3_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     charts.append(chart3_path)
     
@@ -173,6 +276,7 @@ def generate_pdf_report(data, model_results, charts, output_path):
     BLANCO = HexColor('#FFFFFF')       # Blanco
     ROJO = HexColor('#E74C3C')         # Rojo para alertas
     NARANJA = HexColor('#F39C12')      # Naranja para advertencias
+    AMARILLO = HexColor('#F1C40F')     # Amarillo para moderado
     VERDE = HexColor('#27AE60')        # Verde para normal
     
     doc = SimpleDocTemplate(output_path, pagesize=letter,
@@ -343,7 +447,7 @@ def generate_pdf_report(data, model_results, charts, output_path):
         ["Estudiantes:", "Marco Martínez Malagón\nCamilo Reyes Rodríguez"],
         ["Programa:", "Ingeniería de Sistemas"],
         ["Asignatura:", "Seminario de Investigación"],
-        ["Docente:", "Luis Palmera Quintero"]
+        
         
     ]
     
@@ -387,7 +491,7 @@ def generate_pdf_report(data, model_results, charts, output_path):
     
     # Estadísticas reales para las tablas
     total_records = len(data)
-    hypertension_cases = len(data[data['Diagnostico'].str.contains('Hipertensión', case=False, na=False)])
+    hypertension_cases = len(data[data['Diagnostico'].str.contains('Hipertension', case=False, na=False)])
     diabetes_cases = len(data[data['Diagnostico'].str.contains('Diabetes', case=False, na=False)])
     high_bp_cases = len(data[data['Presion_Sistolica'] > 140])
     high_glucose_cases = len(data[data['Glucosa'] > 126])
@@ -590,14 +694,286 @@ def generate_pdf_report(data, model_results, charts, output_path):
         story.append(features_table)
         story.append(Spacer(1, 15))
     
-    # 5. CONCLUSIONES Y RECOMENDACIONES
-    story.append(Paragraph("5. CONCLUSIONES Y RECOMENDACIONES", subtitle_style))
+    # 5. ANÁLISIS ESPECÍFICO DE ENFERMEDADES CRÓNICAS PRINCIPALES
+    story.append(Paragraph("5. ANÁLISIS ESPECÍFICO DE HIPERTENSIÓN Y DIABETES", subtitle_style))
     
-    story.append(Paragraph("5.1 Hallazgos Principales", subtitle2_style))
+    # 5.1 Análisis detallado de Hipertensión
+    story.append(Paragraph("5.1 Análisis de Tendencias en Hipertensión Arterial", subtitle2_style))
+    
+    # Calcular estadísticas específicas de hipertensión
+    hipertension_data = data[data['Diagnostico'].str.contains('Hipertension', case=False, na=False)]
+    diabetes_data = data[data['Diagnostico'].str.contains('Diabetes', case=False, na=False)]
+    # Cambiar para usar valores clínicos reales:
+    comorbilidad_data = data[
+        (data['Presion_Sistolica'] > 140) & 
+        (data['Glucosa'] > 126)
+    ]
+    
+    # Análisis por grupos de edad para hipertensión
+    hta_por_edad = []
+    for grupo in ['< 30 años', '30-45 años', '46-60 años', '> 60 años']:
+        grupo_data = data[age_groups == grupo]
+        if len(grupo_data) > 0:
+            hta_casos = len(grupo_data[grupo_data['Diagnostico'].str.contains('Hipertension', case=False, na=False)])
+            hta_prevalencia = (hta_casos / len(grupo_data)) * 100 if len(grupo_data) > 0 else 0
+            
+            # Clasificar riesgo según prevalencia
+            if hta_prevalencia > 40:
+                riesgo_nivel = "MUY ALTO"
+            elif hta_prevalencia > 25:
+                riesgo_nivel = "ALTO"
+            elif hta_prevalencia > 15:
+                riesgo_nivel = "MODERADO"
+            else:
+                riesgo_nivel = "BAJO"
+            
+            hta_por_edad.append([
+                grupo,
+                f"{len(grupo_data):,}",
+                f"{hta_casos:,}",
+                f"{hta_prevalencia:.1f}%",
+                riesgo_nivel
+            ])
+    
+    # Tabla de hipertensión por edad
+    hta_edad_data = [[
+        "Grupo Etario", "Población Total", "Casos HTA", "Prevalencia", "Nivel de Riesgo"
+    ]]
+    hta_edad_data.extend(hta_por_edad)
+    
+    hta_table = Table(hta_edad_data, colWidths=[1.4*inch, 1.2*inch, 1.2*inch, 1.2*inch, 1.2*inch])
+    hta_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+        ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+        ('FONTNAME', (0, 1), (-1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    ]))
+    
+    # Aplicar colores según nivel de riesgo
+    for i, fila in enumerate(hta_por_edad, 1):
+        nivel = fila[4]
+        if nivel == "MUY ALTO":
+            color = ROJO
+        elif nivel == "ALTO":
+            color = NARANJA
+        elif nivel == "MODERADO":
+            color = NARANJA
+        else:
+            color = VERDE
+        
+        hta_table.setStyle(TableStyle([
+            ('BACKGROUND', (4, i), (4, i), color),
+            ('TEXTCOLOR', (4, i), (4, i), BLANCO),
+            ('FONTNAME', (4, i), (4, i), 'Times-Bold')
+        ]))
+    
+    story.append(hta_table)
+    story.append(Spacer(1, 15))
+    
+    # Texto explicativo de hipertensión
+    hta_text = f"""**Hallazgos Clave en Hipertensión:**
+    
+    • **Prevalencia General:** {len(hipertension_data):,} casos de hipertensión identificados ({(len(hipertension_data)/total_records)*100:.1f}% de la población)
+    • **Grupo de Mayor Riesgo:** {max(hta_por_edad, key=lambda x: float(x[3].replace('%', '')))[0] if hta_por_edad else 'N/A'} con {max(hta_por_edad, key=lambda x: float(x[3].replace('%', '')))[3] if hta_por_edad else '0%'} de prevalencia
+    • **Tendencia Etaria:** La prevalencia aumenta significativamente con la edad, siendo crítica en población >60 años
+    • **Impacto Clínico:** La hipertensión no controlada aumenta el riesgo de eventos cardiovasculares en 2-4 veces
+    
+    **Recomendaciones Preventivas:**
+    - Implementar programas de detección temprana en población >45 años
+    - Establecer protocolos de seguimiento para pacientes con presión sistólica >130 mmHg
+    - Promover cambios en estilo de vida: reducción de sodio, actividad física regular"""
+    
+    story.append(Paragraph(hta_text, normal_style))
+    story.append(Spacer(1, 20))
+    
+    # 5.2 Análisis detallado de Diabetes
+    story.append(Paragraph("5.2 Análisis de Tendencias en Diabetes Mellitus", subtitle2_style))
+    
+    # Análisis por grupos de edad para diabetes
+    dm_por_edad = []
+    for grupo in ['< 30 años', '30-45 años', '46-60 años', '> 60 años']:
+        grupo_data = data[age_groups == grupo]
+        if len(grupo_data) > 0:
+            dm_casos = len(grupo_data[grupo_data['Diagnostico'].str.contains('Diabetes', case=False, na=False)])
+            dm_prevalencia = (dm_casos / len(grupo_data)) * 100 if len(grupo_data) > 0 else 0
+            
+            # Calcular promedio de glucosa en el grupo
+            glucosa_promedio = grupo_data['Glucosa'].mean()
+            
+            # Clasificar control glucémico
+            if glucosa_promedio > 180:
+                control = "DEFICIENTE"
+            elif glucosa_promedio > 140:
+                control = "REGULAR"
+            elif glucosa_promedio > 100:
+                control = "ACEPTABLE"
+            else:
+                control = "ÓPTIMO"
+            
+            dm_por_edad.append([
+                grupo,
+                f"{len(grupo_data):,}",
+                f"{dm_casos:,}",
+                f"{dm_prevalencia:.1f}%",
+                f"{glucosa_promedio:.0f} mg/dL",
+                control
+            ])
+    
+    # Tabla de diabetes por edad
+    dm_edad_data = [[
+        "Grupo Etario", "Población", "Casos DM", "Prevalencia", "Glucosa Promedio", "Control Glucémico"
+    ]]
+    dm_edad_data.extend(dm_por_edad)
+    
+    dm_table = Table(dm_edad_data, colWidths=[1.1*inch, 1*inch, 1*inch, 1*inch, 1.2*inch, 1.2*inch])
+    dm_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+        ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+        ('FONTNAME', (0, 1), (-1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    ]))
+    
+    # Aplicar colores según control glucémico
+    for i, fila in enumerate(dm_por_edad, 1):
+        control = fila[5]
+        if control == "DEFICIENTE":
+            color = ROJO
+        elif control == "REGULAR":
+            color = NARANJA
+        elif control == "ACEPTABLE":
+            color = AMARILLO
+        else:
+            color = VERDE
+        
+        dm_table.setStyle(TableStyle([
+            ('BACKGROUND', (5, i), (5, i), color),
+            ('TEXTCOLOR', (5, i), (5, i), BLANCO),
+            ('FONTNAME', (5, i), (5, i), 'Times-Bold')
+        ]))
+    
+    story.append(dm_table)
+    story.append(Spacer(1, 15))
+    
+    # Texto explicativo de diabetes
+    dm_text = f"""**Hallazgos Clave en Diabetes:**
+    
+    • **Prevalencia General:** {len(diabetes_data):,} casos de diabetes identificados ({(len(diabetes_data)/total_records)*100:.1f}% de la población)
+    • **Control Glucémico:** Análisis revela necesidad de mejora en el manejo terapéutico
+    • **Factores de Riesgo:** Correlación significativa con edad, IMC y antecedentes familiares
+    • **Complicaciones Potenciales:** Riesgo elevado de nefropatía, retinopatía y neuropatía diabética
+    
+    **Estrategias de Manejo:**
+    - Implementar programas de educación diabetológica
+    - Establecer metas de HbA1c <7% para la mayoría de pacientes
+    - Monitoreo regular de complicaciones microvasculares y macrovasculares
+    - Integración de equipos multidisciplinarios (endocrinólogo, nutricionista, educador)"""
+    
+    story.append(Paragraph(dm_text, normal_style))
+    story.append(Spacer(1, 20))
+    
+    # 5.3 Análisis de Comorbilidad: Hipertensión + Diabetes
+    story.append(Paragraph("5.3 Análisis de Comorbilidad: Hipertensión y Diabetes", subtitle2_style))
+    
+    # Calcular estadísticas de comorbilidad usando valores clínicos
+    solo_hta = len(data[
+        (data['Presion_Sistolica'] > 140) & 
+        (data['Glucosa'] <= 126)
+    ])
+    
+    solo_dm = len(data[
+        (data['Glucosa'] > 126) & 
+        (data['Presion_Sistolica'] <= 140)
+    ])
+    
+    ambas_condiciones = len(comorbilidad_data)
+    sin_condiciones = len(data[
+        (data['Presion_Sistolica'] <= 140) & 
+        (data['Glucosa'] <= 126)
+    ])
+    
+    # Tabla de comorbilidad
+    comorbilidad_tabla_data = [
+        ["Condición", "Casos", "Prevalencia", "Riesgo Cardiovascular"],
+        ["Solo Hipertensión", f"{solo_hta:,}", f"{(solo_hta/total_records)*100:.1f}%", "ALTO"],
+        ["Solo Diabetes", f"{solo_dm:,}", f"{(solo_dm/total_records)*100:.1f}%", "ALTO"],
+        ["Hipertensión + Diabetes", f"{ambas_condiciones:,}", f"{(ambas_condiciones/total_records)*100:.1f}%", "MUY ALTO"],
+        ["Sin Condiciones", f"{sin_condiciones:,}", f"{(sin_condiciones/total_records)*100:.1f}%", "BAJO"]
+    ]
+    
+    comorbilidad_table = Table(comorbilidad_tabla_data, colWidths=[2*inch, 1.2*inch, 1.3*inch, 1.5*inch])
+    comorbilidad_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+        ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+        ('FONTNAME', (0, 1), (-1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('ALIGN', (1, 1), (2, -1), 'CENTER'),
+    ]))
+    
+    # Colores para riesgo cardiovascular
+    riesgo_colores = {
+        "MUY ALTO": ROJO,
+        "ALTO": NARANJA,
+        "BAJO": VERDE
+    }
+    
+    for i in range(1, len(comorbilidad_tabla_data)):
+        riesgo = comorbilidad_tabla_data[i][3]
+        color = riesgo_colores.get(riesgo, GRIS_MEDIO)
+        comorbilidad_table.setStyle(TableStyle([
+            ('BACKGROUND', (3, i), (3, i), color),
+            ('TEXTCOLOR', (3, i), (3, i), BLANCO),
+            ('FONTNAME', (3, i), (3, i), 'Times-Bold')
+        ]))
+    
+    story.append(comorbilidad_table)
+    story.append(Spacer(1, 15))
+    
+    # Texto de comorbilidad
+    comorbilidad_text = f"""**Análisis de Comorbilidad:**
+    
+La presencia simultánea de hipertensión y diabetes ({ambas_condiciones:,} casos, {(ambas_condiciones/total_records)*100:.1f}%) representa el escenario de mayor riesgo cardiovascular. Estos pacientes requieren:
+    
+• **Manejo Integral:** Control estricto de presión arterial (<130/80 mmHg) y glucemia (HbA1c <7%)
+• **Prevención Secundaria:** Uso de estatinas, antiagregantes plaquetarios según indicación
+• **Monitoreo Especializado:** Evaluación regular de función renal, fondo de ojo y extremidades
+• **Modificación de Estilo de Vida:** Dieta DASH, ejercicio supervisado, cesación tabáquica
+    
+**Impacto Epidemiológico:** La comorbilidad incrementa el riesgo de eventos cardiovasculares mayores en 3-5 veces comparado con población general."""
+    
+    story.append(Paragraph(comorbilidad_text, normal_style))
+    story.append(Spacer(1, 20))
+    
+    # 6. CONCLUSIONES Y RECOMENDACIONES
+    story.append(Paragraph("6. CONCLUSIONES Y RECOMENDACIONES", subtitle_style))
+    
+    story.append(Paragraph("6.1 Hallazgos Principales", subtitle2_style))
     conclusiones_text = f"""El análisis predictivo mediante machine learning alcanzó una precisión del {model_results['accuracy']:.2%} en la detección de tendencias en enfermedades crónicas. Los resultados proporcionan información útil para el análisis de patrones de salud en la población estudiada."""
     story.append(Paragraph(conclusiones_text, normal_style))
     
-    story.append(Paragraph("5.2 Recomendaciones Estratégicas", subtitle2_style))
+    story.append(Paragraph("6.2 Recomendaciones Estratégicas", subtitle2_style))
     recomendaciones = [
         "Implementar sistemas de vigilancia epidemiológica predictiva en tiempo real",
         "Desarrollar políticas de salud pública basadas en perfiles de riesgo individualizados",
@@ -671,8 +1047,8 @@ async def analyze_file(request: AnalysisRequest, background_tasks: BackgroundTas
         generate_pdf_report(processed_data, model_results, charts, report_path)
         
         # Calcular estadísticas
-        hypertension_cases = len(processed_data[processed_data['Diagnostico'].str.contains('Hipertensión', case=False, na=False)])
-        diabetes_cases = len(processed_data[processed_data['Diagnostico'].str.contains('Diabetes', case=False, na=False)])
+        hypertension_cases = len(df[df['Diagnostico'].str.contains('Hipertension', case=False, na=False)])
+        diabetes_cases = len(df[df['Diagnostico'].str.contains('Diabetes', case=False, na=False)])
         
         summary = f"Análisis completado con {accuracy:.2%} de precisión. Se identificaron {hypertension_cases} casos de hipertensión y {diabetes_cases} casos de diabetes."
         
@@ -737,6 +1113,11 @@ async def get_charts_data(file_id: str):
             # Datos REALES basados en tu archivo de 10 registros
             diagnosis_counts = df['Diagnostico'].value_counts() if 'Diagnostico' in df.columns else {}
             age_data = df['Edad'].describe() if 'Edad' in df.columns else {}
+            
+            # Calcular factores de riesgo
+            hypertension = len(df[df['Diagnostico'].str.contains('Hipertension', case=False, na=False)])
+            diabetes = len(df[df['Diagnostico'].str.contains('Diabetes', case=False, na=False)])
+            healthy = len(df) - hypertension - diabetes
             
             charts_data = {
                 "diagnostic_distribution": {

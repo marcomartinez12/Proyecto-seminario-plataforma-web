@@ -529,7 +529,66 @@ function showChartsModal(chartsData, fileId) {
 }
 
 function createCharts(data) {
-    // Gráfica de distribución de diagnósticos
+    // Paleta de colores profesional consistente
+    const colors = {
+        primary: '#2C3E50',      // Azul oscuro
+        secondary: '#3498DB',    // Azul claro  
+        accent: '#16A085',       // Verde turquesa
+        success: '#27AE60',      // Verde
+        warning: '#F39C12',      // Naranja
+        danger: '#E74C3C',       // Rojo
+        info: '#9B59B6',         // Púrpura
+        light: '#ECF0F1',        // Gris claro
+        gradient: ['#2C3E50', '#3498DB', '#16A085', '#27AE60', '#F39C12', '#E74C3C', '#9B59B6', '#34495E']
+    };
+
+    // Configuración global de fuentes
+    Chart.defaults.font.family = 'Poppins, sans-serif';
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = colors.primary;
+
+    // Plugin para etiquetas de datos
+    const dataLabelsPlugin = {
+        id: 'datalabels',
+        afterDatasetsDraw(chart, args, options) {
+            const { ctx, data } = chart;
+            ctx.save();
+            
+            data.datasets.forEach((dataset, datasetIndex) => {
+                const meta = chart.getDatasetMeta(datasetIndex);
+                if (!meta.hidden) {
+                    meta.data.forEach((element, index) => {
+                        const value = dataset.data[index];
+                        if (value > 0) {
+                            ctx.fillStyle = '#FFFFFF';
+                            ctx.strokeStyle = '#000000';
+                            ctx.lineWidth = 2;
+                            ctx.font = 'bold 16px Poppins';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            
+                            let label = '';
+                            if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+                                const total = dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                label = `${percentage}%`;
+                            } else {
+                                label = value.toString();
+                            }
+                            
+                            const position = element.tooltipPosition();
+                            ctx.strokeText(label, position.x, position.y);
+                            ctx.fillText(label, position.x, position.y);
+                        }
+                    });
+                }
+            });
+            
+            ctx.restore();
+        }
+    };
+
+    // Gráfica de distribución de diagnósticos (PIE)
     const diagnosticCtx = document.getElementById('diagnosticChart').getContext('2d');
     const diagnosticChart = new Chart(diagnosticCtx, {
         type: 'pie',
@@ -537,10 +596,11 @@ function createCharts(data) {
             labels: data.diagnostic_distribution?.labels || ['Sin datos'],
             datasets: [{
                 data: data.diagnostic_distribution?.values || [1],
-                backgroundColor: [
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                    '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
-                ]
+                backgroundColor: colors.gradient,
+                borderColor: '#FFFFFF',
+                borderWidth: 3,
+                hoverBorderWidth: 4,
+                hoverOffset: 8
             }]
         },
         options: {
@@ -548,44 +608,53 @@ function createCharts(data) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            family: 'Poppins',
+                            size: 11,
+                            weight: '500'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: colors.primary,
+                    titleColor: '#FFFFFF',
+                    bodyColor: '#FFFFFF',
+                    borderColor: colors.secondary,
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    titleFont: { family: 'Poppins', weight: 'bold' },
+                    bodyFont: { family: 'Poppins' }
                 }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1000
             }
-        }
+        },
+        plugins: [dataLabelsPlugin]
     });
     currentCharts.push(diagnosticChart);
+    // KPI de edad por diagnóstico (reemplaza el bar chart)
+    const ageKpiCard = document.getElementById('ageKpiCard');
+    if (ageKpiCard && data.age_by_diagnosis) {
+        // Calcular estadísticas de edad
+        const ages = data.age_by_diagnosis.values || [];
+        const avgAge = ages.length > 0 ? (ages.reduce((a, b) => a + b, 0) / ages.length).toFixed(1) : 0;
+        
+        // Crear HTML dinámico para la tarjeta KPI simplificada
+        ageKpiCard.innerHTML = `
+            <div class="kpi-main-value">${avgAge}</div>
+            <div class="kpi-label">Edad Promedio (años)</div>
+        `;
+    }
 
-    // Gráfica de edad por diagnóstico
-    const ageCtx = document.getElementById('ageChart').getContext('2d');
-    const ageChart = new Chart(ageCtx, {
-        type: 'bar',
-        data: {
-            labels: data.age_by_diagnosis?.labels || ['Sin datos'],
-            datasets: [{
-                label: 'Edad Promedio',
-                data: data.age_by_diagnosis?.values || [0],
-                backgroundColor: '#36A2EB',
-                borderColor: '#36A2EB',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Edad (años)'
-                    }
-                }
-            }
-        }
-    });
-    currentCharts.push(ageChart);
-
-    // Gráfica de factores de riesgo
+    // Gráfica de factores de riesgo (DOUGHNUT)
     const riskCtx = document.getElementById('riskChart').getContext('2d');
     const riskChart = new Chart(riskCtx, {
         type: 'doughnut',
@@ -593,56 +662,74 @@ function createCharts(data) {
             labels: data.risk_factors?.labels || ['Sin datos'],
             datasets: [{
                 data: data.risk_factors?.values || [1],
-                backgroundColor: [
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                    '#9966FF', '#FF9F40'
-                ]
+                backgroundColor: colors.gradient,
+                borderColor: '#FFFFFF',
+                borderWidth: 3,
+                hoverBorderWidth: 4,
+                hoverOffset: 6
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '60%',
             plugins: {
                 legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-    currentCharts.push(riskChart);
-
-    // Gráfica de correlación
-    const correlationCtx = document.getElementById('correlationChart').getContext('2d');
-    const correlationChart = new Chart(correlationCtx, {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Correlación',
-                data: data.correlation?.points || [{x: 0, y: 0}],
-                backgroundColor: '#FF6384',
-                borderColor: '#FF6384'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: data.correlation?.x_label || 'Variable X'
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            family: 'Poppins',
+                            size: 11,
+                            weight: '500'
+                        }
                     }
                 },
-                y: {
-                    title: {
-                        display: true,
-                        text: data.correlation?.y_label || 'Variable Y'
-                    }
+                tooltip: {
+                    backgroundColor: colors.primary,
+                    titleColor: '#FFFFFF',
+                    bodyColor: '#FFFFFF',
+                    borderColor: colors.secondary,
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    titleFont: { family: 'Poppins', weight: 'bold' },
+                    bodyFont: { family: 'Poppins' }
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1000
+            }
+        },
+        plugins: [
+            dataLabelsPlugin,
+            {
+                id: 'centerText',
+                afterDraw(chart) {
+                    const { ctx, chartArea } = chart;
+                    ctx.save();
+                    
+                    const centerX = (chartArea.left + chartArea.right) / 2;
+                    const centerY = (chartArea.top + chartArea.bottom) / 2;
+                    
+                    ctx.fillStyle = colors.primary;
+                    ctx.font = 'bold 16px Poppins';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('Factores', centerX, centerY - 8);
+                    
+                    ctx.font = '12px Poppins';
+                    ctx.fillText('de Riesgo', centerX, centerY + 8);
+                    
+                    ctx.restore();
                 }
             }
-        }
+        ]
     });
-    currentCharts.push(correlationChart);
+    currentCharts.push(riskChart);
 }
 
 function destroyCurrentCharts() {
