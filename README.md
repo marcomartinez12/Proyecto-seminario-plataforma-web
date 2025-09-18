@@ -2,7 +2,7 @@
 
 ## 📋 Descripción
 
-Plataforma web avanzada para el análisis automatizado de datos médicos utilizando técnicas de Machine Learning. Permite cargar archivos Excel/CSV con información de pacientes y genera reportes PDF profesionales con análisis predictivo para la detección de enfermedades crónicas como diabetes e hipertensión.
+Plataforma web para detectar tendencias de enfermedades crónicas no transmisibles como la hipertensión y diabetes
 
 ## ✨ Características Principales
 
@@ -13,26 +13,50 @@ Plataforma web avanzada para el análisis automatizado de datos médicos utiliza
 - **Cálculo de importancia** de características clínicas
 - **Precisión del modelo** reportada en tiempo real
 
-### 📊 Análisis de Datos
+### 📊 Análisis de Datos Avanzado
 - Procesamiento de **10 variables médicas clave**:
   - Edad, Sexo, Peso, Altura, IMC
   - Presión Arterial (Sistólica/Diastólica)
   - Glucosa, Colesterol, Hábito de fumar
-- **Detección automática** de factores de riesgo
-- **Análisis demográfico** completo
-- **Correlaciones** entre variables
+- **Detección automática** de factores de riesgo cardiovascular
+- **Análisis demográfico** completo por grupos etarios
+- **Correlaciones** entre variables clínicas
+- **🆕 Análisis de comorbilidad** hipertensión + diabetes basado en valores clínicos reales
+- **🆕 Tendencias epidemiológicas** por grupos de edad (< 30, 30-45, 46-60, > 60 años)
+- **🆕 Detección de patrones** de riesgo cardiovascular específicos
+
+### 🩺 Análisis Clínico Especializado
+- **Análisis de Hipertensión Arterial**:
+  - Prevalencia por grupos etarios
+  - Clasificación de riesgo (Bajo, Moderado, Alto, Muy Alto)
+  - Recomendaciones preventivas específicas
+- **Análisis de Diabetes Mellitus**:
+  - Tendencias por edad y factores de riesgo
+  - Estrategias de manejo terapéutico
+  - Detección de complicaciones potenciales
+- **🆕 Comorbilidad Inteligente**:
+  - Detección basada en criterios clínicos (Presión Sistólica >140 mmHg + Glucosa >126 mg/dL)
+  - Análisis de riesgo cardiovascular combinado
+  - Estrategias de manejo integral
 
 ### 📈 Visualización
 - **Gráficos interactivos** con matplotlib y seaborn
 - Distribución de diagnósticos
 - Correlación entre variables
 - Análisis por edad y diagnóstico
+- **🆕 Factores de riesgo** con datos precisos de comorbilidad
 
-### 📄 Reportes PDF
-- **Formato profesional** con Times New Roman 12pt
-- **Normas APA** para documentos médicos
+### 📄 Reportes PDF Profesionales
+- **Formato profesional** con Times New Roman 12pt siguiendo normas APA
+- **🆕 Secciones especializadas**:
+  - Detección de patrones de riesgo cardiovascular
+  - Tendencias epidemiológicas por grupos etarios
+  - Análisis específico de hipertensión arterial
+  - Análisis detallado de diabetes mellitus
+  - **Análisis de comorbilidad hipertensión + diabetes**
 - **Gráficos integrados** de alta calidad
-- **Recomendaciones médicas** automatizadas
+- **Recomendaciones médicas** automatizadas y específicas
+- **Tablas de riesgo** con codificación por colores
 - **Descarga automática** al completar análisis
 
 ### 🎨 Interfaz de Usuario
@@ -41,6 +65,21 @@ Plataforma web avanzada para el análisis automatizado de datos médicos utiliza
 - **Barra de progreso** en tiempo real
 - **Notificaciones** de estado
 - **Responsive design**
+
+## 🔬 Metodología Clínica
+
+### Criterios de Diagnóstico
+- **Hipertensión**: Presión Sistólica > 140 mmHg
+- **Diabetes**: Glucosa > 126 mg/dL
+- **Obesidad**: IMC > 30 kg/m²
+- **Dislipidemia**: Colesterol > 240 mg/dL
+
+### Análisis de Comorbilidad
+El sistema utiliza valores clínicos reales para detectar comorbilidad, identificando pacientes que presentan simultáneamente:
+- Presión arterial elevada (>140 mmHg sistólica)
+- Glucosa elevada (>126 mg/dL)
+
+Esta metodología proporciona una evaluación más precisa del riesgo cardiovascular combinado.
 
 ## 🛠️ Tecnologías Utilizadas
 
