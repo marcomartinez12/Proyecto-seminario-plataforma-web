@@ -21,6 +21,7 @@ matplotlib.use('Agg')  # Para generar gráficos sin interfaz gráfica
 import uuid
 from datetime import datetime
 import json
+import httpx
 
 from app.schemas import AnalysisRequest, AnalysisResponse
 from app.utils import storage

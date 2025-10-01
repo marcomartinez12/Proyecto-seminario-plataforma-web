@@ -2036,3 +2036,223 @@ header p {
         font-size: 2.5rem;
     }
 }
+
+/* Estilos para Modal de Análisis con IA */
+.ai-modal-content {
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+.ai-modal-body {
+    padding: 20px;
+}
+
+.ai-summary {
+    background: var(--bg-quaternary);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 1px solid var(--border);
+}
+
+.ai-summary h4 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.summary-item {
+    background: var(--bg-tertiary);
+    padding: 12px 15px;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.summary-item:hover {
+    background: var(--bg-card-hover);
+    border-left-color: var(--success);
+    transform: translateX(5px);
+}
+
+.summary-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.summary-value {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ai-explanation {
+    background: var(--bg-quaternary);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.ai-explanation h4 {
+    color: var(--success);
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.explanation-content {
+    background: var(--bg-tertiary);
+    padding: 20px;
+    border-radius: 8px;
+    line-height: 1.8;
+    margin-bottom: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.explanation-content p {
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.explanation-content p:empty {
+    display: none;
+}
+
+.ai-model-info {
+    text-align: center;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+}
+
+.ai-model-info small {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+/* Botón de análisis IA */
+.btn-success {
+    background: var(--success-gradient);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(34, 197, 94, 0.4);
+}
+
+/* Scrollbar personalizado para el modal de IA */
+.explanation-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.explanation-content::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.explanation-content::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+}
+
+.explanation-content::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}
+
+@media (max-width: 768px) {
+    .ai-modal-content {
+        max-width: 95%;
+        margin: 20px auto;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .explanation-content {
+        max-height: 300px;
+    }
+}
+
+/* Loading para AI */
+.ai-loading {
+    text-align: center;
+    padding: 60px 40px;
+}
+
+.ai-loading .spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+.ai-loading h3 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+}
+
+.ai-loading p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Cursor de escritura */
+.typing-cursor {
+    color: var(--success);
+    font-weight: bold;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+.explanation-content p {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}

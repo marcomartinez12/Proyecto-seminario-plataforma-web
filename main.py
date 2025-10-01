@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 
 # Importar módulos locales
-from app.routers import files, analysis
+from app.routers import files, analysis, ai_analysis
 
 app = FastAPI(
     title="Plataforma de Detección de Enfermedades Crónicas",
@@ -30,6 +30,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Incluir routers
 app.include_router(files.router, prefix="/api/files", tags=["files"])
 app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
+app.include_router(ai_analysis.router, prefix="/api", tags=["ai-analysis"])
 
 # Crear directorios necesarios
 os.makedirs("uploads", exist_ok=True)

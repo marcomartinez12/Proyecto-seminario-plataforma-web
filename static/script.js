@@ -105,13 +105,22 @@ function initializeEventListeners() {
     if (closeChartsModal) {
         closeChartsModal.addEventListener('click', hideChartsModal);
     }
-    
+
+    // AI modal
+    const closeAIModal = document.getElementById('closeAIModal');
+    if (closeAIModal) {
+        closeAIModal.addEventListener('click', hideAIModal);
+    }
+
     // Window click events
     window.addEventListener('click', (e) => {
         if (e.target === infoModal) hideModal();
-        
+
         const chartsModal = document.getElementById('chartsModal');
         if (e.target === chartsModal) hideChartsModal();
+
+        const aiModal = document.getElementById('aiModal');
+        if (e.target === aiModal) hideAIModal();
     });
 }
 
@@ -446,6 +455,9 @@ function renderFilesList() {
                     ${file.status === 'completed' ? `
                         <button class="btn btn-secondary" onclick="viewCharts('${file.id}')">
                             <i class="fas fa-chart-bar"></i> Ver Gráficas
+                        </button>
+                        <button class="btn btn-success" onclick="analyzeWithAI('${file.id}')">
+                            <i class="fas fa-brain"></i> Análisis IA
                         </button>
                         <button class="btn btn-primary" onclick="downloadReport('${file.id}')">
                             <i class="fas fa-download"></i> Descargar Reporte
@@ -798,8 +810,249 @@ function showToast(message, type = 'info') {
     }, 4000);
 }
 
+// ANÁLISIS CON IA
+async function analyzeWithAI(fileId) {
+    console.log('=== INICIANDO ANÁLISIS CON IA ===');
+    console.log('File ID:', fileId);
+
+    try {
+        // Mostrar modal con loading inmediatamente
+        console.log('Mostrando modal de loading...');
+        showAIModalLoading();
+        showToast('Generando análisis con IA...', 'info');
+
+        console.log('Llamando a la API...');
+        const response = await fetch(`${API_BASE_URL}/ai-analysis/${fileId}`, {
+            method: 'POST'
+        });
+
+        console.log('Respuesta recibida. Status:', response.status);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error en la API:', errorData);
+            hideAIModal();
+            throw new Error(errorData.detail || 'Error al generar análisis con IA');
+        }
+
+        const result = await response.json();
+        console.log('=== RESULTADO DE LA IA ===');
+        console.log('Datos completos:', result);
+        console.log('Explicación:', result.ai_explanation);
+
+        showAIModal(result);
+        showToast('Análisis con IA completado', 'success');
+
+    } catch (error) {
+        console.error('=== ERROR EN ANÁLISIS IA ===');
+        console.error('Mensaje:', error.message);
+        console.error('Error completo:', error);
+        showToast(`Error: ${error.message}`, 'error');
+    }
+}
+
+function showAIModalLoading() {
+    console.log('Ejecutando showAIModalLoading...');
+
+    // Eliminar modal anterior si existe
+    const oldModal = document.getElementById('aiModalCustom');
+    if (oldModal) {
+        oldModal.remove();
+    }
+
+    // Crear modal completamente desde JavaScript
+    const modalHTML = `
+        <div id="aiModalCustom" style="
+            display: block !important;
+            position: fixed !important;
+            z-index: 999999 !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background-color: rgba(0, 0, 0, 0.95) !important;
+            overflow: auto !important;
+        ">
+            <div style="
+                background: #1a1a1a;
+                margin: 10% auto;
+                padding: 40px;
+                border: 2px solid #8b5cf6;
+                border-radius: 15px;
+                width: 80%;
+                max-width: 800px;
+                position: relative;
+                box-shadow: 0 0 50px rgba(139, 92, 246, 0.5);
+            ">
+                <span onclick="hideAIModalCustom()" style="
+                    color: #fff;
+                    float: right;
+                    font-size: 35px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    line-height: 20px;
+                ">&times;</span>
+
+                <h2 style="color: #fff; margin-bottom: 20px; text-align: center;">
+                    <i class="fas fa-brain"></i> Análisis con Inteligencia Artificial
+                </h2>
+
+                <div id="aiModalContentCustom" style="color: #fff; text-align: center; padding: 40px;">
+                    <div class="spinner" style="
+                        width: 60px;
+                        height: 60px;
+                        border: 4px solid rgba(255,255,255,0.3);
+                        border-top-color: #8b5cf6;
+                        border-radius: 50%;
+                        animation: spin 1s linear infinite;
+                        margin: 0 auto 20px;
+                    "></div>
+                    <h3 style="color: #8b5cf6; margin-bottom: 10px;">Generando análisis con IA...</h3>
+                    <p style="color: #aaa;">El modelo de IA está analizando los datos médicos. Esto puede tomar unos segundos.</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    console.log('Modal HTML insertado directamente en body');
+}
+
+function showAIModal(data) {
+    console.log('Mostrando resultado de IA...');
+
+    const modalContent = document.getElementById('aiModalContentCustom');
+
+    if (!modalContent) {
+        console.error('No se encontró el contenedor del modal custom');
+        return;
+    }
+
+    const summary = data.analysis_summary;
+    const explanation = data.ai_explanation;
+
+    modalContent.innerHTML = `
+        <div style="background: #222; padding: 25px; border-radius: 12px; margin-bottom: 25px;">
+            <h4 style="color: #8b5cf6; margin-bottom: 20px; font-size: 1.3rem;">
+                <i class="fas fa-chart-pie"></i> Resumen del Análisis
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div class="summary-item">
+                    <span class="summary-label">Total de Pacientes:</span>
+                    <span class="summary-value">${summary.total_records}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Casos de Hipertensión:</span>
+                    <span class="summary-value">${summary.hypertension_cases} (${((summary.hypertension_cases/summary.total_records)*100).toFixed(1)}%)</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Casos de Diabetes:</span>
+                    <span class="summary-value">${summary.diabetes_cases} (${((summary.diabetes_cases/summary.total_records)*100).toFixed(1)}%)</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Precisión del Modelo:</span>
+                    <span class="summary-value">${(summary.accuracy * 100).toFixed(1)}%</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Edad Promedio:</span>
+                    <span class="summary-value">${summary.avg_age} años</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">IMC Promedio:</span>
+                    <span class="summary-value">${summary.avg_bmi} kg/m²</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Glucosa Promedio:</span>
+                    <span class="summary-value">${summary.avg_glucose} mg/dL</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Presión Sistólica Promedio:</span>
+                    <span class="summary-value">${summary.avg_systolic} mmHg</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Fumadores:</span>
+                    <span class="summary-value">${summary.smokers} (${((summary.smokers/summary.total_records)*100).toFixed(1)}%)</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #222; padding: 25px; border-radius: 12px;">
+            <h4 style="color: #22c55e; margin-bottom: 20px; font-size: 1.3rem;">
+                <i class="fas fa-robot"></i> Explicación del Especialista en IA
+            </h4>
+            <div id="aiExplanationText" style="
+                background: #1a1a1a;
+                padding: 20px;
+                border-radius: 8px;
+                line-height: 1.8;
+                margin-bottom: 15px;
+                max-height: 400px;
+                overflow-y: auto;
+                color: #fff;
+                white-space: pre-wrap;
+            "></div>
+            <div style="text-align: center; padding-top: 15px; border-top: 1px solid #333;">
+                <small style="color: #888;"><i class="fas fa-info-circle"></i> Generado por: ${data.model_used}</small>
+            </div>
+        </div>
+    `;
+
+    console.log('Contenido del modal actualizado');
+
+    // Efecto de escritura para la explicación
+    const explanationDiv = document.getElementById('aiExplanationText');
+    if (explanationDiv) {
+        typeWriterEffect(explanationDiv, explanation, 10);
+    }
+}
+
+function hideAIModalCustom() {
+    const modal = document.getElementById('aiModalCustom');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Efecto de escritura tipo máquina de escribir
+function typeWriterEffect(element, text, speed = 20) {
+    element.innerHTML = '<span class="typing-cursor">|</span>';
+    let i = 0;
+
+    const type = () => {
+        if (i < text.length) {
+            const currentChar = text.charAt(i);
+            const currentText = element.innerHTML.replace('<span class="typing-cursor">|</span>', '');
+            element.innerHTML = currentText + currentChar + '<span class="typing-cursor">|</span>';
+            i++;
+            setTimeout(type, speed);
+        } else {
+            // Remover cursor al finalizar
+            element.innerHTML = element.innerHTML.replace('<span class="typing-cursor">|</span>', '');
+
+            // Formatear texto con párrafos
+            const formattedText = text.split('\n\n').map(para =>
+                para.trim() ? `<p>${para.trim().replace(/\n/g, '<br>')}</p>` : ''
+            ).join('');
+            element.innerHTML = formattedText;
+        }
+    };
+
+    type();
+}
+
+function hideAIModal() {
+    // Intentar cerrar ambos modales (el original y el custom)
+    const modal = document.getElementById('aiModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    hideAIModalCustom();
+}
+
 // FUNCIONES GLOBALES
 window.analyzeFile = analyzeFile;
 window.downloadReport = downloadReport;
 window.deleteFile = deleteFile;
 window.viewCharts = viewCharts;
+window.analyzeWithAI = analyzeWithAI;
+window.hideAIModalCustom = hideAIModalCustom;
