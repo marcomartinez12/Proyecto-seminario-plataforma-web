@@ -56,7 +56,7 @@ async def ai_analysis(file_id: str):
         diagnosis_list = "\n".join([f"- {str(diag)}: {int(count)} casos" for diag, count in diagnosis_dist.items()])
 
         # Crear prompt para la IA (evitando caracteres especiales)
-        prompt = """Eres un medico especialista en enfermedades cronicas y analisis epidemiologico. Analiza los siguientes datos de salud poblacional y proporciona una explicacion profesional, clara y detallada:
+        prompt = """Eres un experto en salud que explica informacion medica de manera clara y sencilla para que cualquier persona pueda entenderla. Analiza los siguientes datos de salud y proporciona una explicacion facil de comprender:
 
 DATOS DEL ANALISIS:
 - Total de pacientes: {}
@@ -74,14 +74,15 @@ ESTADISTICAS CLINICAS:
 DISTRIBUCION DE DIAGNOSTICOS:
 {}
 
-Por favor, proporciona:
-1. Un analisis epidemiologico de los hallazgos principales
-2. Interpretacion de los factores de riesgo detectados
-3. Recomendaciones preventivas especificas basadas en los datos
-4. Evaluacion de la gravedad de la situacion poblacional
-5. Estrategias de intervencion prioritarias
+Por favor, proporciona una explicacion en lenguaje simple y accesible que incluya:
 
-Responde de manera profesional, estructurada y en español, como si fueras un medico epidemiologo presentando resultados a un comite de salud publica.""".format(
+1. **Resumen general**: Que nos dicen estos datos en palabras sencillas
+2. **Hallazgos importantes**: Los puntos mas relevantes explicados de forma clara
+3. **Que significan los numeros**: Interpreta las estadisticas de manera comprensible (por ejemplo: si el IMC promedio es alto, bajo o normal)
+4. **Recomendaciones practicas**: Consejos de prevencion que cualquiera pueda entender y aplicar
+5. **Conclusion**: Un mensaje final breve sobre la situacion general de salud
+
+IMPORTANTE: Usa lenguaje cotidiano, evita terminos medicos complicados o explicalo cuando los uses. Escribe como si le estuvieras explicando a un familiar o amigo. Se claro, directo y positivo cuando sea posible.""".format(
             total_records,
             hypertension_cases,
             round((hypertension_cases/total_records*100), 1),
@@ -98,7 +99,7 @@ Responde de manera profesional, estructurada y en español, como si fueras un me
         )
 
         # Llamar a OpenRouter API
-        OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
+        OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
 
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
@@ -114,7 +115,7 @@ Responde de manera profesional, estructurada y en español, como si fueras un me
                     "messages": [
                         {
                             "role": "system",
-                            "content": "Eres un medico especialista en epidemiologia y salud publica con amplia experiencia en analisis de datos de enfermedades cronicas."
+                            "content": "Eres un comunicador de salud experto en explicar informacion medica compleja de forma simple y accesible para todo publico. Tu objetivo es que cualquier persona, sin importar su nivel educativo, pueda entender los conceptos de salud."
                         },
                         {
                             "role": "user",
@@ -122,7 +123,7 @@ Responde de manera profesional, estructurada y en español, como si fueras un me
                         }
                     ],
                     "temperature": 0.7,
-                    "max_tokens": 2000
+                    "max_tokens": 1500
                 }
             )
 

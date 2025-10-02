@@ -1,107 +1,35 @@
-# 🏥 Plataforma de Análisis Médico con Machine Learning
+# Plataforma de Análisis Médico
 
-## 📋 Descripción
+## Descripción
 
-Plataforma web para detectar tendencias de enfermedades crónicas no transmisibles como la hipertensión y diabetes
+Aplicación web para análisis de datos médicos con detección de hipertensión y diabetes mediante Machine Learning.
 
-## ✨ Características Principales
+## Funcionalidades
 
-### 🤖 Machine Learning
-- **Algoritmo**: Random Forest Classifier con 100 estimadores
-- **Análisis predictivo** para detección de diabetes e hipertensión
-- **Procesamiento automático** de datos médicos
-- **Cálculo de importancia** de características clínicas
-- **Precisión del modelo** reportada en tiempo real
+- Carga de archivos Excel con datos médicos
+- Análisis predictivo con Random Forest
+- Generación de reportes PDF con gráficos
+- Explicaciones de resultados con IA
 
-### 📊 Análisis de Datos Avanzado
-- Procesamiento de **10 variables médicas clave**:
-  - Edad, Sexo, Peso, Altura, IMC
-  - Presión Arterial (Sistólica/Diastólica)
-  - Glucosa, Colesterol, Hábito de fumar
-- **Detección automática** de factores de riesgo cardiovascular
-- **Análisis demográfico** completo por grupos etarios
-- **Correlaciones** entre variables clínicas
-- **🆕 Análisis de comorbilidad** hipertensión + diabetes basado en valores clínicos reales
-- **🆕 Tendencias epidemiológicas** por grupos de edad (< 30, 30-45, 46-60, > 60 años)
-- **🆕 Detección de patrones** de riesgo cardiovascular específicos
-
-### 🩺 Análisis Clínico Especializado
-- **Análisis de Hipertensión Arterial**:
-  - Prevalencia por grupos etarios
-  - Clasificación de riesgo (Bajo, Moderado, Alto, Muy Alto)
-  - Recomendaciones preventivas específicas
-- **Análisis de Diabetes Mellitus**:
-  - Tendencias por edad y factores de riesgo
-  - Estrategias de manejo terapéutico
-  - Detección de complicaciones potenciales
-- **🆕 Comorbilidad Inteligente**:
-  - Detección basada en criterios clínicos (Presión Sistólica >140 mmHg + Glucosa >126 mg/dL)
-  - Análisis de riesgo cardiovascular combinado
-  - Estrategias de manejo integral
-
-### 📈 Visualización
-- **Gráficos interactivos** con matplotlib y seaborn
-- Distribución de diagnósticos
-- Correlación entre variables
-- Análisis por edad y diagnóstico
-- **🆕 Factores de riesgo** con datos precisos de comorbilidad
-
-### 📄 Reportes PDF Profesionales
-- **Formato profesional** con Times New Roman 12pt siguiendo normas APA
-- **🆕 Secciones especializadas**:
-  - Detección de patrones de riesgo cardiovascular
-  - Tendencias epidemiológicas por grupos etarios
-  - Análisis específico de hipertensión arterial
-  - Análisis detallado de diabetes mellitus
-  - **Análisis de comorbilidad hipertensión + diabetes**
-- **Gráficos integrados** de alta calidad
-- **Recomendaciones médicas** automatizadas y específicas
-- **Tablas de riesgo** con codificación por colores
-- **Descarga automática** al completar análisis
-
-### 🎨 Interfaz de Usuario
-- **Diseño moderno** con tema oscuro
-- **Drag & drop** para carga de archivos
-- **Barra de progreso** en tiempo real
-- **Notificaciones** de estado
-- **Responsive design**
-
-## 🔬 Metodología Clínica
-
-### Criterios de Diagnóstico
-- **Hipertensión**: Presión Sistólica > 140 mmHg
-- **Diabetes**: Glucosa > 126 mg/dL
-- **Obesidad**: IMC > 30 kg/m²
-- **Dislipidemia**: Colesterol > 240 mg/dL
-
-### Análisis de Comorbilidad
-El sistema utiliza valores clínicos reales para detectar comorbilidad, identificando pacientes que presentan simultáneamente:
-- Presión arterial elevada (>140 mmHg sistólica)
-- Glucosa elevada (>126 mg/dL)
-
-Esta metodología proporciona una evaluación más precisa del riesgo cardiovascular combinado.
-
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías
 
 ### Backend
-- **FastAPI** - Framework web moderno y rápido
-- **Python 3.8+** - Lenguaje principal
+- **FastAPI** - Framework web
+- **Python 3.8+**
 - **scikit-learn** - Machine Learning
-- **pandas** - Manipulación de datos
-- **numpy** - Computación numérica
-- **matplotlib/seaborn** - Visualización
+- **pandas** - Procesamiento de datos
+- **matplotlib/seaborn** - Gráficos
 - **ReportLab** - Generación de PDFs
 
 ### Frontend
-- **HTML5/CSS3** - Estructura y estilos
-- **JavaScript ES6+** - Interactividad
-- **Fetch API** - Comunicación con backend
-- **CSS Grid/Flexbox** - Layout responsivo
+- HTML5/CSS3/JavaScript
+- Fetch API
 
-### Dependencias
+## Dependencias
+
 ```txt
 fastapi
-uvicorn
+uvicorn[standard]
 python-multipart
 pandas
 numpy
@@ -110,26 +38,18 @@ matplotlib
 seaborn
 reportlab
 openpyxl
-aiofiles
-jinja2
-requests
-psutil
+httpx
 ```
 
-## 🚀 Instalación y Configuración
+## Instalación
 
-### Prerrequisitos
-- Python 3.8 o superior
-- Node.js y npm (para desarrollo frontend)
-- Git
-
-### 1. Clonar el Repositorio
+### 1. Clonar repositorio
 ```bash
 git clone <url-del-repositorio>
 cd Proyecto-seminario-plataforma-web
 ```
 
-### 2. Crear Entorno Virtual
+### 2. Crear entorno virtual
 ```bash
 python -m venv venv
 
@@ -140,21 +60,51 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-### 3. Instalar Dependencias
+### 3. Instalar dependencias
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configurar Directorios
+### 4. Configurar API key de OpenRouter
+Editar la clave API en `app/routers/ai_analysis.py` línea 101 o configurar como variable de entorno:
 ```bash
-mkdir uploads downloads data reports\charts
+set OPENROUTER_API_KEY=tu-clave-aqui
 ```
 
-### 5. Ejecutar la Aplicación
+### 5. Ejecutar aplicación
 ```bash
 python main.py
 ```
 
-La aplicación estará disponible en: `http://localhost:8000`
+La aplicación estará en: `http://localhost:8000`
 
-## 📁 Estructura del Proyecto
+## Formato de datos
+
+El archivo Excel debe contener las siguientes columnas:
+
+- ID
+- Edad
+- Sexo
+- Peso
+- Altura
+- Presion_Arterial (formato: "120/80")
+- Glucosa
+- Colesterol
+- Fumador ("Si" o "No")
+- Diagnostico
+
+## Estructura del proyecto
+
+```
+Proyecto-seminario-plataforma-web/
+├── app/
+│   ├── routers/         # Endpoints de la API
+│   ├── schemas.py       # Modelos de datos
+│   └── utils/           # Utilidades
+├── static/              # Archivos estáticos (CSS, JS)
+├── templates/           # Templates HTML
+├── uploads/             # Archivos cargados
+├── downloads/           # Reportes generados
+├── main.py             # Punto de entrada
+└── requirements.txt    # Dependencias
+```

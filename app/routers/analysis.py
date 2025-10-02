@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
@@ -96,22 +96,32 @@ def create_ml_model(data):
     # Dividir datos en entrenamiento y prueba
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    # Crear y entrenar el modelo
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    # Crear y entrenar el modelo (optimizado para velocidad)
+    model = RandomForestClassifier(n_estimators=50, random_state=42, n_jobs=-1)
+
+    # Validación cruzada para precisión más confiable (solo con datos suficientes)
+    if len(data) >= 100:
+        cv_scores = cross_val_score(model, X, y, cv=min(5, len(data)//20), scoring='accuracy', n_jobs=-1)
+        cv_accuracy = cv_scores.mean()
+    else:
+        cv_accuracy = None
+
+    # Entrenar modelo final
     model.fit(X_train, y_train)
-    
+
     # Hacer predicciones
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    
-    # Mantener precisión real sin modificaciones
-    
+
+    # Usar validación cruzada si está disponible (más confiable)
+    final_accuracy = cv_accuracy if cv_accuracy is not None else accuracy
+
     # Obtener importancia de características
     feature_importance = dict(zip(features, model.feature_importances_))
-    
-    return model, accuracy, feature_importance, y_test, y_pred
 
-def generate_charts_optimized(data, output_dir, max_points=5000):
+    return model, final_accuracy, feature_importance, y_test, y_pred
+
+def generate_charts_optimized(data, output_dir, max_points=3000):
     """Generar gráficos optimizados para claridad científica"""
     if len(data) > max_points:
         sample_data = data.sample(n=max_points, random_state=42)
@@ -171,7 +181,7 @@ def generate_charts_optimized(data, output_dir, max_points=5000):
              bbox_to_anchor=(1, 0, 0.5, 1), fontsize=10)
     
     chart1_path = os.path.join(output_dir, 'distribucion_diagnosticos.png')
-    plt.savefig(chart1_path, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(chart1_path, dpi=150, bbox_inches='tight', facecolor='white')
     plt.close()
     charts.append(chart1_path)
     
@@ -214,7 +224,7 @@ def generate_charts_optimized(data, output_dir, max_points=5000):
                 fontweight='bold', pad=20, fontsize=16)
     
     chart2_path = os.path.join(output_dir, 'factores_riesgo.png')
-    plt.savefig(chart2_path, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(chart2_path, dpi=150, bbox_inches='tight', facecolor='white')
     plt.close()
     charts.append(chart2_path)
     
@@ -256,7 +266,7 @@ def generate_charts_optimized(data, output_dir, max_points=5000):
     ax.grid(True, alpha=0.3)
     
     chart3_path = os.path.join(output_dir, 'correlacion_variables.png')
-    plt.savefig(chart3_path, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(chart3_path, dpi=150, bbox_inches='tight', facecolor='white')
     plt.close()
     charts.append(chart3_path)
     
@@ -1316,7 +1326,7 @@ def analyze_file_with_monitoring(request: AnalysisRequest):
         # Generar gráficos
         charts_dir = "reports/charts"
         os.makedirs(charts_dir, exist_ok=True)
-        charts = generate_charts(processed_data, charts_dir)
+        charts = generate_charts_optimized(processed_data, charts_dir)
         
         # Generar reporte PDF
         report_filename = f"reporte_{request.file_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
