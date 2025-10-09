@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Entorno virtual
+venv/
+ENV/
+
+# Variables de entorno y credenciales
+.env
+.env.local
+
+# Archivos subidos por usuarios
+uploads/*
+!uploads/.gitkeep
+
+# Reportes generados
+downloads/*
+!downloads/.gitkeep
+reports/charts/*
+!reports/charts/.gitkeep
+
+# Base de datos local
+data/*.json
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+
+# Sistema operativo
+Thumbs.db

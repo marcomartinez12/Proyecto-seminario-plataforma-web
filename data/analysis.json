@@ -1,24 +1,24 @@
 [
   {
-    "id": "aabc8251-578a-471f-a795-3c7e159c3fa3",
-    "file_id": "4c4f85b7-bb1d-4fa1-ab2d-5facd0c6932d",
-    "analysis_date": "2025-10-01T21:28:22.195495",
-    "report_path": "downloads\\reporte_4c4f85b7-bb1d-4fa1-ab2d-5facd0c6932d_20251001_212822.pdf",
-    "hypertension_cases": 342,
-    "diabetes_cases": 324,
-    "total_records": 1010,
-    "accuracy_score": 0.3118811881188119,
-    "summary": "Análisis completado con 31.19% de precisión. Se identificaron 342 casos de hipertensión y 324 casos de diabetes."
-  },
-  {
-    "id": "8c724bee-8e6f-4a5d-8a21-e4d8c93381a3",
-    "file_id": "fb0993bc-fd78-4e97-b7fe-85bc8b2e0388",
-    "analysis_date": "2025-10-01T21:33:35.965482",
-    "report_path": "downloads\\reporte_fb0993bc-fd78-4e97-b7fe-85bc8b2e0388_20251001_213335.pdf",
+    "id": "3dc9bc93-c610-4126-98ce-3bbd8c5b8edd",
+    "file_id": "c3b5956c-ecbf-4563-ab73-294c777ff8a1",
+    "analysis_date": "2025-10-09T14:28:40.951945",
+    "report_path": "downloads\\reporte_c3b5956c-ecbf-4563-ab73-294c777ff8a1_20251009_142840.pdf",
     "hypertension_cases": 1341,
     "diabetes_cases": 937,
     "total_records": 5010,
-    "accuracy_score": 0.5199600798403193,
-    "summary": "Análisis completado con 52.00% de precisión. Se identificaron 1341 casos de hipertensión y 937 casos de diabetes."
+    "accuracy_score": 0.5137724550898204,
+    "summary": "Análisis completado con 51.38% de precisión. Se identificaron 1341 casos de hipertensión y 937 casos de diabetes."
+  },
+  {
+    "id": "1ede146b-6efc-4e48-8ce5-7fe439c21bec",
+    "file_id": "71b732dc-2692-449d-9410-025b758b9552",
+    "analysis_date": "2025-10-09T14:43:35.167873",
+    "report_path": "downloads\\reporte_71b732dc-2692-449d-9410-025b758b9552_20251009_144335.pdf",
+    "hypertension_cases": 1341,
+    "diabetes_cases": 937,
+    "total_records": 25010,
+    "accuracy_score": 0.26189524190323865,
+    "summary": "Análisis completado con 26.19% de precisión. Se identificaron 1341 casos de hipertensión y 937 casos de diabetes."
   }
 ]

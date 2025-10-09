@@ -99,7 +99,13 @@ IMPORTANTE: Usa lenguaje cotidiano, evita terminos medicos complicados o explica
         )
 
         # Llamar a OpenRouter API
-        OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
+        OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
+
+        if not OPENROUTER_API_KEY:
+            raise HTTPException(
+                status_code=500,
+                detail="OPENROUTER_API_KEY no configurada. Por favor configura la variable de entorno."
+            )
 
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(

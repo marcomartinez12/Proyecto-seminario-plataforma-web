@@ -5,6 +5,10 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde .env
+load_dotenv()
 
 # Importar módulos locales
 from app.routers import files, analysis, ai_analysis
