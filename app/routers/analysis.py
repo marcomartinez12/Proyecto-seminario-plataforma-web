@@ -40,86 +40,411 @@ except:
     pass
 
 def preprocess_data(df):
-    """Preprocesar los datos para el modelo ML"""
+    """Preprocesar los datos para el modelo ML - VERSIÓN OPTIMIZADA"""
+    from scipy import stats
+
+    print("\n" + "="*70)
+    print("PREPROCESAMIENTO DE DATOS - VERSION MEJORADA")
+    print("="*70)
+    print(f"Registros iniciales: {len(df):,}")
+
     # Crear una copia para no modificar el original
     data = df.copy()
-    
-    # Convertir columnas numéricas a float (por si vienen como string)
+
+    # ===== 1. FILTRAR DIAGNÓSTICOS VÁLIDOS =====
+    diagnosticos_validos = [
+        'Normal', 'Hipertension', 'Hipertensión', 'hipertension',
+        'Diabetes', 'diabetes',
+        'Prediabetes', 'prediabetes',
+        'Obesidad', 'obesidad',
+        'Síndrome Metabólico', 'Sindrome Metabolico',
+        'Dislipidemia', 'dislipidemia'
+    ]
+
+    # Normalizar nombres (quitar espacios, estandarizar)
+    data['Diagnostico'] = data['Diagnostico'].str.strip()
+    data['Diagnostico'] = data['Diagnostico'].replace({
+        'Hipertensión': 'Hipertension',
+        'hipertension': 'Hipertension',
+        'diabetes': 'Diabetes',
+        'prediabetes': 'Prediabetes',
+        'obesidad': 'Obesidad',
+        'Sindrome Metabolico': 'Síndrome Metabólico',
+        'dislipidemia': 'Dislipidemia'
+    })
+
+    # Mostrar diagnósticos ANTES de filtrar
+    print("\nDiagnosticos en dataset original:")
+    diag_counts = data['Diagnostico'].value_counts()
+    for diag, count in diag_counts.head(10).items():
+        pct = (count / len(data)) * 100
+        print(f"   - {diag}: {count:,} ({pct:.1f}%)")
+
+    if len(diag_counts) > 10:
+        print(f"   ... y {len(diag_counts) - 10} diagnosticos mas")
+
+    # Filtrar solo diagnósticos válidos
+    data = data[data['Diagnostico'].isin(diagnosticos_validos)]
+
+    print(f"\nRegistros despues de filtrar: {len(data):,} ({len(data)/len(df)*100:.1f}% del total)")
+
+    # Validar que hay suficientes datos
+    if len(data) < 100:
+        raise ValueError(
+            f"Insuficientes registros validos: {len(data)} (se requieren >=100).\n"
+            f"Diagnosticos esperados: {', '.join(set([d for d in diagnosticos_validos if not d.islower()]))}"
+        )
+
+    print("\nDiagnosticos validos encontrados:")
+    valid_counts = data['Diagnostico'].value_counts()
+    for diag, count in valid_counts.items():
+        pct = (count / len(data)) * 100
+        print(f"   - {diag}: {count:,} ({pct:.1f}%)")
+
+    # Verificar balance de clases
+    max_class = valid_counts.max()
+    min_class = valid_counts.min()
+    imbalance_ratio = max_class / min_class
+    if imbalance_ratio > 5:
+        print(f"\nDesbalance detectado: {imbalance_ratio:.1f}:1 (se aplicara balanceo automatico)")
+    elif imbalance_ratio > 2:
+        print(f"\nDesbalance moderado: {imbalance_ratio:.1f}:1")
+    else:
+        print(f"\nBalance aceptable: {imbalance_ratio:.1f}:1")
+
+    # ===== 2. CONVERTIR COLUMNAS NUMÉRICAS =====
+    print("\nConvirtiendo columnas numericas...")
     numeric_columns = ['Edad', 'Peso', 'Altura', 'Glucosa', 'Colesterol']
     for col in numeric_columns:
         data[col] = pd.to_numeric(data[col], errors='coerce')
-    
-    # Codificar variables categóricas
+
+    # ===== 3. CODIFICAR SEXO =====
     le_sexo = LabelEncoder()
     data['Sexo_encoded'] = le_sexo.fit_transform(data['Sexo'])
-    
-    # Procesar presión arterial (extraer valores numéricos)
+
+    # ===== 4. PROCESAR PRESIÓN ARTERIAL =====
     def extract_pressure_values(pressure_str):
         try:
             if '/' in str(pressure_str):
                 systolic, diastolic = str(pressure_str).split('/')
                 return float(systolic), float(diastolic)
             else:
-                # Si no tiene formato sistólica/diastólica, usar como sistólica
-                return float(pressure_str), 80.0  # Valor por defecto para diastólica
+                return float(pressure_str), 80.0
         except:
-            return 120.0, 80.0  # Valores por defecto
-    
+            return 120.0, 80.0
+
     pressure_values = data['Presion_Arterial'].apply(extract_pressure_values)
     data['Presion_Sistolica'] = [p[0] for p in pressure_values]
     data['Presion_Diastolica'] = [p[1] for p in pressure_values]
-    
-    # Convertir Fumador a numérico (Si=1, No=0)
-    data['Fumador_encoded'] = data['Fumador'].map({'Si': 1, 'Sí': 1, 'si': 1, 'sí': 1, 'No': 0, 'no': 0}).fillna(0).astype(int)
-    
-    # Calcular IMC (convertir altura de cm a metros)
-    # Asegurar que Peso y Altura son numéricos antes del cálculo
+
+    # ===== 5. CODIFICAR FUMADOR =====
+    data['Fumador_encoded'] = data['Fumador'].map({
+        'Si': 1, 'Sí': 1, 'si': 1, 'sí': 1, 'SI': 1, 'SÍ': 1,
+        'No': 0, 'no': 0, 'NO': 0
+    }).fillna(0).astype(int)
+
+    # ===== 6. CALCULAR IMC =====
     data['IMC'] = data['Peso'] / ((data['Altura'] / 100) ** 2)
-    
-    # Llenar valores NaN con la mediana de cada columna
-    for col in numeric_columns + ['IMC', 'Presion_Sistolica', 'Presion_Diastolica']:
+
+    # ===== 7. ELIMINAR OUTLIERS EXTREMOS =====
+    print("\nEliminando outliers extremos (valores clinicamente imposibles)...")
+    len_before = len(data)
+
+    data = data[
+        (data['Edad'] > 0) & (data['Edad'] < 120) &
+        (data['Peso'] > 20) & (data['Peso'] < 300) &
+        (data['Altura'] > 100) & (data['Altura'] < 250) &
+        (data['Glucosa'] > 0) & (data['Glucosa'] < 600) &
+        (data['Colesterol'] > 50) & (data['Colesterol'] < 500) &
+        (data['Presion_Sistolica'] > 60) & (data['Presion_Sistolica'] < 250) &
+        (data['Presion_Diastolica'] > 30) & (data['Presion_Diastolica'] < 150) &
+        (data['IMC'] > 10) & (data['IMC'] < 60)
+    ]
+
+    outliers_removed = len_before - len(data)
+    if outliers_removed > 0:
+        print(f"   Outliers eliminados: {outliers_removed:,} ({outliers_removed/len_before*100:.2f}%)")
+    else:
+        print(f"   No se encontraron outliers extremos")
+
+    # ===== 8. FEATURE ENGINEERING AVANZADO =====
+    print("\nCreando features clinicas avanzadas...")
+
+    # Presión Arterial Media (mejor predictor cardiovascular)
+    data['Presion_Media'] = (data['Presion_Sistolica'] + 2*data['Presion_Diastolica']) / 3
+
+    # Presión de Pulso (indicador de rigidez arterial)
+    data['Presion_Pulso'] = data['Presion_Sistolica'] - data['Presion_Diastolica']
+
+    # Ratio Colesterol/Edad (aproximación de riesgo acumulado)
+    data['Ratio_Colesterol_Edad'] = data['Colesterol'] / (data['Edad'] + 1)
+
+    # Score de Riesgo Cardiovascular (basado en guías clínicas)
+    data['Score_Cardiovascular'] = (
+        (data['Presion_Sistolica'] > 140).astype(int) * 3 +
+        (data['Presion_Sistolica'] > 130).astype(int) * 2 +
+        (data['Glucosa'] > 126).astype(int) * 3 +
+        (data['Glucosa'] > 100).astype(int) * 2 +
+        (data['IMC'] > 30).astype(int) * 3 +
+        (data['IMC'] > 25).astype(int) * 1 +
+        (data['Colesterol'] > 240).astype(int) * 2 +
+        data['Fumador_encoded'] * 3
+    )
+
+    # Interacciones de features
+    data['IMC_x_Edad'] = data['IMC'] * data['Edad']
+    data['Glucosa_x_IMC'] = data['Glucosa'] * data['IMC']
+    data['Presion_x_Edad'] = data['Presion_Sistolica'] * data['Edad']
+    data['Glucosa_x_Edad'] = data['Glucosa'] * data['Edad']
+
+    # Ratios clínicos
+    data['Ratio_Sistolica_Diastolica'] = data['Presion_Sistolica'] / (data['Presion_Diastolica'] + 1)
+
+    # Categorías de riesgo
+    data['Categoria_IMC'] = pd.cut(
+        data['IMC'],
+        bins=[0, 18.5, 25, 30, 35, 100],
+        labels=[0, 1, 2, 3, 4]
+    ).astype(int)
+
+    data['Categoria_Edad'] = pd.cut(
+        data['Edad'],
+        bins=[0, 30, 45, 60, 75, 100],
+        labels=[0, 1, 2, 3, 4]
+    ).astype(int)
+
+    data['Categoria_Glucosa'] = pd.cut(
+        data['Glucosa'],
+        bins=[0, 100, 126, 200, 1000],
+        labels=[0, 1, 2, 3]
+    ).astype(int)
+
+    data['Categoria_Presion'] = pd.cut(
+        data['Presion_Sistolica'],
+        bins=[0, 120, 130, 140, 180, 300],
+        labels=[0, 1, 2, 3, 4]
+    ).astype(int)
+
+    print(f"   Features creadas: 15 nuevas variables clinicas")
+
+    # ===== 9. LLENAR VALORES NULOS =====
+    print("\nManejando valores nulos...")
+    all_numeric_cols = numeric_columns + [
+        'IMC', 'Presion_Sistolica', 'Presion_Diastolica', 'Presion_Media',
+        'Presion_Pulso', 'Ratio_Colesterol_Edad', 'Score_Cardiovascular',
+        'IMC_x_Edad', 'Glucosa_x_IMC', 'Presion_x_Edad', 'Glucosa_x_Edad',
+        'Ratio_Sistolica_Diastolica'
+    ]
+
+    nulls_before = data[all_numeric_cols].isnull().sum().sum()
+
+    for col in all_numeric_cols:
         if col in data.columns:
-            data[col] = data[col].fillna(data[col].median())
-    
+            nulls = data[col].isnull().sum()
+            if nulls > 0:
+                data[col] = data[col].fillna(data[col].median())
+
+    if nulls_before > 0:
+        print(f"   Valores nulos rellenados: {nulls_before:,}")
+    else:
+        print(f"   No se encontraron valores nulos")
+
+    # ===== 10. RESUMEN FINAL =====
+    print("\n" + "="*70)
+    print("PREPROCESAMIENTO COMPLETADO")
+    print("="*70)
+    print(f"Registros finales: {len(data):,}")
+    print(f"Features totales: {len([col for col in data.columns if col not in ['ID', 'Diagnostico', 'Presion_Arterial', 'Fumador', 'Sexo']])}")
+    print(f"Clases: {len(data['Diagnostico'].unique())}")
+    print("="*70 + "\n")
+
     return data, le_sexo
 
 def create_ml_model(data):
-    """Crear y entrenar el modelo de ML"""
-    # Seleccionar características para el modelo
-    features = ['Edad', 'Sexo_encoded', 'Peso', 'Altura', 'IMC', 
-                'Presion_Sistolica', 'Presion_Diastolica', 'Glucosa', 
-                'Colesterol', 'Fumador_encoded']
-    
+    """Crear y entrenar el modelo de ML - VERSIÓN OPTIMIZADA CON XGBOOST"""
+    from xgboost import XGBClassifier
+    from sklearn.metrics import f1_score, classification_report, confusion_matrix
+    from sklearn.model_selection import StratifiedKFold
+    from imblearn.over_sampling import SMOTE
+
+    print("\n" + "="*70)
+    print("ENTRENAMIENTO DE MODELO DE MACHINE LEARNING")
+    print("="*70)
+
+    # ===== 1. SELECCIONAR CARACTERÍSTICAS =====
+    features = [
+        # Features originales
+        'Edad', 'Sexo_encoded', 'Peso', 'Altura', 'IMC',
+        'Presion_Sistolica', 'Presion_Diastolica', 'Glucosa',
+        'Colesterol', 'Fumador_encoded',
+        # Features avanzadas
+        'Presion_Media', 'Presion_Pulso', 'Ratio_Colesterol_Edad',
+        'Score_Cardiovascular', 'IMC_x_Edad', 'Glucosa_x_IMC',
+        'Presion_x_Edad', 'Glucosa_x_Edad', 'Ratio_Sistolica_Diastolica',
+        'Categoria_IMC', 'Categoria_Edad', 'Categoria_Glucosa', 'Categoria_Presion'
+    ]
+
+    print(f"\nFeatures seleccionadas: {len(features)}")
+
     X = data[features]
     y = data['Diagnostico']
-    
-    # Dividir datos en entrenamiento y prueba
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    # Crear y entrenar el modelo (optimizado para velocidad)
-    model = RandomForestClassifier(n_estimators=50, random_state=42, n_jobs=-1)
 
-    # Validación cruzada para precisión más confiable (solo con datos suficientes)
+    # Codificar target (XGBoost requiere enteros)
+    le_target = LabelEncoder()
+    y_encoded = le_target.fit_transform(y)
+
+    print(f"Clases a predecir: {list(le_target.classes_)}")
+
+    # ===== 2. SPLIT ESTRATIFICADO =====
+    print(f"\nDividiendo datos...")
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y_encoded,
+        test_size=0.2,
+        random_state=42,
+        stratify=y_encoded
+    )
+
+    print(f"   Entrenamiento: {len(X_train):,} registros ({len(X_train)/len(X)*100:.1f}%)")
+    print(f"   Prueba: {len(X_test):,} registros ({len(X_test)/len(X)*100:.1f}%)")
+
+    # ===== 3. BALANCEO CON SMOTE =====
+    if len(X_train) >= 500:
+        train_class_counts = pd.Series(y_train).value_counts()
+        max_class = train_class_counts.max()
+        min_class = train_class_counts.min()
+        imbalance = max_class / min_class
+
+        if imbalance > 2 and min_class >= 6:
+            try:
+                print(f"\nAplicando SMOTE para balancear clases...")
+                smote = SMOTE(random_state=42, k_neighbors=min(5, min_class-1))
+                X_train, y_train = smote.fit_resample(X_train, y_train)
+                print(f"   Dataset balanceado: {len(X_train):,} registros")
+
+                smote_counts = pd.Series(y_train).value_counts()
+                for class_idx, count in smote_counts.items():
+                    class_name = le_target.classes_[class_idx]
+                    print(f"      - {class_name}: {count:,}")
+            except Exception as e:
+                print(f"   SMOTE no aplicado: {str(e)}")
+
+    # ===== 4. CREAR MODELO XGBOOST =====
+    print(f"\nCreando modelo XGBoost optimizado...")
+
+    model = XGBClassifier(
+        n_estimators=300,
+        learning_rate=0.05,
+        max_depth=8,
+        min_child_weight=3,
+        gamma=0.1,
+        reg_alpha=0.1,
+        reg_lambda=1.0,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        colsample_bylevel=0.8,
+        random_state=42,
+        n_jobs=-1,
+        eval_metric='mlogloss',
+        use_label_encoder=False
+    )
+
+    print(f"   Modelo: XGBoost Classifier")
+    print(f"   Arboles: 300")
+    print(f"   Learning rate: 0.05")
+    print(f"   Profundidad: 8")
+
+    # ===== 5. VALIDACIÓN CRUZADA ESTRATIFICADA =====
     if len(data) >= 100:
-        cv_scores = cross_val_score(model, X, y, cv=min(5, len(data)//20), scoring='accuracy', n_jobs=-1)
-        cv_accuracy = cv_scores.mean()
+        print(f"\nValidacion cruzada estratificada (5-fold)...")
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+        X_original = data[features]
+        y_original = le_target.transform(data['Diagnostico'])
+
+        cv_scores = cross_val_score(
+            model, X_original, y_original,
+            cv=skf,
+            scoring='f1_weighted',
+            n_jobs=-1
+        )
+
+        cv_mean = cv_scores.mean()
+        cv_std = cv_scores.std()
+
+        print(f"   F1-Score (CV): {cv_mean:.4f} (+/-{cv_std:.4f})")
+        print(f"   Scores por fold: {[f'{s:.4f}' for s in cv_scores]}")
     else:
-        cv_accuracy = None
+        cv_mean = None
 
-    # Entrenar modelo final
+    # ===== 6. ENTRENAR MODELO =====
+    print(f"\nEntrenando modelo final...")
     model.fit(X_train, y_train)
+    print(f"   Modelo entrenado exitosamente")
 
-    # Hacer predicciones
+    # ===== 7. PREDICCIONES =====
     y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
 
-    # Usar validación cruzada si está disponible (más confiable)
-    final_accuracy = cv_accuracy if cv_accuracy is not None else accuracy
+    # Decodificar para compatibilidad
+    y_test_decoded = le_target.inverse_transform(y_test)
+    y_pred_decoded = le_target.inverse_transform(y_pred)
 
-    # Obtener importancia de características
+    # ===== 8. MÉTRICAS =====
+    print(f"\nMETRICAS DEL MODELO")
+    print("="*70)
+
+    accuracy = accuracy_score(y_test_decoded, y_pred_decoded)
+    f1 = f1_score(y_test_decoded, y_pred_decoded, average='weighted')
+
+    print(f"Accuracy: {accuracy:.4f} ({accuracy*100:.2f}%)")
+    print(f"F1-Score (weighted): {f1:.4f} ({f1*100:.2f}%)")
+
+    if cv_mean is not None:
+        print(f"F1-Score (CV): {cv_mean:.4f} ({cv_mean*100:.2f}%)")
+
+    # Reporte detallado
+    print(f"\nReporte de Clasificacion por Clase:")
+    print("-"*70)
+    report = classification_report(y_test_decoded, y_pred_decoded, output_dict=True)
+
+    for class_name in le_target.classes_:
+        if class_name in report:
+            metrics = report[class_name]
+            print(f"\n{class_name}:")
+            print(f"   Precision: {metrics['precision']:.4f}")
+            print(f"   Recall:    {metrics['recall']:.4f}")
+            print(f"   F1-Score:  {metrics['f1-score']:.4f}")
+            print(f"   Support:   {int(metrics['support'])} casos")
+
+    # Matriz de confusión
+    print(f"\nMatriz de Confusion:")
+    print("-"*70)
+    cm = confusion_matrix(y_test_decoded, y_pred_decoded, labels=le_target.classes_)
+
+    print("\n" + " "*15 + "  ".join([f"{c[:10]:>10}" for c in le_target.classes_]))
+    for i, class_name in enumerate(le_target.classes_):
+        row = cm[i]
+        print(f"{class_name[:12]:>12}  " + "  ".join([f"{val:>10}" for val in row]))
+
+    # ===== 9. IMPORTANCIA DE FEATURES =====
+    print(f"\nTop 10 Features Mas Importantes:")
+    print("-"*70)
+
     feature_importance = dict(zip(features, model.feature_importances_))
+    top_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)[:10]
 
-    return model, final_accuracy, feature_importance, y_test, y_pred
+    for i, (feature, importance) in enumerate(top_features, 1):
+        bar = "=" * int(importance * 50)
+        print(f"{i:2}. {feature:25} {importance:6.4f} {bar}")
+
+    # ===== 10. MÉTRICA FINAL =====
+    final_accuracy = cv_mean if cv_mean is not None else f1
+
+    print("\n" + "="*70)
+    print(f"ENTRENAMIENTO COMPLETADO")
+    print(f"Precision final (F1): {final_accuracy:.4f} ({final_accuracy*100:.2f}%)")
+    print("="*70 + "\n")
+
+    return model, final_accuracy, feature_importance, y_test_decoded, y_pred_decoded
 
 def generate_charts_optimized(data, output_dir, max_points=3000):
     """Generar gráficos optimizados para claridad científica"""

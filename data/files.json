@@ -1,22 +1,12 @@
 [
   {
-    "id": "c3b5956c-ecbf-4563-ab73-294c777ff8a1",
-    "filename": "d7d9d3e8-322a-46ba-8cfd-cae0ad16d115.xlsx",
-    "original_filename": "datos_reales_5000.xlsx",
-    "file_path": "uploads\\d7d9d3e8-322a-46ba-8cfd-cae0ad16d115.xlsx",
-    "upload_date": "2025-10-09T14:28:32.394396",
-    "file_size": 225575,
+    "id": "98d50da9-b031-4019-b25a-abbe03d1e7cf",
+    "filename": "a1ec42d8-dbb2-4050-893f-24ad75e2a418.xlsx",
+    "original_filename": "dataset_medico_completo_10k_20251009.xlsx",
+    "file_path": "uploads\\a1ec42d8-dbb2-4050-893f-24ad75e2a418.xlsx",
+    "upload_date": "2025-10-11T15:21:49.085113",
+    "file_size": 1199292,
     "status": "completed",
-    "records_count": 5010
-  },
-  {
-    "id": "71b732dc-2692-449d-9410-025b758b9552",
-    "filename": "81c5ab7a-f509-4081-9a95-9d3b42bf833d.xlsx",
-    "original_filename": "datos_reales_7000.xlsx",
-    "file_path": "uploads\\81c5ab7a-f509-4081-9a95-9d3b42bf833d.xlsx",
-    "upload_date": "2025-10-09T14:43:13.197726",
-    "file_size": 1136898,
-    "status": "completed",
-    "records_count": 25010
+    "records_count": 10000
   }
 ]

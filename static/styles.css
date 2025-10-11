@@ -819,43 +819,69 @@ header p {
     --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.4);
 }
 
-/* Modal de gráficas */
+/* Modal de gráficas MEJORADO */
 .charts-modal-content {
-    max-width: 90%;
-    width: 1200px;
-    max-height: 90vh;
+    max-width: 95%;
+    width: 1400px;
+    max-height: 95vh;
     overflow-y: auto;
+    background: var(--bg-secondary);
+    padding: 3rem;
+}
+
+.charts-modal-content h3 {
+    color: var(--text-primary);
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 700;
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
 
 .charts-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-top: 20px;
+    gap: 30px;
+    margin-top: 30px;
 }
 
 .chart-item {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    height: 300px;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-light);
+    height: 450px;
     display: flex;
     flex-direction: column;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-lg);
+}
+
+.chart-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl), 0 0 30px rgba(139, 92, 246, 0.3);
+    border-color: var(--primary);
 }
 
 .chart-item h4 {
-    margin: 0 0 15px 0;
-    color: #495057;
-    font-size: 16px;
+    margin: 0 0 25px 0;
+    color: var(--text-primary);
+    font-size: 1.4rem;
+    font-weight: 700;
     text-align: center;
     flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .chart-item canvas {
     flex: 1;
-    max-height: 250px;
-    min-height: 200px;
+    max-height: 380px;
+    min-height: 350px;
 }
 
 @media (max-width: 768px) {
@@ -1973,15 +1999,18 @@ header p {
     }
 }
 
-/* KPI card simplificado y equilibrado */
+/* KPI card MEJORADO - Más visible y atractivo */
 .kpi-card {
-    background: var(--bg-glass);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--border);
+    background: linear-gradient(135deg,
+        rgba(139, 92, 246, 0.15) 0%,
+        rgba(6, 182, 212, 0.1) 50%,
+        rgba(34, 197, 94, 0.15) 100%);
+    backdrop-filter: blur(30px);
+    border: 2px solid var(--border-light);
     border-radius: var(--radius-lg);
-    padding: 1rem;
+    padding: 2rem;
     text-align: center;
-    height: 250px;
+    height: 450px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1989,6 +2018,14 @@ header p {
     position: relative;
     overflow: hidden;
     flex: 1;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl), 0 0 30px rgba(139, 92, 246, 0.3);
+    border-color: var(--primary);
 }
 
 .kpi-card::before {
@@ -1998,42 +2035,66 @@ header p {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, 
-        rgba(139, 92, 246, 0.1) 0%, 
-        rgba(6, 182, 212, 0.05) 50%, 
-        rgba(34, 197, 94, 0.1) 100%);
-    z-index: -1;
+    background: radial-gradient(circle at center,
+        rgba(139, 92, 246, 0.2) 0%,
+        transparent 70%);
+    z-index: 0;
+    animation: kpiGlow 4s ease-in-out infinite;
 }
 
 .kpi-main-value {
-    font-size: 3rem;
-    font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 0.5rem;
-    text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    font-size: 5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
     animation: kpiPulse 3s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
 }
 
 .kpi-label {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    font-weight: 500;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
 }
 
 @keyframes kpiPulse {
     0%, 100% {
         transform: scale(1);
-        text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.4));
     }
     50% {
-        transform: scale(1.05);
-        text-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.7));
+    }
+}
+
+@keyframes kpiGlow {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
     }
 }
 
 @media (max-width: 768px) {
     .kpi-main-value {
-        font-size: 2.5rem;
+        font-size: 3.5rem;
+    }
+
+    .kpi-label {
+        font-size: 1.1rem;
     }
 }
 

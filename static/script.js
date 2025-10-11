@@ -541,31 +541,32 @@ function showChartsModal(chartsData, fileId) {
 }
 
 function createCharts(data) {
-    // Paleta de colores profesional consistente
+    // Paleta de colores MEJORADA - Más vibrante y visible
     const colors = {
-        primary: '#2C3E50',      // Azul oscuro
-        secondary: '#3498DB',    // Azul claro  
-        accent: '#16A085',       // Verde turquesa
-        success: '#27AE60',      // Verde
-        warning: '#F39C12',      // Naranja
-        danger: '#E74C3C',       // Rojo
-        info: '#9B59B6',         // Púrpura
-        light: '#ECF0F1',        // Gris claro
-        gradient: ['#2C3E50', '#3498DB', '#16A085', '#27AE60', '#F39C12', '#E74C3C', '#9B59B6', '#34495E']
+        primary: '#2563eb',      // Azul brillante
+        secondary: '#3b82f6',    // Azul claro
+        accent: '#06b6d4',       // Cyan brillante
+        success: '#10b981',      // Verde esmeralda
+        warning: '#f59e0b',      // Naranja brillante
+        danger: '#ef4444',       // Rojo brillante
+        info: '#8b5cf6',         // Púrpura vibrante
+        light: '#f3f4f6',        // Gris claro
+        gradient: ['#8b5cf6', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1']
     };
 
-    // Configuración global de fuentes
-    Chart.defaults.font.family = 'Poppins, sans-serif';
-    Chart.defaults.font.size = 12;
-    Chart.defaults.color = colors.primary;
+    // Configuración global de fuentes MEJORADA - Más grandes y legibles
+    Chart.defaults.font.family = 'Inter, sans-serif';
+    Chart.defaults.font.size = 14;
+    Chart.defaults.font.weight = '600';
+    Chart.defaults.color = '#ffffff';
 
-    // Plugin para etiquetas de datos
+    // Plugin para etiquetas de datos MEJORADO - Más grandes y visibles
     const dataLabelsPlugin = {
         id: 'datalabels',
         afterDatasetsDraw(chart, args, options) {
             const { ctx, data } = chart;
             ctx.save();
-            
+
             data.datasets.forEach((dataset, datasetIndex) => {
                 const meta = chart.getDatasetMeta(datasetIndex);
                 if (!meta.hidden) {
@@ -574,11 +575,11 @@ function createCharts(data) {
                         if (value > 0) {
                             ctx.fillStyle = '#FFFFFF';
                             ctx.strokeStyle = '#000000';
-                            ctx.lineWidth = 2;
-                            ctx.font = 'bold 16px Poppins';
+                            ctx.lineWidth = 3;
+                            ctx.font = 'bold 20px Inter';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
-                            
+
                             let label = '';
                             if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
                                 const total = dataset.data.reduce((a, b) => a + b, 0);
@@ -587,7 +588,7 @@ function createCharts(data) {
                             } else {
                                 label = value.toString();
                             }
-                            
+
                             const position = element.tooltipPosition();
                             ctx.strokeText(label, position.x, position.y);
                             ctx.fillText(label, position.x, position.y);
@@ -595,12 +596,12 @@ function createCharts(data) {
                     });
                 }
             });
-            
+
             ctx.restore();
         }
     };
 
-    // Gráfica de distribución de diagnósticos (PIE)
+    // Gráfica de distribución de diagnósticos (PIE) MEJORADA
     const diagnosticCtx = document.getElementById('diagnosticChart').getContext('2d');
     const diagnosticChart = new Chart(diagnosticCtx, {
         type: 'pie',
@@ -609,44 +610,87 @@ function createCharts(data) {
             datasets: [{
                 data: data.diagnostic_distribution?.values || [1],
                 backgroundColor: colors.gradient,
-                borderColor: '#FFFFFF',
-                borderWidth: 3,
-                hoverBorderWidth: 4,
-                hoverOffset: 8
+                borderColor: '#1a1a1a',
+                borderWidth: 4,
+                hoverBorderWidth: 6,
+                hoverOffset: 15
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    bottom: 10
+                }
+            },
             plugins: {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        padding: 20,
+                        padding: 15,
                         usePointStyle: true,
                         pointStyle: 'circle',
                         font: {
-                            family: 'Poppins',
-                            size: 11,
-                            weight: '500'
+                            family: 'Inter',
+                            size: 12,
+                            weight: '600'
+                        },
+                        color: '#ffffff',
+                        boxWidth: 12,
+                        boxHeight: 12,
+                        textAlign: 'left',
+                        generateLabels: (chart) => {
+                            const data = chart.data;
+                            if (data.labels.length && data.datasets.length) {
+                                return data.labels.map((label, i) => {
+                                    const meta = chart.getDatasetMeta(0);
+                                    const style = meta.controller.getStyle(i);
+                                    // Truncar texto largo
+                                    const shortLabel = label.length > 15 ? label.substring(0, 15) + '...' : label;
+                                    return {
+                                        text: shortLabel,
+                                        fillStyle: style.backgroundColor,
+                                        strokeStyle: style.borderColor,
+                                        lineWidth: style.borderWidth,
+                                        hidden: !chart.getDataVisibility(i),
+                                        index: i
+                                    };
+                                });
+                            }
+                            return [];
                         }
                     }
                 },
                 tooltip: {
-                    backgroundColor: colors.primary,
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
                     titleColor: '#FFFFFF',
                     bodyColor: '#FFFFFF',
-                    borderColor: colors.secondary,
-                    borderWidth: 1,
-                    cornerRadius: 8,
-                    titleFont: { family: 'Poppins', weight: 'bold' },
-                    bodyFont: { family: 'Poppins' }
+                    borderColor: colors.info,
+                    borderWidth: 2,
+                    cornerRadius: 12,
+                    padding: 15,
+                    titleFont: { family: 'Inter', size: 16, weight: 'bold' },
+                    bodyFont: { family: 'Inter', size: 14, weight: '600' },
+                    displayColors: true,
+                    boxPadding: 6,
+                    callbacks: {
+                        // Mostrar nombre completo en tooltip
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
                 }
             },
             animation: {
                 animateRotate: true,
-                animateScale: true,
-                duration: 1000
+                animateScale: false,
+                duration: 600,
+                easing: 'easeOutQuart'
             }
         },
         plugins: [dataLabelsPlugin]
@@ -666,7 +710,7 @@ function createCharts(data) {
         `;
     }
 
-    // Gráfica de factores de riesgo (DOUGHNUT)
+    // Gráfica de factores de riesgo (DOUGHNUT) MEJORADA
     const riskCtx = document.getElementById('riskChart').getContext('2d');
     const riskChart = new Chart(riskCtx, {
         type: 'doughnut',
@@ -675,45 +719,52 @@ function createCharts(data) {
             datasets: [{
                 data: data.risk_factors?.values || [1],
                 backgroundColor: colors.gradient,
-                borderColor: '#FFFFFF',
-                borderWidth: 3,
-                hoverBorderWidth: 4,
-                hoverOffset: 6
+                borderColor: '#1a1a1a',
+                borderWidth: 4,
+                hoverBorderWidth: 6,
+                hoverOffset: 15
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '60%',
+            cutout: '65%',
             plugins: {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        padding: 20,
+                        padding: 25,
                         usePointStyle: true,
                         pointStyle: 'circle',
                         font: {
-                            family: 'Poppins',
-                            size: 11,
-                            weight: '500'
-                        }
+                            family: 'Inter',
+                            size: 14,
+                            weight: '600'
+                        },
+                        color: '#ffffff',
+                        boxWidth: 15,
+                        boxHeight: 15
                     }
                 },
                 tooltip: {
-                    backgroundColor: colors.primary,
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
                     titleColor: '#FFFFFF',
                     bodyColor: '#FFFFFF',
-                    borderColor: colors.secondary,
-                    borderWidth: 1,
-                    cornerRadius: 8,
-                    titleFont: { family: 'Poppins', weight: 'bold' },
-                    bodyFont: { family: 'Poppins' }
+                    borderColor: colors.info,
+                    borderWidth: 2,
+                    cornerRadius: 12,
+                    padding: 15,
+                    titleFont: { family: 'Inter', size: 16, weight: 'bold' },
+                    bodyFont: { family: 'Inter', size: 14, weight: '600' },
+                    displayColors: true,
+                    boxPadding: 6
                 }
             },
             animation: {
                 animateRotate: true,
                 animateScale: true,
-                duration: 1000
+                duration: 1200,
+                easing: 'easeInOutQuart'
             }
         },
         plugins: [
@@ -723,19 +774,22 @@ function createCharts(data) {
                 afterDraw(chart) {
                     const { ctx, chartArea } = chart;
                     ctx.save();
-                    
+
                     const centerX = (chartArea.left + chartArea.right) / 2;
                     const centerY = (chartArea.top + chartArea.bottom) / 2;
-                    
-                    ctx.fillStyle = colors.primary;
-                    ctx.font = 'bold 16px Poppins';
+
+                    ctx.fillStyle = '#8b5cf6';
+                    ctx.font = 'bold 22px Inter';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText('Factores', centerX, centerY - 8);
-                    
-                    ctx.font = '12px Poppins';
-                    ctx.fillText('de Riesgo', centerX, centerY + 8);
-                    
+                    ctx.shadowColor = 'rgba(139, 92, 246, 0.5)';
+                    ctx.shadowBlur = 10;
+                    ctx.fillText('Factores', centerX, centerY - 10);
+
+                    ctx.font = 'bold 18px Inter';
+                    ctx.fillStyle = '#a855f7';
+                    ctx.fillText('de Riesgo', centerX, centerY + 15);
+
                     ctx.restore();
                 }
             }

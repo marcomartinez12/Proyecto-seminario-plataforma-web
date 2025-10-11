@@ -14,3 +14,6 @@ requests
 psutil
 httpx
 python-dotenv
+xgboost
+imbalanced-learn
+scipy
