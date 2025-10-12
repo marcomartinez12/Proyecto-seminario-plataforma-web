@@ -5,8 +5,9 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, f1_score, confusion_matrix
 from sklearn.preprocessing import LabelEncoder
+from scipy import stats
 import matplotlib.pyplot as plt
 import seaborn as sns
 from reportlab.lib.pagesizes import letter
@@ -444,7 +445,17 @@ def create_ml_model(data):
     print(f"Precision final (F1): {final_accuracy:.4f} ({final_accuracy*100:.2f}%)")
     print("="*70 + "\n")
 
-    return model, final_accuracy, feature_importance, y_test_decoded, y_pred_decoded
+    # Retornar métricas completas para el PDF
+    detailed_metrics = {
+        'accuracy': accuracy,
+        'f1_score': f1,
+        'cv_mean': cv_mean,
+        'classification_report': report,
+        'confusion_matrix': cm,
+        'classes': le_target.classes_
+    }
+
+    return model, final_accuracy, feature_importance, y_test_decoded, y_pred_decoded, detailed_metrics
 
 def generate_charts_optimized(data, output_dir, max_points=3000):
     """Generar gráficos optimizados para claridad científica"""
@@ -780,9 +791,11 @@ def generate_pdf_report(data, model_results, charts, output_path):
     
     # Información de estudiantes y fecha
     info_data = [
-        ["Estudiantes:", "Marco Martínez Malagón\nCamilo Reyes Rodríguez"],
+        ["Estudiantes:", "Marco Andrés Martínez Malagón\nCamilo Reyes Rodríguez"],
         ["Programa:", "Ingeniería de Sistemas"],
         ["Asignatura:", "Seminario de Investigación"],
+        ["Profesor:", "Ing. Luis Palmera"],
+       
         
         
     ]
@@ -821,10 +834,7 @@ def generate_pdf_report(data, model_results, charts, output_path):
     story.append(PageBreak())
     
     # CONTENIDO DEL REPORTE
-    
-    # Resumen de estadísticas para tablas
-        # CONTENIDO DEL REPORTE
-    
+
     # Estadísticas reales para las tablas
     total_records = len(data)
     hypertension_cases = len(data[data['Diagnostico'].str.contains('Hipertension', case=False, na=False)])
@@ -834,6 +844,37 @@ def generate_pdf_report(data, model_results, charts, output_path):
     high_cholesterol_cases = len(data[data['Colesterol'] > 240])
     obese_cases = len(data[data['IMC'] > 30])
     smokers_cases = len(data[data['Fumador_encoded'] == 1])
+
+    # Calcular estadísticas demográficas (necesarias para varias secciones)
+    edad_mean = data['Edad'].mean()
+    edad_std = data['Edad'].std()
+    edad_min = data['Edad'].min()
+    edad_max = data['Edad'].max()
+    edad_median = data['Edad'].median()
+
+    imc_mean = data['IMC'].mean()
+    imc_std = data['IMC'].std()
+    imc_min = data['IMC'].min()
+    imc_max = data['IMC'].max()
+    imc_median = data['IMC'].median()
+
+    ps_mean = data['Presion_Sistolica'].mean()
+    ps_std = data['Presion_Sistolica'].std()
+    ps_min = data['Presion_Sistolica'].min()
+    ps_max = data['Presion_Sistolica'].max()
+    ps_median = data['Presion_Sistolica'].median()
+
+    gluc_mean = data['Glucosa'].mean()
+    gluc_std = data['Glucosa'].std()
+    gluc_min = data['Glucosa'].min()
+    gluc_max = data['Glucosa'].max()
+    gluc_median = data['Glucosa'].median()
+
+    col_mean = data['Colesterol'].mean()
+    col_std = data['Colesterol'].std()
+    col_min = data['Colesterol'].min()
+    col_max = data['Colesterol'].max()
+    col_median = data['Colesterol'].median()
     
     # 1. DETECCIÓN DE PATRONES DE RIESGO CARDIOVASCULAR
     story.append(Paragraph("1. DETECCIÓN DE PATRONES DE RIESGO CARDIOVASCULAR", subtitle_style))
@@ -977,13 +1018,112 @@ def generate_pdf_report(data, model_results, charts, output_path):
     
     # 3. ANÁLISIS DEMOGRÁFICO
     story.append(Paragraph("3. ANÁLISIS DEMOGRÁFICO DE LA POBLACIÓN", subtitle_style))
-    
-    avg_age = data['Edad'].mean()
-    gender_dist = data['Sexo'].value_counts()
-    
+
     story.append(Paragraph("3.1 Características Generales de la Población", subtitle2_style))
-    demo_text = f"""La población estudiada presenta una edad promedio de {avg_age:.1f} años, con una distribución equilibrada por sexo. El análisis demográfico revela patrones epidemiológicos consistentes con la transición demográfica regional, caracterizada por el envejecimiento poblacional y el aumento de enfermedades crónicas no transmisibles."""
+
+    # Crear tabla con estadísticas demográficas (ya calculadas al inicio)
+    demo_stats_data = [["Variable", "Media ± DE", "Rango (Min-Max)", "Mediana", "n (%)"]]
+
+    # Edad (variables ya calculadas)
+    demo_stats_data.append([
+        "Edad (años)",
+        f"{edad_mean:.1f} ± {edad_std:.1f}",
+        f"{int(edad_min)} - {int(edad_max)}",
+        f"{edad_median:.1f}",
+        f"{len(data)}"
+    ])
+
+    # Sexo
+    if 'Sexo' in data.columns:
+        gender_counts = data['Sexo'].value_counts()
+        for sexo in gender_counts.index:
+            count = gender_counts[sexo]
+            pct = (count / len(data)) * 100
+            demo_stats_data.append([
+                f"Sexo: {sexo}",
+                "-",
+                "-",
+                "-",
+                f"{count} ({pct:.1f}%)"
+            ])
+
+    # IMC (variables ya calculadas)
+    demo_stats_data.append([
+        "IMC (kg/m²)",
+        f"{imc_mean:.1f} ± {imc_std:.1f}",
+        f"{imc_min:.1f} - {imc_max:.1f}",
+        f"{imc_median:.1f}",
+        f"{len(data)}"
+    ])
+
+    # Presión Sistólica (variables ya calculadas)
+    demo_stats_data.append([
+        "Presión Sistólica (mmHg)",
+        f"{ps_mean:.1f} ± {ps_std:.1f}",
+        f"{int(ps_min)} - {int(ps_max)}",
+        f"{ps_median:.1f}",
+        f"{len(data)}"
+    ])
+
+    # Glucosa (variables ya calculadas)
+    demo_stats_data.append([
+        "Glucosa (mg/dL)",
+        f"{gluc_mean:.1f} ± {gluc_std:.1f}",
+        f"{int(gluc_min)} - {int(gluc_max)}",
+        f"{gluc_median:.1f}",
+        f"{len(data)}"
+    ])
+
+    # Colesterol (variables ya calculadas)
+    demo_stats_data.append([
+        "Colesterol (mg/dL)",
+        f"{col_mean:.1f} ± {col_std:.1f}",
+        f"{int(col_min)} - {int(col_max)}",
+        f"{col_median:.1f}",
+        f"{len(data)}"
+    ])
+
+    # Fumador
+    if 'Fumador_encoded' in data.columns:
+        fumadores = len(data[data['Fumador_encoded'] == 1])
+        pct_fumadores = (fumadores / len(data)) * 100
+        demo_stats_data.append([
+            "Fumadores",
+            "-",
+            "-",
+            "-",
+            f"{fumadores} ({pct_fumadores:.1f}%)"
+        ])
+
+    # Crear tabla demográfica
+    demo_table = Table(demo_stats_data, colWidths=[1.8*inch, 1.3*inch, 1.3*inch, 1.0*inch, 1.1*inch])
+    demo_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+        ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+
+        # Filas alternadas
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [BLANCO, GRIS_CLARO]),
+
+        ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+        ('FONTNAME', (0, 1), (-1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    ]))
+
+    story.append(demo_table)
+    story.append(Spacer(1, 15))
+
+    demo_text = f"""La población estudiada comprende {len(data):,} individuos con una edad promedio de {edad_mean:.1f} ± {edad_std:.1f} años (rango: {int(edad_min)}-{int(edad_max)} años). El análisis demográfico revela patrones epidemiológicos consistentes con la transición demográfica regional, caracterizada por el envejecimiento poblacional y el aumento de enfermedades crónicas no transmisibles.
+
+**Nota metodológica:** Los valores se presentan como Media ± Desviación Estándar (DE) para variables continuas y n (%) para variables categóricas."""
     story.append(Paragraph(demo_text, normal_style))
+    story.append(Spacer(1, 20))
     
     # 4. DETECCIÓN DE TENDENCIAS PREDICTIVAS
     story.append(Paragraph("4. DETECCIÓN DE TENDENCIAS PREDICTIVAS", subtitle_style))
@@ -1029,7 +1169,156 @@ def generate_pdf_report(data, model_results, charts, output_path):
         
         story.append(features_table)
         story.append(Spacer(1, 15))
-    
+
+    # 4.2 MÉTRICAS DETALLADAS DEL MODELO
+    story.append(Paragraph("4.2 Métricas de Rendimiento del Modelo", subtitle2_style))
+
+    # Obtener métricas detalladas
+    detailed_metrics = model_results.get('detailed_metrics', {})
+    classification_report = detailed_metrics.get('classification_report', {})
+
+    if classification_report:
+        # Tabla de métricas por clase
+        metrics_data = [["Clase", "Precision", "Recall (Sensibilidad)", "F1-Score", "Soporte (n)"]]
+
+        classes = detailed_metrics.get('classes', [])
+        for class_name in classes:
+            if class_name in classification_report:
+                metrics = classification_report[class_name]
+                metrics_data.append([
+                    class_name,
+                    f"{metrics['precision']:.3f}",
+                    f"{metrics['recall']:.3f}",
+                    f"{metrics['f1-score']:.3f}",
+                    f"{int(metrics['support'])}"
+                ])
+
+        # Agregar fila de promedios
+        if 'weighted avg' in classification_report:
+            weighted = classification_report['weighted avg']
+            metrics_data.append([
+                "Promedio Ponderado",
+                f"{weighted['precision']:.3f}",
+                f"{weighted['recall']:.3f}",
+                f"{weighted['f1-score']:.3f}",
+                f"{int(weighted['support'])}"
+            ])
+
+        metrics_table = Table(metrics_data, colWidths=[1.8*inch, 1.2*inch, 1.5*inch, 1.2*inch, 1.3*inch])
+        metrics_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+            ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+            ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+
+            # Filas de clases
+            ('BACKGROUND', (0, 1), (-1, -2), BLANCO),
+            ('BACKGROUND', (0, 2), (-1, -2), GRIS_CLARO),
+
+            # Fila de promedio en color especial
+            ('BACKGROUND', (0, -1), (-1, -1), VERDE_TURQUESA),
+            ('TEXTCOLOR', (0, -1), (-1, -1), BLANCO),
+            ('FONTNAME', (0, -1), (-1, -1), 'Times-Bold'),
+
+            ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+            ('FONTNAME', (0, 1), (-1, -2), 'Times-Roman'),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+        ]))
+
+        story.append(metrics_table)
+        story.append(Spacer(1, 15))
+
+        # Texto explicativo de métricas
+        accuracy = detailed_metrics.get('accuracy', 0)
+        f1_global = detailed_metrics.get('f1_score', 0)
+
+        metrics_text = f"""**Interpretación de Métricas:**
+
+• **Precision:** Proporción de predicciones positivas correctas. Un valor de {weighted['precision']:.3f} indica que {weighted['precision']*100:.1f}% de los casos predichos como positivos son verdaderos positivos.
+
+• **Recall (Sensibilidad):** Proporción de casos positivos correctamente identificados. Un valor de {weighted['recall']:.3f} indica que el modelo detecta {weighted['recall']*100:.1f}% de todos los casos reales.
+
+• **F1-Score:** Media armónica de Precision y Recall. Valor global de {f1_global:.3f} ({f1_global*100:.1f}%), indicando un balance entre ambas métricas.
+
+• **Accuracy Global:** {accuracy:.3f} ({accuracy*100:.1f}%) de todas las predicciones fueron correctas."""
+
+        story.append(Paragraph(metrics_text, normal_style))
+        story.append(Spacer(1, 20))
+
+    # 4.3 MATRIZ DE CONFUSIÓN
+    story.append(Paragraph("4.3 Matriz de Confusión del Modelo", subtitle2_style))
+
+    confusion_matrix = detailed_metrics.get('confusion_matrix', None)
+    classes = detailed_metrics.get('classes', [])
+
+    if confusion_matrix is not None and len(classes) > 0:
+        # Crear tabla de matriz de confusión
+        cm_data = [["Clase Real \\ Predicho"] + [f"Pred: {c}" for c in classes]]
+
+        for i, class_name in enumerate(classes):
+            row = [f"Real: {class_name}"] + [str(int(confusion_matrix[i][j])) for j in range(len(classes))]
+            cm_data.append(row)
+
+        # Calcular anchos dinámicamente
+        num_classes = len(classes)
+        cell_width = 6*inch / (num_classes + 1)
+        col_widths = [cell_width * 1.5] + [cell_width] * num_classes
+
+        cm_table = Table(cm_data, colWidths=col_widths)
+
+        # Estilo base
+        cm_style = [
+            ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+            ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+            ('BACKGROUND', (0, 1), (0, -1), AZUL_OSCURO),
+            ('TEXTCOLOR', (0, 1), (0, -1), BLANCO),
+            ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+            ('FONTNAME', (0, 1), (0, -1), 'Times-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ]
+
+        # Colorear celdas de la diagonal (predicciones correctas) en verde
+        for i in range(len(classes)):
+            cm_style.append(('BACKGROUND', (i+1, i+1), (i+1, i+1), VERDE))
+            cm_style.append(('TEXTCOLOR', (i+1, i+1), (i+1, i+1), BLANCO))
+            cm_style.append(('FONTNAME', (i+1, i+1), (i+1, i+1), 'Times-Bold'))
+
+        # Colorear errores de predicción en naranja
+        for i in range(len(classes)):
+            for j in range(len(classes)):
+                if i != j:
+                    cm_style.append(('BACKGROUND', (j+1, i+1), (j+1, i+1), NARANJA))
+                    cm_style.append(('TEXTCOLOR', (j+1, i+1), (j+1, i+1), BLANCO))
+
+        cm_table.setStyle(TableStyle(cm_style))
+        story.append(cm_table)
+        story.append(Spacer(1, 15))
+
+        # Calcular totales y precisión por clase
+        total_correct = sum([confusion_matrix[i][i] for i in range(len(classes))])
+        total_samples = confusion_matrix.sum()
+
+        cm_text = f"""**Interpretación de la Matriz de Confusión:**
+
+La diagonal principal (verde) representa las predicciones correctas: {total_correct} de {int(total_samples)} casos ({(total_correct/total_samples*100):.1f}%). Las celdas naranjas representan errores de clasificación.
+
+• **Verdaderos Positivos (diagonal):** Casos correctamente clasificados
+• **Falsos Positivos:** Casos clasificados incorrectamente como esa clase
+• **Falsos Negativos:** Casos de esa clase clasificados como otra"""
+
+        story.append(Paragraph(cm_text, normal_style))
+        story.append(Spacer(1, 20))
+
     # 5. ANÁLISIS ESPECÍFICO DE ENFERMEDADES CRÓNICAS PRINCIPALES
     story.append(Paragraph("5. ANÁLISIS ESPECÍFICO DE HIPERTENSIÓN Y DIABETES", subtitle_style))
     
@@ -1301,7 +1590,137 @@ La presencia simultánea de hipertensión y diabetes ({ambas_condiciones:,} caso
     
     story.append(Paragraph(comorbilidad_text, normal_style))
     story.append(Spacer(1, 20))
-    
+
+    # NUEVA SECCIÓN: RESUMEN DE DATOS CLAVE PARA ARTÍCULO CIENTÍFICO
+    story.append(PageBreak())
+    story.append(Paragraph("ANEXO: DATOS CLAVE PARA PUBLICACIÓN CIENTÍFICA", subtitle_style))
+
+    story.append(Paragraph("Resumen Estadístico para Citación", subtitle2_style))
+
+    # Obtener métricas del modelo
+    detailed_metrics = model_results.get('detailed_metrics', {})
+    accuracy = detailed_metrics.get('accuracy', model_results['accuracy'])
+    f1_score = detailed_metrics.get('f1_score', 0)
+    classification_report = detailed_metrics.get('classification_report', {})
+
+    # Calcular intervalo de confianza para accuracy (aproximación binomial)
+    n_samples = total_records
+    z = 1.96  # 95% de confianza
+    ci_margin = z * np.sqrt((accuracy * (1 - accuracy)) / n_samples)
+    ci_lower = max(0, accuracy - ci_margin)
+    ci_upper = min(1, accuracy + ci_margin)
+
+    # Tabla de datos clave
+    datos_clave_data = [["Métrica/Parámetro", "Valor", "IC 95% / Detalles"]]
+
+    datos_clave_data.append(["DISEÑO DEL ESTUDIO", "", ""])
+    datos_clave_data.append(["Tamaño muestral (n)", f"{total_records:,}", "Casos analizados"])
+    datos_clave_data.append(["Período de análisis", fecha_espanol, "Fecha de generación"])
+    datos_clave_data.append(["Variables analizadas", "8 variables", "Edad, Sexo, IMC, PA, Glucosa, Col, Fumador, Diagnóstico"])
+
+    datos_clave_data.append(["", "", ""])
+    datos_clave_data.append(["RENDIMIENTO DEL MODELO ML", "", ""])
+    datos_clave_data.append(["Algoritmo utilizado", "Random Forest", "n_estimators=100, max_depth=10"])
+    datos_clave_data.append(["Accuracy (Precisión)", f"{accuracy:.3f} ({accuracy*100:.1f}%)", f"{ci_lower*100:.1f}% - {ci_upper*100:.1f}%"])
+    datos_clave_data.append(["F1-Score (ponderado)", f"{f1_score:.3f} ({f1_score*100:.1f}%)", "Media armónica Precision-Recall"])
+
+    if 'weighted avg' in classification_report:
+        weighted = classification_report['weighted avg']
+        datos_clave_data.append(["Precision (ponderada)", f"{weighted['precision']:.3f}", "Precisión promedio ponderada"])
+        datos_clave_data.append(["Recall/Sensibilidad (ponderada)", f"{weighted['recall']:.3f}", "Sensibilidad promedio ponderada"])
+
+    datos_clave_data.append(["", "", ""])
+    datos_clave_data.append(["PREVALENCIAS POBLACIONALES", "", ""])
+
+    # Calcular IC para prevalencias (aproximación normal)
+    hta_prev = high_bp_cases / total_records
+    dm_prev = high_glucose_cases / total_records
+    comorb_prev = ambas_condiciones / total_records
+
+    hta_ci_margin = z * np.sqrt((hta_prev * (1 - hta_prev)) / total_records)
+    dm_ci_margin = z * np.sqrt((dm_prev * (1 - dm_prev)) / total_records)
+    comorb_ci_margin = z * np.sqrt((comorb_prev * (1 - comorb_prev)) / total_records)
+
+    datos_clave_data.append([
+        "Hipertensión Arterial",
+        f"{high_bp_cases:,} ({hta_prev*100:.1f}%)",
+        f"IC 95%: {max(0, hta_prev-hta_ci_margin)*100:.1f}% - {min(1, hta_prev+hta_ci_margin)*100:.1f}%"
+    ])
+    datos_clave_data.append([
+        "Diabetes Mellitus",
+        f"{high_glucose_cases:,} ({dm_prev*100:.1f}%)",
+        f"IC 95%: {max(0, dm_prev-dm_ci_margin)*100:.1f}% - {min(1, dm_prev+dm_ci_margin)*100:.1f}%"
+    ])
+    datos_clave_data.append([
+        "Comorbilidad HTA+DM",
+        f"{ambas_condiciones:,} ({comorb_prev*100:.1f}%)",
+        f"IC 95%: {max(0, comorb_prev-comorb_ci_margin)*100:.1f}% - {min(1, comorb_prev+comorb_ci_margin)*100:.1f}%"
+    ])
+
+    datos_clave_data.append(["", "", ""])
+    datos_clave_data.append(["ESTADÍSTICAS DESCRIPTIVAS", "", ""])
+    datos_clave_data.append(["Edad promedio", f"{edad_mean:.1f} ± {edad_std:.1f} años", f"Mediana: {edad_median:.1f} años"])
+    datos_clave_data.append(["IMC promedio", f"{imc_mean:.1f} ± {imc_std:.1f} kg/m²", f"Rango: {imc_min:.1f}-{imc_max:.1f}"])
+    datos_clave_data.append(["Presión Sistólica promedio", f"{ps_mean:.1f} ± {ps_std:.1f} mmHg", f"Rango: {int(ps_min)}-{int(ps_max)}"])
+    datos_clave_data.append(["Glucosa promedio", f"{gluc_mean:.1f} ± {gluc_std:.1f} mg/dL", f"Rango: {int(gluc_min)}-{int(gluc_max)}"])
+
+    # Crear tabla
+    datos_table = Table(datos_clave_data, colWidths=[2.2*inch, 2.0*inch, 2.3*inch])
+    datos_table.setStyle(TableStyle([
+        # Cabecera
+        ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+        ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+
+        # Subtítulos (filas específicas)
+        ('BACKGROUND', (0, 1), (-1, 1), GRIS_MEDIO),
+        ('BACKGROUND', (0, 6), (-1, 6), GRIS_MEDIO),
+        ('BACKGROUND', (0, 13), (-1, 13), GRIS_MEDIO),
+        ('BACKGROUND', (0, 18), (-1, 18), GRIS_MEDIO),
+        ('FONTNAME', (0, 1), (-1, 1), 'Times-Bold'),
+        ('FONTNAME', (0, 6), (-1, 6), 'Times-Bold'),
+        ('FONTNAME', (0, 13), (-1, 13), 'Times-Bold'),
+        ('FONTNAME', (0, 18), (-1, 18), 'Times-Bold'),
+        ('SPAN', (0, 1), (-1, 1)),
+        ('SPAN', (0, 6), (-1, 6)),
+        ('SPAN', (0, 13), (-1, 13)),
+        ('SPAN', (0, 18), (-1, 18)),
+
+        # Filas vacías (separadores)
+        ('BACKGROUND', (0, 5), (-1, 5), BLANCO),
+        ('BACKGROUND', (0, 12), (-1, 12), BLANCO),
+        ('BACKGROUND', (0, 17), (-1, 17), BLANCO),
+
+        # Resto de filas
+        ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+        ('FONTNAME', (0, 2), (-1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 2), (-1, -1), 9),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    ]))
+
+    story.append(datos_table)
+    story.append(Spacer(1, 15))
+
+    # Texto explicativo
+    datos_text = f"""**Uso de estos datos en publicación científica:**
+
+Esta tabla contiene todos los valores estadísticos necesarios para la sección de Resultados de un artículo científico. Los intervalos de confianza (IC 95%) se calcularon mediante aproximación normal para proporciones.
+
+**Cómo citar los resultados del modelo:**
+"Se desarrolló un modelo de Random Forest (n_estimators=100) que alcanzó una precisión de {accuracy*100:.1f}% (IC 95%: {ci_lower*100:.1f}%-{ci_upper*100:.1f}%) en la clasificación de diagnósticos, con un F1-Score ponderado de {f1_score:.3f}."
+
+**Formato de citación para prevalencias:**
+"La prevalencia de hipertensión arterial fue {hta_prev*100:.1f}% (IC 95%: {max(0, hta_prev-hta_ci_margin)*100:.1f}%-{min(1, hta_prev+hta_ci_margin)*100:.1f}%), mientras que la diabetes mellitus presentó una prevalencia de {dm_prev*100:.1f}% (IC 95%: {max(0, dm_prev-dm_ci_margin)*100:.1f}%-{min(1, dm_prev+dm_ci_margin)*100:.1f}%)."
+"""
+
+    story.append(Paragraph(datos_text, normal_style))
+    story.append(Spacer(1, 20))
+
     # 6. CONCLUSIONES Y RECOMENDACIONES
     story.append(Paragraph("6. CONCLUSIONES Y RECOMENDACIONES", subtitle_style))
     
@@ -1364,7 +1783,7 @@ async def analyze_file(request: AnalysisRequest, background_tasks: BackgroundTas
         processed_data, label_encoder = preprocess_data(df)
         
         # Crear modelo ML
-        model, accuracy, feature_importance, y_test, y_pred = create_ml_model(processed_data)
+        model, accuracy, feature_importance, y_test, y_pred, detailed_metrics = create_ml_model(processed_data)
         
         # Generar gráficos
         charts_dir = "reports/charts"
@@ -1377,9 +1796,10 @@ async def analyze_file(request: AnalysisRequest, background_tasks: BackgroundTas
         
         model_results = {
             'accuracy': accuracy,
-            'feature_importance': feature_importance
+            'feature_importance': feature_importance,
+            'detailed_metrics': detailed_metrics
         }
-        
+
         generate_pdf_report(processed_data, model_results, charts, report_path)
         
         # Calcular estadísticas
@@ -1646,7 +2066,7 @@ def analyze_file_with_monitoring(request: AnalysisRequest):
         processed_data, label_encoder = preprocess_data(df)
         
         # Crear modelo ML
-        model, accuracy, feature_importance, y_test, y_pred = create_ml_model(processed_data)
+        model, accuracy, feature_importance, y_test, y_pred, detailed_metrics = create_ml_model(processed_data)
         
         # Generar gráficos
         charts_dir = "reports/charts"
@@ -1659,9 +2079,10 @@ def analyze_file_with_monitoring(request: AnalysisRequest):
         
         model_results = {
             'accuracy': accuracy,
-            'feature_importance': feature_importance
+            'feature_importance': feature_importance,
+            'detailed_metrics': detailed_metrics
         }
-        
+
         generate_pdf_report(processed_data, model_results, charts, report_path)
         
         # Calcular estadísticas

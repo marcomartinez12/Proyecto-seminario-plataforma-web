@@ -556,8 +556,8 @@ function createCharts(data) {
 
     // Configuración global de fuentes MEJORADA - Más grandes y legibles
     Chart.defaults.font.family = 'Inter, sans-serif';
-    Chart.defaults.font.size = 14;
-    Chart.defaults.font.weight = '600';
+    Chart.defaults.font.size = 18;
+    Chart.defaults.font.weight = '700';
     Chart.defaults.color = '#ffffff';
 
     // Plugin para etiquetas de datos MEJORADO - Más grandes y visibles
@@ -575,8 +575,8 @@ function createCharts(data) {
                         if (value > 0) {
                             ctx.fillStyle = '#FFFFFF';
                             ctx.strokeStyle = '#000000';
-                            ctx.lineWidth = 3;
-                            ctx.font = 'bold 20px Inter';
+                            ctx.lineWidth = 5;
+                            ctx.font = 'bold 28px Inter';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
 
@@ -628,17 +628,17 @@ function createCharts(data) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        padding: 15,
+                        padding: 25,
                         usePointStyle: true,
                         pointStyle: 'circle',
                         font: {
                             family: 'Inter',
-                            size: 12,
-                            weight: '600'
+                            size: 20,
+                            weight: '700'
                         },
                         color: '#ffffff',
-                        boxWidth: 12,
-                        boxHeight: 12,
+                        boxWidth: 22,
+                        boxHeight: 22,
                         textAlign: 'left',
                         generateLabels: (chart) => {
                             const data = chart.data;
@@ -669,11 +669,11 @@ function createCharts(data) {
                     borderColor: colors.info,
                     borderWidth: 2,
                     cornerRadius: 12,
-                    padding: 15,
-                    titleFont: { family: 'Inter', size: 16, weight: 'bold' },
-                    bodyFont: { family: 'Inter', size: 14, weight: '600' },
+                    padding: 20,
+                    titleFont: { family: 'Inter', size: 20, weight: 'bold' },
+                    bodyFont: { family: 'Inter', size: 18, weight: '600' },
                     displayColors: true,
-                    boxPadding: 6,
+                    boxPadding: 8,
                     callbacks: {
                         // Mostrar nombre completo en tooltip
                         label: function(context) {
@@ -733,17 +733,17 @@ function createCharts(data) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        padding: 25,
+                        padding: 30,
                         usePointStyle: true,
                         pointStyle: 'circle',
                         font: {
                             family: 'Inter',
-                            size: 14,
-                            weight: '600'
+                            size: 20,
+                            weight: '700'
                         },
                         color: '#ffffff',
-                        boxWidth: 15,
-                        boxHeight: 15
+                        boxWidth: 22,
+                        boxHeight: 22
                     }
                 },
                 tooltip: {
@@ -753,11 +753,11 @@ function createCharts(data) {
                     borderColor: colors.info,
                     borderWidth: 2,
                     cornerRadius: 12,
-                    padding: 15,
-                    titleFont: { family: 'Inter', size: 16, weight: 'bold' },
-                    bodyFont: { family: 'Inter', size: 14, weight: '600' },
+                    padding: 20,
+                    titleFont: { family: 'Inter', size: 20, weight: 'bold' },
+                    bodyFont: { family: 'Inter', size: 18, weight: '600' },
                     displayColors: true,
-                    boxPadding: 6
+                    boxPadding: 8
                 }
             },
             animation: {
@@ -779,16 +779,16 @@ function createCharts(data) {
                     const centerY = (chartArea.top + chartArea.bottom) / 2;
 
                     ctx.fillStyle = '#8b5cf6';
-                    ctx.font = 'bold 22px Inter';
+                    ctx.font = 'bold 36px Inter';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.shadowColor = 'rgba(139, 92, 246, 0.5)';
-                    ctx.shadowBlur = 10;
-                    ctx.fillText('Factores', centerX, centerY - 10);
+                    ctx.shadowBlur = 15;
+                    ctx.fillText('Factores', centerX, centerY - 15);
 
-                    ctx.font = 'bold 18px Inter';
+                    ctx.font = 'bold 30px Inter';
                     ctx.fillStyle = '#a855f7';
-                    ctx.fillText('de Riesgo', centerX, centerY + 15);
+                    ctx.fillText('de Riesgo', centerX, centerY + 20);
 
                     ctx.restore();
                 }

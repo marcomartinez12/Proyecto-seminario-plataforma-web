@@ -819,19 +819,19 @@ header p {
     --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.4);
 }
 
-/* Modal de gráficas MEJORADO */
+/* Modal de gráficas MEJORADO - Una sola columna para máxima visibilidad */
 .charts-modal-content {
-    max-width: 95%;
+    max-width: 90%;
     width: 1400px;
     max-height: 95vh;
     overflow-y: auto;
     background: var(--bg-secondary);
-    padding: 3rem;
+    padding: 2.5rem;
 }
 
 .charts-modal-content h3 {
     color: var(--text-primary);
-    font-size: 2rem;
+    font-size: 2.5rem;
     margin-bottom: 2rem;
     text-align: center;
     font-weight: 700;
@@ -839,22 +839,23 @@ header p {
 }
 
 .charts-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
     margin-top: 30px;
 }
 
 .chart-item {
     background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-quaternary) 100%);
-    padding: 30px;
+    padding: 40px;
     border-radius: var(--radius-lg);
     border: 2px solid var(--border-light);
-    height: 450px;
+    min-height: 550px;
     display: flex;
     flex-direction: column;
     transition: all 0.3s ease;
     box-shadow: var(--shadow-lg);
+    width: 100%;
 }
 
 .chart-item:hover {
@@ -864,9 +865,9 @@ header p {
 }
 
 .chart-item h4 {
-    margin: 0 0 25px 0;
+    margin: 0 0 30px 0;
     color: var(--text-primary);
-    font-size: 1.4rem;
+    font-size: 2rem;
     font-weight: 700;
     text-align: center;
     flex-shrink: 0;
@@ -880,8 +881,8 @@ header p {
 
 .chart-item canvas {
     flex: 1;
-    max-height: 380px;
-    min-height: 350px;
+    min-height: 450px;
+    max-height: 500px;
 }
 
 @media (max-width: 768px) {
@@ -1999,7 +2000,7 @@ header p {
     }
 }
 
-/* KPI card MEJORADO - Más visible y atractivo */
+/* KPI card MEJORADO - Más visible y atractivo con tamaño aumentado */
 .kpi-card {
     background: linear-gradient(135deg,
         rgba(139, 92, 246, 0.15) 0%,
@@ -2008,16 +2009,16 @@ header p {
     backdrop-filter: blur(30px);
     border: 2px solid var(--border-light);
     border-radius: var(--radius-lg);
-    padding: 2rem;
+    padding: 3rem;
     text-align: center;
-    height: 450px;
+    min-height: 550px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     position: relative;
     overflow: hidden;
-    flex: 1;
+    width: 100%;
     box-shadow: var(--shadow-lg);
     transition: all 0.3s ease;
 }
@@ -2043,13 +2044,13 @@ header p {
 }
 
 .kpi-main-value {
-    font-size: 5rem;
+    font-size: 7rem;
     font-weight: 800;
     background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #06b6d4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
     text-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
     animation: kpiPulse 3s ease-in-out infinite;
     position: relative;
@@ -2057,7 +2058,7 @@ header p {
 }
 
 .kpi-label {
-    font-size: 1.3rem;
+    font-size: 1.6rem;
     color: var(--text-primary);
     font-weight: 700;
     text-transform: uppercase;
