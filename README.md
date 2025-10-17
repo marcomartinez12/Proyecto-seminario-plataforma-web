@@ -1,16 +1,18 @@
 # Plataforma de Análisis Médico con Machine Learning
 
-Sistema web para análisis de datos médicos que detecta diabetes e hipertensión usando Machine Learning.
+Sistema web inteligente para análisis predictivo de datos médicos que detecta diabetes e hipertensión usando XGBoost con explicaciones generadas por IA.
 
 ---
 
 ## Para qué sirve
 
-- Analizar datos médicos de pacientes (glucosa, presión arterial, edad, etc.)
-- Predecir diagnósticos (Diabetes, Hipertensión, Normal) con 85-95% de precisión
-- Generar reportes PDF con gráficos y estadísticas
-- Aceptar múltiples formatos de archivos (Excel, CSV, JSON)
+- Analizar datos médicos de pacientes (glucosa, presión arterial, edad, IMC, etc.)
+- Predecir diagnósticos (Diabetes, Hipertensión, Normal) con 85-95% de precisión usando XGBoost
+- Generar reportes PDF profesionales con gráficos, estadísticas y análisis clínico
+- Explicaciones médicas en lenguaje simple generadas por IA (GPT-OSS-20B)
+- Aceptar múltiples formatos de archivos (Excel, CSV, JSON, TSV)
 - Adaptar automáticamente el análisis según las columnas disponibles
+- Detección de comorbilidades (HTA + Diabetes)
 
 ---
 
@@ -22,14 +24,15 @@ fastapi              - Framework web
 uvicorn              - Servidor ASGI
 pandas               - Procesamiento de datos
 numpy                - Cálculos numéricos
-scikit-learn         - Machine Learning (Random Forest)
-xgboost              - Modelo avanzado (XGBoost)
+xgboost              - Modelo de Machine Learning (XGBoost Classifier)
+scikit-learn         - Preprocesamiento y métricas ML
 imbalanced-learn     - Balanceo de clases (SMOTE)
 scipy                - Análisis estadístico
 matplotlib           - Gráficos
 seaborn              - Visualizaciones
-reportlab            - Generación de PDFs
+reportlab            - Generación de PDFs profesionales
 openpyxl             - Lectura de Excel
+httpx                - Cliente HTTP para API de IA
 ```
 
 ### Frontend
@@ -47,16 +50,25 @@ cd Proyecto-seminario-plataforma-web
 pip install -r requirements.txt
 ```
 
-### 2. Iniciar servidor
+### 2. Configurar variables de entorno (opcional)
+
+Para habilitar explicaciones con IA, crea un archivo `.env`:
+```bash
+OPENROUTER_API_KEY=tu_api_key_aqui
+```
+
+**Nota:** El sistema funciona completamente sin API key. Solo las explicaciones con IA requieren esta configuración.
+
+### 3. Iniciar servidor
 ```bash
 # Windows
 start.bat
 
 # O manualmente
-python -m uvicorn app.main:app --reload
+python main.py
 ```
 
-### 3. Abrir navegador
+### 4. Abrir navegador
 ```
 http://localhost:8000
 ```
@@ -104,8 +116,14 @@ http://localhost:8000
 
 1. Seleccionar archivo de la lista
 2. Clic en "Generar Análisis"
-3. Esperar procesamiento
-4. Descargar reporte PDF
+3. Esperar procesamiento (el modelo XGBoost entrenará con tus datos)
+4. Descargar reporte PDF profesional
+
+### 4. Obtener explicaciones con IA (opcional)
+
+1. Después de generar el análisis
+2. Clic en "Explicar con IA"
+3. Lee la explicación médica en lenguaje simple generada por GPT-OSS-20B
 
 ---
 
@@ -148,12 +166,23 @@ Si el dataset no tiene columna "Diagnostico", la genera automáticamente:
 - Presión > 140 → Hipertensión
 - Valores normales → Normal
 
-### Modelo ML adaptativo
+### Modelo ML con XGBoost
 
-- Usa XGBoost con hiperparámetros dinámicos
-- Aplica SMOTE para balanceo de clases
-- Validación cruzada estratificada (5-fold)
-- Feature engineering automático (hasta 40+ features)
+**Configuración del modelo:**
+- Algoritmo: XGBoost Classifier
+- Estimadores: 300 árboles
+- Learning rate: 0.05
+- Profundidad máxima: 8
+- Balanceo: SMOTE para clases desbalanceadas
+- Validación: Cross-validation estratificada (5-fold)
+- Feature engineering: Hasta 40+ características automáticas
+
+**Hiperparámetros avanzados:**
+- subsample: 0.8
+- colsample_bytree: 0.8
+- min_child_weight: 3
+- gamma: 0.1
+- scale_pos_weight: balance automático
 
 ---
 
@@ -163,21 +192,27 @@ Si el dataset no tiene columna "Diagnostico", la genera automáticamente:
 Proyecto-seminario-plataforma-web/
 ├── app/
 │   ├── routers/
-│   │   ├── files.py              - Manejo de archivos (multi-formato)
-│   │   ├── analysis.py           - Análisis ML
-│   │   ├── analysis_improved.py  - Funciones ML mejoradas
-│   │   └── ai_analysis.py        - Explicaciones con IA
-│   ├── schemas.py                - Modelos de datos
-│   ├── utils/                    - Utilidades
-│   └── main.py                   - Configuración FastAPI
-├── static/                       - CSS, JavaScript
-├── templates/                    - HTML
-├── uploads/                      - Archivos subidos
+│   │   ├── files.py              - Gestión de archivos multi-formato
+│   │   ├── analysis.py           - Análisis ML con XGBoost (PRINCIPAL)
+│   │   ├── analysis_improved.py  - Funciones auxiliares (no usado)
+│   │   └── ai_analysis.py        - Explicaciones con IA (GPT-OSS-20B)
+│   ├── schemas.py                - Modelos de datos Pydantic
+│   ├── utils/
+│   │   └── storage.py            - Almacenamiento en memoria
+│   └── main.py                   - Punto de entrada FastAPI
+├── static/
+│   ├── index.html                - Interfaz web principal
+│   ├── script.js                 - Lógica del frontend
+│   └── styles.css                - Estilos (si existe)
+├── uploads/                      - Archivos subidos temporalmente
 ├── downloads/                    - Reportes PDF generados
+├── data/                         - Datasets de prueba
 ├── generar_dataset_sintetico.py  - Generador de datasets
 ├── requirements.txt              - Dependencias Python
+├── main.py                       - Launcher del servidor
 ├── start.bat                     - Inicio rápido (Windows)
-└── README.md                     - Este archivo
+├── .env                          - Variables de entorno (crear manualmente)
+└── README.md                     - Documentación
 ```
 
 ---
@@ -199,9 +234,20 @@ Proyecto-seminario-plataforma-web/
 
 ### No se genera el reporte
 
-**Causa:** Falta API key de OpenRouter (opcional).
+**Causa:** Error durante el entrenamiento del modelo o datos insuficientes.
 
-**Solución:** El análisis ML funciona sin API key. Solo las explicaciones con IA requieren configuración adicional.
+**Solución:** Verifica que tengas al menos 50 registros con las columnas mínimas requeridas.
+
+### Explicaciones con IA no funcionan
+
+**Causa:** No está configurada la API key de OpenRouter.
+
+**Solución:**
+1. Crea un archivo `.env` en la raíz del proyecto
+2. Añade: `OPENROUTER_API_KEY=tu_key_aqui`
+3. Reinicia el servidor
+
+**Nota:** El análisis ML funciona perfectamente sin IA. Las explicaciones son una característica adicional opcional.
 
 ---
 
@@ -217,12 +263,16 @@ Esto crea 4 archivos con datos médicos coherentes listos para probar.
 
 ## Tecnologías utilizadas
 
-- **Backend:** Python 3.8+, FastAPI
-- **ML:** scikit-learn, XGBoost, SMOTE
-- **Datos:** pandas, numpy, scipy
+- **Backend:** Python 3.8+, FastAPI, Uvicorn
+- **Machine Learning:** XGBoost Classifier (300 estimadores)
+- **Balanceo de datos:** SMOTE (imbalanced-learn)
+- **Preprocesamiento:** scikit-learn (LabelEncoder, train_test_split)
+- **Análisis de datos:** pandas, numpy, scipy
 - **Visualización:** matplotlib, seaborn
-- **PDF:** ReportLab
-- **Frontend:** HTML5, CSS3, JavaScript
+- **Generación de PDFs:** ReportLab (reportes profesionales)
+- **IA:** OpenRouter API con GPT-OSS-20B (explicaciones médicas)
+- **Frontend:** HTML5, CSS3, JavaScript vanilla
+- **Comunicación:** httpx (cliente HTTP async)
 
 ---
 
@@ -244,6 +294,98 @@ Proyecto académico - Seminario de Plataformas Web
 
 ---
 
+## Características del Reporte PDF
+
+El reporte generado incluye:
+
+1. **Portada profesional** con identificador único
+2. **Resumen ejecutivo** con estadísticas clave
+3. **Análisis descriptivo** con gráficos estadísticos
+4. **Matriz de confusión** del modelo XGBoost
+5. **Importancia de características** (top 10 features)
+6. **Análisis de comorbilidad** HTA + Diabetes
+7. **Conclusiones y recomendaciones** estratégicas
+8. **Pie de página** con fecha y numeración
+
+**Nota:** La sección "ANEXO: DATOS CLAVE PARA PUBLICACIÓN CIENTÍFICA" está comentada en esta versión.
+
+---
+
+## Endpoints de la API
+
+### Archivos
+- `POST /api/files/upload` - Subir archivo
+- `GET /api/files/list` - Listar archivos
+- `DELETE /api/files/{file_id}` - Eliminar archivo
+
+### Análisis
+- `POST /api/analysis/analyze` - Generar análisis ML
+- `GET /api/analysis/download/{analysis_id}` - Descargar PDF
+- `GET /api/analysis/results/{file_id}` - Obtener resultados
+
+### IA
+- `POST /api/ai-analysis/{file_id}` - Generar explicación con IA
+
+---
+
+## Modelo de IA para Explicaciones
+
+- **Proveedor:** OpenRouter
+- **Modelo:** `openai/gpt-oss-20b:free`
+- **Temperatura:** 0.7
+- **Max tokens:** 1500
+- **Propósito:** Traducir análisis técnico a lenguaje accesible
+
+El modelo recibe las estadísticas del análisis y genera explicaciones que incluyen:
+- Resumen general en palabras simples
+- Hallazgos importantes explicados claramente
+- Interpretación de los números (ej: si un IMC promedio es alto/bajo/normal)
+- Recomendaciones prácticas de prevención
+- Conclusión sobre la situación general de salud
+
+---
+
+## Historial de Cambios
+
+### v3.0 (Actual)
+- ✅ Modelo cambiado de Random Forest a **XGBoost** (300 estimadores)
+- ✅ Integración con **IA (GPT-OSS-20B)** para explicaciones médicas
+- ✅ Reportes PDF profesionales con 7 secciones
+- ✅ Análisis de comorbilidades HTA + Diabetes
+- ✅ Sección de anexo científico comentada (opcional)
+- ✅ Interfaz web con modal de IA
+- ✅ Soporte multi-formato (Excel, CSV, JSON, TSV)
+
+### v2.0
+- Sistema con ML adaptativo
+- Soporte multi-formato de archivos
+- Auto-detección de columnas
+
+### v1.0
+- Sistema básico con Random Forest
+- Solo archivos Excel
+
+---
+
+## Contribuciones
+
+Este es un proyecto académico. Si deseas contribuir:
+
+1. Asegúrate de que el código sea para fines educativos/médicos defensivos
+2. Documenta tus cambios
+3. Prueba con los datasets incluidos
+
+---
+
+## Contacto y Soporte
+
+Para reportar problemas o sugerencias, revisa la documentación del código fuente en los archivos principales:
+- [analysis.py](app/routers/analysis.py) - Lógica principal del análisis ML
+- [ai_analysis.py](app/routers/ai_analysis.py) - Integración con IA
+- [main.py](main.py) - Configuración del servidor
+
+---
+
 ## Versión
 
-2.0 - Sistema mejorado con soporte multi-formato y ML adaptativo
+**3.0** - Sistema profesional con XGBoost, explicaciones IA y reportes médicos completos

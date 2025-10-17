@@ -3,7 +3,6 @@ from fastapi.responses import FileResponse
 import os
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import accuracy_score, classification_report, f1_score, confusion_matrix
 from sklearn.preprocessing import LabelEncoder
@@ -1129,7 +1128,7 @@ def generate_pdf_report(data, model_results, charts, output_path):
     story.append(Paragraph("4. DETECCIÓN DE TENDENCIAS PREDICTIVAS", subtitle_style))
     
     story.append(Paragraph("4.1 Rendimiento del Modelo de Machine Learning", subtitle2_style))
-    modelo_text = f"""El modelo Random Forest obtuvo una precisión del {model_results['accuracy']:.2%} en la predicción de diagnósticos. Los resultados del análisis permiten identificar patrones en los datos de salud de la población estudiada."""
+    modelo_text = f"""El modelo XGBoost obtuvo una precisión del {model_results['accuracy']:.2%} en la predicción de diagnósticos. Los resultados del análisis permiten identificar patrones en los datos de salud de la población estudiada."""
     story.append(Paragraph(modelo_text, normal_style))
     
     # Tabla de importancia de características
@@ -1591,135 +1590,135 @@ La presencia simultánea de hipertensión y diabetes ({ambas_condiciones:,} caso
     story.append(Paragraph(comorbilidad_text, normal_style))
     story.append(Spacer(1, 20))
 
-    # NUEVA SECCIÓN: RESUMEN DE DATOS CLAVE PARA ARTÍCULO CIENTÍFICO
-    story.append(PageBreak())
-    story.append(Paragraph("ANEXO: DATOS CLAVE PARA PUBLICACIÓN CIENTÍFICA", subtitle_style))
+    # NUEVA SECCIÓN: RESUMEN DE DATOS CLAVE PARA ARTÍCULO CIENTÍFICO (COMENTADA)
+    # story.append(PageBreak())
+    # story.append(Paragraph("ANEXO: DATOS CLAVE PARA PUBLICACIÓN CIENTÍFICA", subtitle_style))
 
-    story.append(Paragraph("Resumen Estadístico para Citación", subtitle2_style))
+    # story.append(Paragraph("Resumen Estadístico para Citación", subtitle2_style))
 
     # Obtener métricas del modelo
-    detailed_metrics = model_results.get('detailed_metrics', {})
-    accuracy = detailed_metrics.get('accuracy', model_results['accuracy'])
-    f1_score = detailed_metrics.get('f1_score', 0)
-    classification_report = detailed_metrics.get('classification_report', {})
+    # detailed_metrics = model_results.get('detailed_metrics', {})
+    # accuracy = detailed_metrics.get('accuracy', model_results['accuracy'])
+    # f1_score = detailed_metrics.get('f1_score', 0)
+    # classification_report = detailed_metrics.get('classification_report', {})
 
-    # Calcular intervalo de confianza para accuracy (aproximación binomial)
-    n_samples = total_records
-    z = 1.96  # 95% de confianza
-    ci_margin = z * np.sqrt((accuracy * (1 - accuracy)) / n_samples)
-    ci_lower = max(0, accuracy - ci_margin)
-    ci_upper = min(1, accuracy + ci_margin)
+    # # Calcular intervalo de confianza para accuracy (aproximación binomial)
+    # n_samples = total_records
+    # z = 1.96  # 95% de confianza
+    # ci_margin = z * np.sqrt((accuracy * (1 - accuracy)) / n_samples)
+    # ci_lower = max(0, accuracy - ci_margin)
+    # ci_upper = min(1, accuracy + ci_margin)
 
-    # Tabla de datos clave
-    datos_clave_data = [["Métrica/Parámetro", "Valor", "IC 95% / Detalles"]]
+    # # Tabla de datos clave
+    # datos_clave_data = [["Métrica/Parámetro", "Valor", "IC 95% / Detalles"]]
 
-    datos_clave_data.append(["DISEÑO DEL ESTUDIO", "", ""])
-    datos_clave_data.append(["Tamaño muestral (n)", f"{total_records:,}", "Casos analizados"])
-    datos_clave_data.append(["Período de análisis", fecha_espanol, "Fecha de generación"])
-    datos_clave_data.append(["Variables analizadas", "8 variables", "Edad, Sexo, IMC, PA, Glucosa, Col, Fumador, Diagnóstico"])
+    # datos_clave_data.append(["DISEÑO DEL ESTUDIO", "", ""])
+    # datos_clave_data.append(["Tamaño muestral (n)", f"{total_records:,}", "Casos analizados"])
+    # datos_clave_data.append(["Período de análisis", fecha_espanol, "Fecha de generación"])
+    # datos_clave_data.append(["Variables analizadas", "8 variables", "Edad, Sexo, IMC, PA, Glucosa, Col, Fumador, Diagnóstico"])
 
-    datos_clave_data.append(["", "", ""])
-    datos_clave_data.append(["RENDIMIENTO DEL MODELO ML", "", ""])
-    datos_clave_data.append(["Algoritmo utilizado", "Random Forest", "n_estimators=100, max_depth=10"])
-    datos_clave_data.append(["Accuracy (Precisión)", f"{accuracy:.3f} ({accuracy*100:.1f}%)", f"{ci_lower*100:.1f}% - {ci_upper*100:.1f}%"])
-    datos_clave_data.append(["F1-Score (ponderado)", f"{f1_score:.3f} ({f1_score*100:.1f}%)", "Media armónica Precision-Recall"])
+    # datos_clave_data.append(["", "", ""])
+    # datos_clave_data.append(["RENDIMIENTO DEL MODELO ML", "", ""])
+    # datos_clave_data.append(["Algoritmo utilizado", "XGBoost", "n_estimators=300, learning_rate=0.05, max_depth=8"])
+    # datos_clave_data.append(["Accuracy (Precisión)", f"{accuracy:.3f} ({accuracy*100:.1f}%)", f"{ci_lower*100:.1f}% - {ci_upper*100:.1f}%"])
+    # datos_clave_data.append(["F1-Score (ponderado)", f"{f1_score:.3f} ({f1_score*100:.1f}%)", "Media armónica Precision-Recall"])
 
-    if 'weighted avg' in classification_report:
-        weighted = classification_report['weighted avg']
-        datos_clave_data.append(["Precision (ponderada)", f"{weighted['precision']:.3f}", "Precisión promedio ponderada"])
-        datos_clave_data.append(["Recall/Sensibilidad (ponderada)", f"{weighted['recall']:.3f}", "Sensibilidad promedio ponderada"])
+    # if 'weighted avg' in classification_report:
+    #     weighted = classification_report['weighted avg']
+    #     datos_clave_data.append(["Precision (ponderada)", f"{weighted['precision']:.3f}", "Precisión promedio ponderada"])
+    #     datos_clave_data.append(["Recall/Sensibilidad (ponderada)", f"{weighted['recall']:.3f}", "Sensibilidad promedio ponderada"])
 
-    datos_clave_data.append(["", "", ""])
-    datos_clave_data.append(["PREVALENCIAS POBLACIONALES", "", ""])
+    # datos_clave_data.append(["", "", ""])
+    # datos_clave_data.append(["PREVALENCIAS POBLACIONALES", "", ""])
 
-    # Calcular IC para prevalencias (aproximación normal)
-    hta_prev = high_bp_cases / total_records
-    dm_prev = high_glucose_cases / total_records
-    comorb_prev = ambas_condiciones / total_records
+    # # Calcular IC para prevalencias (aproximación normal)
+    # hta_prev = high_bp_cases / total_records
+    # dm_prev = high_glucose_cases / total_records
+    # comorb_prev = ambas_condiciones / total_records
 
-    hta_ci_margin = z * np.sqrt((hta_prev * (1 - hta_prev)) / total_records)
-    dm_ci_margin = z * np.sqrt((dm_prev * (1 - dm_prev)) / total_records)
-    comorb_ci_margin = z * np.sqrt((comorb_prev * (1 - comorb_prev)) / total_records)
+    # hta_ci_margin = z * np.sqrt((hta_prev * (1 - hta_prev)) / total_records)
+    # dm_ci_margin = z * np.sqrt((dm_prev * (1 - dm_prev)) / total_records)
+    # comorb_ci_margin = z * np.sqrt((comorb_prev * (1 - comorb_prev)) / total_records)
 
-    datos_clave_data.append([
-        "Hipertensión Arterial",
-        f"{high_bp_cases:,} ({hta_prev*100:.1f}%)",
-        f"IC 95%: {max(0, hta_prev-hta_ci_margin)*100:.1f}% - {min(1, hta_prev+hta_ci_margin)*100:.1f}%"
-    ])
-    datos_clave_data.append([
-        "Diabetes Mellitus",
-        f"{high_glucose_cases:,} ({dm_prev*100:.1f}%)",
-        f"IC 95%: {max(0, dm_prev-dm_ci_margin)*100:.1f}% - {min(1, dm_prev+dm_ci_margin)*100:.1f}%"
-    ])
-    datos_clave_data.append([
-        "Comorbilidad HTA+DM",
-        f"{ambas_condiciones:,} ({comorb_prev*100:.1f}%)",
-        f"IC 95%: {max(0, comorb_prev-comorb_ci_margin)*100:.1f}% - {min(1, comorb_prev+comorb_ci_margin)*100:.1f}%"
-    ])
+    # datos_clave_data.append([
+    #     "Hipertensión Arterial",
+    #     f"{high_bp_cases:,} ({hta_prev*100:.1f}%)",
+    #     f"IC 95%: {max(0, hta_prev-hta_ci_margin)*100:.1f}% - {min(1, hta_prev+hta_ci_margin)*100:.1f}%"
+    # ])
+    # datos_clave_data.append([
+    #     "Diabetes Mellitus",
+    #     f"{high_glucose_cases:,} ({dm_prev*100:.1f}%)",
+    #     f"IC 95%: {max(0, dm_prev-dm_ci_margin)*100:.1f}% - {min(1, dm_prev+dm_ci_margin)*100:.1f}%"
+    # ])
+    # datos_clave_data.append([
+    #     "Comorbilidad HTA+DM",
+    #     f"{ambas_condiciones:,} ({comorb_prev*100:.1f}%)",
+    #     f"IC 95%: {max(0, comorb_prev-comorb_ci_margin)*100:.1f}% - {min(1, comorb_prev+comorb_ci_margin)*100:.1f}%"
+    # ])
 
-    datos_clave_data.append(["", "", ""])
-    datos_clave_data.append(["ESTADÍSTICAS DESCRIPTIVAS", "", ""])
-    datos_clave_data.append(["Edad promedio", f"{edad_mean:.1f} ± {edad_std:.1f} años", f"Mediana: {edad_median:.1f} años"])
-    datos_clave_data.append(["IMC promedio", f"{imc_mean:.1f} ± {imc_std:.1f} kg/m²", f"Rango: {imc_min:.1f}-{imc_max:.1f}"])
-    datos_clave_data.append(["Presión Sistólica promedio", f"{ps_mean:.1f} ± {ps_std:.1f} mmHg", f"Rango: {int(ps_min)}-{int(ps_max)}"])
-    datos_clave_data.append(["Glucosa promedio", f"{gluc_mean:.1f} ± {gluc_std:.1f} mg/dL", f"Rango: {int(gluc_min)}-{int(gluc_max)}"])
+    # datos_clave_data.append(["", "", ""])
+    # datos_clave_data.append(["ESTADÍSTICAS DESCRIPTIVAS", "", ""])
+    # datos_clave_data.append(["Edad promedio", f"{edad_mean:.1f} ± {edad_std:.1f} años", f"Mediana: {edad_median:.1f} años"])
+    # datos_clave_data.append(["IMC promedio", f"{imc_mean:.1f} ± {imc_std:.1f} kg/m²", f"Rango: {imc_min:.1f}-{imc_max:.1f}"])
+    # datos_clave_data.append(["Presión Sistólica promedio", f"{ps_mean:.1f} ± {ps_std:.1f} mmHg", f"Rango: {int(ps_min)}-{int(ps_max)}"])
+    # datos_clave_data.append(["Glucosa promedio", f"{gluc_mean:.1f} ± {gluc_std:.1f} mg/dL", f"Rango: {int(gluc_min)}-{int(gluc_max)}"])
 
-    # Crear tabla
-    datos_table = Table(datos_clave_data, colWidths=[2.2*inch, 2.0*inch, 2.3*inch])
-    datos_table.setStyle(TableStyle([
-        # Cabecera
-        ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
-        ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
-        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+    # # Crear tabla
+    # datos_table = Table(datos_clave_data, colWidths=[2.2*inch, 2.0*inch, 2.3*inch])
+    # datos_table.setStyle(TableStyle([
+    #     # Cabecera
+    #     ('BACKGROUND', (0, 0), (-1, 0), AZUL_OSCURO),
+    #     ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+    #     ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+    #     ('FONTSIZE', (0, 0), (-1, 0), 10),
+    #     ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
 
-        # Subtítulos (filas específicas)
-        ('BACKGROUND', (0, 1), (-1, 1), GRIS_MEDIO),
-        ('BACKGROUND', (0, 6), (-1, 6), GRIS_MEDIO),
-        ('BACKGROUND', (0, 13), (-1, 13), GRIS_MEDIO),
-        ('BACKGROUND', (0, 18), (-1, 18), GRIS_MEDIO),
-        ('FONTNAME', (0, 1), (-1, 1), 'Times-Bold'),
-        ('FONTNAME', (0, 6), (-1, 6), 'Times-Bold'),
-        ('FONTNAME', (0, 13), (-1, 13), 'Times-Bold'),
-        ('FONTNAME', (0, 18), (-1, 18), 'Times-Bold'),
-        ('SPAN', (0, 1), (-1, 1)),
-        ('SPAN', (0, 6), (-1, 6)),
-        ('SPAN', (0, 13), (-1, 13)),
-        ('SPAN', (0, 18), (-1, 18)),
+    #     # Subtítulos (filas específicas)
+    #     ('BACKGROUND', (0, 1), (-1, 1), GRIS_MEDIO),
+    #     ('BACKGROUND', (0, 6), (-1, 6), GRIS_MEDIO),
+    #     ('BACKGROUND', (0, 13), (-1, 13), GRIS_MEDIO),
+    #     ('BACKGROUND', (0, 18), (-1, 18), GRIS_MEDIO),
+    #     ('FONTNAME', (0, 1), (-1, 1), 'Times-Bold'),
+    #     ('FONTNAME', (0, 6), (-1, 6), 'Times-Bold'),
+    #     ('FONTNAME', (0, 13), (-1, 13), 'Times-Bold'),
+    #     ('FONTNAME', (0, 18), (-1, 18), 'Times-Bold'),
+    #     ('SPAN', (0, 1), (-1, 1)),
+    #     ('SPAN', (0, 6), (-1, 6)),
+    #     ('SPAN', (0, 13), (-1, 13)),
+    #     ('SPAN', (0, 18), (-1, 18)),
 
-        # Filas vacías (separadores)
-        ('BACKGROUND', (0, 5), (-1, 5), BLANCO),
-        ('BACKGROUND', (0, 12), (-1, 12), BLANCO),
-        ('BACKGROUND', (0, 17), (-1, 17), BLANCO),
+    #     # Filas vacías (separadores)
+    #     ('BACKGROUND', (0, 5), (-1, 5), BLANCO),
+    #     ('BACKGROUND', (0, 12), (-1, 12), BLANCO),
+    #     ('BACKGROUND', (0, 17), (-1, 17), BLANCO),
 
-        # Resto de filas
-        ('GRID', (0, 0), (-1, -1), 1, NEGRO),
-        ('FONTNAME', (0, 2), (-1, -1), 'Times-Roman'),
-        ('FONTSIZE', (0, 2), (-1, -1), 9),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
-    ]))
+    #     # Resto de filas
+    #     ('GRID', (0, 0), (-1, -1), 1, NEGRO),
+    #     ('FONTNAME', (0, 2), (-1, -1), 'Times-Roman'),
+    #     ('FONTSIZE', (0, 2), (-1, -1), 9),
+    #     ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    #     ('TOPPADDING', (0, 0), (-1, -1), 6),
+    #     ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    #     ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    # ]))
 
-    story.append(datos_table)
-    story.append(Spacer(1, 15))
+    # story.append(datos_table)
+    # story.append(Spacer(1, 15))
 
-    # Texto explicativo
-    datos_text = f"""**Uso de estos datos en publicación científica:**
+    # # Texto explicativo
+    # datos_text = f"""**Uso de estos datos en publicación científica:**
 
-Esta tabla contiene todos los valores estadísticos necesarios para la sección de Resultados de un artículo científico. Los intervalos de confianza (IC 95%) se calcularon mediante aproximación normal para proporciones.
+    # Esta tabla contiene todos los valores estadísticos necesarios para la sección de Resultados de un artículo científico. Los intervalos de confianza (IC 95%) se calcularon mediante aproximación normal para proporciones.
 
-**Cómo citar los resultados del modelo:**
-"Se desarrolló un modelo de Random Forest (n_estimators=100) que alcanzó una precisión de {accuracy*100:.1f}% (IC 95%: {ci_lower*100:.1f}%-{ci_upper*100:.1f}%) en la clasificación de diagnósticos, con un F1-Score ponderado de {f1_score:.3f}."
+    # **Cómo citar los resultados del modelo:**
+    # "Se desarrolló un modelo de XGBoost (n_estimators=300, learning_rate=0.05, max_depth=8) que alcanzó una precisión de {accuracy*100:.1f}% (IC 95%: {ci_lower*100:.1f}%-{ci_upper*100:.1f}%) en la clasificación de diagnósticos, con un F1-Score ponderado de {f1_score:.3f}."
 
-**Formato de citación para prevalencias:**
-"La prevalencia de hipertensión arterial fue {hta_prev*100:.1f}% (IC 95%: {max(0, hta_prev-hta_ci_margin)*100:.1f}%-{min(1, hta_prev+hta_ci_margin)*100:.1f}%), mientras que la diabetes mellitus presentó una prevalencia de {dm_prev*100:.1f}% (IC 95%: {max(0, dm_prev-dm_ci_margin)*100:.1f}%-{min(1, dm_prev+dm_ci_margin)*100:.1f}%)."
-"""
+    # **Formato de citación para prevalencias:**
+    # "La prevalencia de hipertensión arterial fue {hta_prev*100:.1f}% (IC 95%: {max(0, hta_prev-hta_ci_margin)*100:.1f}%-{min(1, hta_prev+hta_ci_margin)*100:.1f}%), mientras que la diabetes mellitus presentó una prevalencia de {dm_prev*100:.1f}% (IC 95%: {max(0, dm_prev-dm_ci_margin)*100:.1f}%-{min(1, dm_prev+dm_ci_margin)*100:.1f}%)."
+    # """
 
-    story.append(Paragraph(datos_text, normal_style))
-    story.append(Spacer(1, 20))
+    # story.append(Paragraph(datos_text, normal_style))
+    # story.append(Spacer(1, 20))
 
     # 6. CONCLUSIONES Y RECOMENDACIONES
     story.append(Paragraph("6. CONCLUSIONES Y RECOMENDACIONES", subtitle_style))

@@ -117,7 +117,7 @@ IMPORTANTE: Usa lenguaje cotidiano, evita terminos medicos complicados o explica
                     "X-Title": "Plataforma Analisis Medico"
                 },
                 json={
-                    "model": "mistralai/mistral-small-24b-instruct-2501:free",
+                    "model": "openai/gpt-oss-20b:free",
                     "messages": [
                         {
                             "role": "system",
@@ -156,7 +156,7 @@ IMPORTANTE: Usa lenguaje cotidiano, evita terminos medicos complicados o explica
                 "smokers": smokers
             },
             "ai_explanation": ai_explanation,
-            "model_used": "mistralai/mistral-small-24b-instruct-2501:free"
+            "model_used": "openai/gpt-oss-20b:free"
         }
 
     except Exception as e:
