@@ -506,14 +506,20 @@ def generate_charts_optimized(data, output_dir, max_points=3000):
     for text in texts:
         text.set_fontsize(11)
         text.set_fontweight('bold')
+        text.set_color('white')
     
     ax.set_title('Distribución de Diagnósticos Clínicos\n(n=' + f'{len(data):,}' + ' pacientes)', 
                 fontweight='bold', pad=20, fontsize=16)
     
     # Agregar leyenda con conteos
     legend_labels = [f'{diag}: {count} casos' for diag, count in diagnosis_counts.items()]
-    ax.legend(wedges, legend_labels, title="Diagnósticos", loc="center left", 
+    legend = ax.legend(wedges, legend_labels, title="Diagnósticos", loc="center left",
              bbox_to_anchor=(1, 0, 0.5, 1), fontsize=10)
+
+    # Cambiar color de texto de la leyenda a blanco
+    for text in legend.get_texts():
+        text.set_color('white')
+    legend.get_title().set_color('white')
     
     chart1_path = os.path.join(output_dir, 'distribucion_diagnosticos.png')
     plt.savefig(chart1_path, dpi=150, bbox_inches='tight', facecolor='white')

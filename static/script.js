@@ -653,6 +653,7 @@ function createCharts(data) {
                                         fillStyle: style.backgroundColor,
                                         strokeStyle: style.borderColor,
                                         lineWidth: style.borderWidth,
+                                        fontColor: '#ffffff',
                                         hidden: !chart.getDataVisibility(i),
                                         index: i
                                     };
