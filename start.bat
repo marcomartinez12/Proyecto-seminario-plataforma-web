@@ -70,6 +70,10 @@ echo  Presiona Ctrl+C para detener el servidor
 echo ========================================
 echo.
 
+REM Abrir navegador automaticamente despues de 3 segundos
+start /B cmd /c "timeout /t 3 /nobreak >nul && start http://127.0.0.1:8000"
+
+REM Iniciar servidor
 python main.py
 
 REM Si el servidor se detiene, preguntar si reiniciar
