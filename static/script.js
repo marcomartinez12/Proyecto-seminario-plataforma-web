@@ -14,46 +14,45 @@ let isLoadingFiles = false;
 // FUNCIÓN ÚNICA DE CARGA CON CONTROL ESTRICTO
 async function loadUploadedFiles(force = false) {
     const now = Date.now();
-    
+
+    console.log(`📋 loadUploadedFiles llamada (force: ${force}, isAnalyzing: ${isAnalyzing})`);
+    console.trace('Stack trace de la llamada'); // Ver quién llama a esta función
+
+    // IMPORTANTE: NO recargar durante subida o análisis
+    if (isAnalyzing && !force) {
+        console.log('❌ Saltando recarga: análisis en progreso');
+        return;
+    }
+
     // Prevenir múltiples ejecuciones simultáneas
     if (isLoadingFiles && !force) {
+        console.log('❌ Saltando recarga: ya está cargando');
         return;
     }
-    
-    // Si estamos analizando y no es forzado, no recargar
-    if (isAnalyzing && !force) {
+
+    // Control de tiempo mínimo entre llamadas (aumentado a 10 segundos)
+    if (!force && (now - lastLoadTime) < 10000) {
+        console.log(`❌ Saltando recarga: muy pronto (${((now - lastLoadTime) / 1000).toFixed(1)}s desde última carga)`);
         return;
     }
-    
-    // Control de tiempo mínimo entre llamadas
-    if (!force && (now - lastLoadTime) < 3000) {
-        return;
+
+    try {
+        isLoadingFiles = true;
+        lastLoadTime = Date.now();
+
+        console.log('✅ Cargando archivos desde API...');
+        const response = await fetch(`${API_BASE_URL}/files/list`);
+        if (!response.ok) throw new Error('Error al cargar archivos');
+
+        uploadedFiles = await response.json();
+        console.log(`✅ ${uploadedFiles.length} archivos cargados`);
+        renderFilesList();
+
+    } catch (error) {
+        console.error('❌ Error loading files:', error);
+    } finally {
+        isLoadingFiles = false;
     }
-    
-    // Limpiar timeout anterior
-    if (loadFilesTimeout) {
-        clearTimeout(loadFilesTimeout);
-    }
-    
-    loadFilesTimeout = setTimeout(async () => {
-        if (isLoadingFiles) return;
-        
-        try {
-            isLoadingFiles = true;
-            lastLoadTime = Date.now();
-            
-            const response = await fetch(`${API_BASE_URL}/files/list`);
-            if (!response.ok) throw new Error('Error al cargar archivos');
-            
-            uploadedFiles = await response.json();
-            renderFilesList();
-            
-        } catch (error) {
-            console.error('Error loading files:', error);
-        } finally {
-            isLoadingFiles = false;
-        }
-    }, force ? 0 : 1000);
 }
 
 // ACTUALIZACIÓN LOCAL SIN REFRESCOS
@@ -80,8 +79,15 @@ const modalMessage = document.getElementById('modalMessage');
 const closeModal = document.getElementById('closeModal');
 const toast = document.getElementById('toast');
 
+// Detectar reloads de página
+window.addEventListener('beforeunload', function(e) {
+    console.error('⚠️ LA PÁGINA SE ESTÁ RECARGANDO! Stack:');
+    console.trace();
+});
+
 // INICIALIZACIÓN ÚNICA
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Aplicación iniciada');
     initializeEventListeners();
     loadUploadedFiles(); // ÚNICA llamada inicial
 });
@@ -155,54 +161,84 @@ function handleFileSelect(e) {
 
 // SUBIDA DE ARCHIVOS SIN REFRESCOS
 async function handleFileUpload(file) {
+    console.log('📤 Iniciando subida de archivo:', file.name);
+
     const allowedTypes = ['.xlsx', '.xls'];
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-    
+
     if (!allowedTypes.includes(fileExtension)) {
         showToast('Error: Solo se permiten archivos Excel (.xlsx, .xls)', 'error');
         return;
     }
-    
+
     try {
         showUploadProgress();
-        
+        updateProgressFluid(10, 'Iniciando subida...');
+
         const formData = new FormData();
         formData.append('file', file);
-        
-        const response = await fetch(`${API_BASE_URL}/files/upload`, {
+
+        console.log('📡 Enviando archivo al servidor...');
+
+        // Iniciar el upload
+        const uploadPromise = fetch(`${API_BASE_URL}/files/upload`, {
             method: 'POST',
             body: formData
         });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Error al subir archivo');
-        }
-        
-        const result = await response.json();
-        
-        updateProgressFluid(100, 'Archivo subido correctamente');
-        
-        setTimeout(() => {
+
+        // Animación de progreso mientras sube (independiente del fetch real)
+        const progressAnimation = async () => {
+            await new Promise(resolve => setTimeout(resolve, 400));
+            updateProgressFluid(30, 'Preparando archivo...');
+
+            await new Promise(resolve => setTimeout(resolve, 600));
+            updateProgressFluid(50, 'Subiendo archivo...');
+
+            await new Promise(resolve => setTimeout(resolve, 800));
+            updateProgressFluid(70, 'Enviando datos...');
+        };
+
+        // Ejecutar animación y upload en paralelo
+        await Promise.all([progressAnimation(), uploadPromise.then(async (response) => {
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Error al subir archivo');
+            }
+            return response.json();
+        })]).then(async ([_, result]) => {
+            updateProgressFluid(90, 'Procesando archivo...');
+            await new Promise(resolve => setTimeout(resolve, 400));
+
+            updateProgressFluid(100, '✓ Archivo subido correctamente');
+            console.log('✅ Archivo subido, respuesta:', result);
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            console.log('🔄 Actualizando lista localmente...');
             hideUploadProgress();
             showToast('Archivo subido correctamente', 'success');
 
-            // SOLO ACTUALIZACIÓN LOCAL - NO MÁS REFRESCOS
+            // SOLO ACTUALIZACIÓN LOCAL
             if (result) {
                 const exists = uploadedFiles.some(f => f.id === result.id);
                 if (!exists) {
                     uploadedFiles.push(result);
+                    console.log('➕ Archivo agregado a la lista');
                 } else {
                     uploadedFiles = uploadedFiles.map(f => f.id === result.id ? { ...f, ...result } : f);
+                    console.log('🔄 Archivo actualizado');
                 }
                 renderFilesList();
+                console.log('✅ Total archivos:', uploadedFiles.length);
             }
-        }, 1000);
-        
+        });
+
+        console.log('✅ Subida completada');
+
     } catch (error) {
         hideUploadProgress();
         showToast(`Error: ${error.message}`, 'error');
-        console.error('Error uploading file:', error);
+        console.error('❌ Error:', error);
     }
 }
 
@@ -227,15 +263,22 @@ function updateProgressFluid(percent, text) {
 
 function hideUploadProgress() {
     if (!uploadProgress) return;
-    
+
+    // Añadir fade out
+    uploadProgress.style.opacity = '0';
+    uploadProgress.style.transition = 'opacity 0.5s ease';
+
     setTimeout(() => {
         uploadProgress.style.display = 'none';
+        uploadProgress.style.opacity = '1';
+        uploadProgress.style.transition = '';
         if (progressFill) {
             progressFill.style.width = '0%';
-            progressFill.style.transition = 'none'; // Resetear transición
         }
-        if (progressText) progressText.textContent = 'Iniciando subida...';
-    }, 1000);
+        if (progressText) {
+            progressText.textContent = 'Iniciando subida...';
+        }
+    }, 500);
 }
 
 // ANÁLISIS ÚNICO SIN REFRESCOS
@@ -246,14 +289,22 @@ async function analyzeFile(fileId) {
             return;
         }
 
+        console.log('=== INICIANDO ANÁLISIS ===');
         isAnalyzing = true;
         showAnalysisProgress();
 
-        const response = await fetch(`${API_BASE_URL}/analysis/analyze`, {
+        console.log('Enviando solicitud de análisis...');
+        const analysisPromise = fetch(`${API_BASE_URL}/analysis/analyze`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ file_id: fileId })
         });
+
+        // Iniciar la animación de pasos inmediatamente
+        const animationPromise = simulateAnalysisStepsFluid();
+
+        // Esperar a que AMBOS terminen (animación Y análisis)
+        const [response, _] = await Promise.all([analysisPromise, animationPromise]);
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -262,18 +313,21 @@ async function analyzeFile(fileId) {
 
         const result = await response.json();
         currentAnalysis = result;
+        console.log('✅ Análisis completado:', result);
 
-        await simulateAnalysisStepsFluid();
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Pequeña pausa antes de ocultar
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
         hideAnalysisProgress();
-        showToast('Análisis completado. Descargando reporte...', 'success');
-        await downloadReport(result.id, true);
+        showToast('¡Análisis completado exitosamente!', 'success');
 
         // SOLO ACTUALIZACIÓN LOCAL - CERO REFRESCOS
         updateFileStatus(fileId, 'completed');
 
+        console.log('=== ANÁLISIS FINALIZADO ===');
+
     } catch (error) {
+        console.error('❌ Error en análisis:', error);
         hideAnalysisProgress();
         showToast(`Error en el análisis: ${error.message}`, 'error');
     } finally {
@@ -281,107 +335,49 @@ async function analyzeFile(fileId) {
     }
 }
 
-// ANIMACIONES FLUIDAS
+// ANIMACIONES SIMPLES
 function showAnalysisProgress() {
     const analysisSection = document.getElementById('analysisSection');
-    const analysisSteps = analysisSection.querySelector('.analysis-steps');
-    
-    analysisSection.className = 'analysis-section-fluid';
-    analysisSteps.className = 'analysis-steps-fluid';
-    
-    const steps = analysisSteps.querySelectorAll('.step');
-    steps.forEach(step => {
-        step.className = 'step-fluid';
-        
-        const icon = step.querySelector('.step-icon');
-        const text = step.querySelector('.step-text');
-        
-        if (icon) icon.className = 'step-icon-fluid';
-        if (text) text.className = 'step-text-fluid';
-    });
-    
-    resetAnalysisStepsFluid();
     analysisSection.style.display = 'block';
     analysisSection.scrollIntoView({ behavior: 'smooth' });
+
+    // Resetear barra de progreso
+    const progressBar = document.getElementById('analysisProgressBar');
+    if (progressBar) {
+        progressBar.style.width = '0%';
+    }
 }
 
 async function simulateAnalysisStepsFluid() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    const stepTimes = [500, 2500, 3500, 3000];
-    const stepTexts = [
-        'Cargando y validando archivo...',
-        'Procesando datos y estadísticas...',
-        'Generando gráficas y visualizaciones...',
-        'Creando reporte PDF final...'
+    const steps = [
+        { progress: 20, time: 1000, subtitle: 'Cargando y validando datos médicos...', step: 'Validando archivo Excel' },
+        { progress: 40, time: 2000, subtitle: 'Entrenando modelo XGBoost...', step: 'Procesando con Machine Learning' },
+        { progress: 65, time: 2500, subtitle: 'Calculando métricas y estadísticas...', step: 'Generando análisis estadístico' },
+        { progress: 85, time: 2000, subtitle: 'Creando visualizaciones...', step: 'Generando gráficos' },
+        { progress: 100, time: 1500, subtitle: 'Finalizando reporte PDF...', step: 'Completando análisis' }
     ];
-    
-    for (let i = 0; i < steps.length; i++) {
-        if (i > 0) {
-            await new Promise(resolve => setTimeout(resolve, stepTimes[i]));
-        }
-        
-        const currentStep = document.getElementById(steps[i]);
-        if (currentStep) {
-            steps.forEach(stepId => {
-                const step = document.getElementById(stepId);
-                if (step && step !== currentStep) {
-                    step.classList.remove('active');
-                    step.classList.add('completed');
-                }
-            });
-            
-            currentStep.classList.add('active');
-            
-            const stepText = currentStep.querySelector('.step-text-fluid');
-            if (stepText) {
-                stepText.textContent = stepTexts[i];
-            }
-            
-            setTimeout(() => {
-                const icon = currentStep.querySelector('i');
-                if (icon && i < steps.length - 1) {
-                    icon.className = 'fas fa-check-circle';
-                }
-            }, stepTimes[i] * 0.8);
-        }
-    }
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const lastStep = document.getElementById(steps[steps.length - 1]);
-    if (lastStep) {
-        lastStep.classList.remove('active');
-        lastStep.classList.add('completed');
-        const icon = lastStep.querySelector('i');
-        if (icon) {
-            icon.className = 'fas fa-check-circle';
-        }
-    }
-    
-    await new Promise(resolve => setTimeout(resolve, 2000));
-}
 
-function resetAnalysisStepsFluid() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    const originalIcons = ['fas fa-upload', 'fas fa-cog fa-spin', 'fas fa-chart-bar', 'fas fa-file-pdf'];
-    const originalTexts = [
-        'Subiendo archivo',
-        'Procesando datos',
-        'Generando gráficas',
-        'Creando reporte'
-    ];
-    
-    steps.forEach((stepId, index) => {
-        const step = document.getElementById(stepId);
-        if (step) {
-            const icon = step.querySelector('i');
-            const text = step.querySelector('.step-text-fluid');
-            
-            step.classList.remove('active', 'completed');
-            
-            if (icon) icon.className = originalIcons[index];
-            if (text) text.textContent = originalTexts[index];
+    const progressBar = document.getElementById('analysisProgressBar');
+    const subtitle = document.getElementById('analysisSubtitle');
+    const currentStep = document.getElementById('analysisCurrentStep');
+
+    for (let i = 0; i < steps.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, steps[i].time));
+
+        if (progressBar) {
+            progressBar.style.width = `${steps[i].progress}%`;
         }
-    });
+
+        if (subtitle) {
+            subtitle.textContent = steps[i].subtitle;
+        }
+
+        if (currentStep) {
+            currentStep.querySelector('span').textContent = steps[i].step;
+        }
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
 }
 
 function hideAnalysisProgress() {
@@ -400,38 +396,47 @@ function hideAnalysisProgress() {
 
 // ELIMINAR ARCHIVO SIN REFRESCOS
 async function deleteFile(fileId) {
+    console.log('🗑️ Intentando eliminar archivo:', fileId);
+
     if (!confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
         return;
     }
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
             method: 'DELETE'
         });
-        
+
         if (!response.ok) throw new Error('Error al eliminar archivo');
-        
+
+        console.log('✅ Archivo eliminado del servidor');
         showToast('Archivo eliminado correctamente', 'success');
 
         // SOLO ACTUALIZACIÓN LOCAL - CERO REFRESCOS
+        const beforeCount = uploadedFiles.length;
         uploadedFiles = uploadedFiles.filter(file => file.id !== fileId);
+        console.log(`📊 Archivos antes: ${beforeCount}, después: ${uploadedFiles.length}`);
+
+        console.log('🔄 Re-renderizando lista...');
         renderFilesList();
+        console.log('✅ Lista actualizada');
 
     } catch (error) {
         showToast(`Error: ${error.message}`, 'error');
-        console.error('Error deleting file:', error);
+        console.error('❌ Error deleting file:', error);
     }
 }
 
 // RENDERIZAR LISTA
 function renderFilesList() {
     if (uploadedFiles.length === 0) {
+        filesList.innerHTML = '';
         noFiles.style.display = 'block';
         return;
     }
-    
+
     noFiles.style.display = 'none';
-    
+
     const filesHTML = uploadedFiles.map(file => {
         const uploadDate = new Date(file.upload_date).toLocaleString('es-ES');
         const fileSize = formatFileSize(file.file_size);

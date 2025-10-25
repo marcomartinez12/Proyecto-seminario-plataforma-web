@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plataforma de Detección de Enfermedades Crónicas</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/styles.css?v=3.4">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -31,10 +31,13 @@
                     </div>
                     
                     <div class="upload-progress" id="uploadProgress" style="display: none;">
+                        <div class="spinner-container">
+                            <div class="modern-spinner"></div>
+                        </div>
                         <div class="progress-bar">
                             <div class="progress-fill" id="progressFill"></div>
                         </div>
-                        <p id="progressText">Subiendo archivo...</p>
+                        <p id="progressText" class="progress-text-animated">Subiendo archivo...</p>
                     </div>
                 </div>
             </section>
@@ -43,39 +46,39 @@
             <section class="files-section">
                 <div class="files-card">
                     <h2><i class="fas fa-file-alt"></i> Archivos Subidos</h2>
-                    <div class="files-list" id="filesList">
-                        <div class="no-files" id="noFiles">
-                            <i class="fas fa-folder-open"></i>
-                            <p>No hay archivos subidos aún</p>
-                        </div>
+                    <div class="no-files" id="noFiles" style="display: none;">
+                        <i class="fas fa-folder-open"></i>
+                        <p>No hay archivos subidos aún</p>
                     </div>
+                    <div class="files-list" id="filesList"></div>
                 </div>
             </section>
 
             <!-- Sección de análisis -->
             <section class="analysis-section" id="analysisSection" style="display: none;">
                 <div class="analysis-card">
-                    <h2><i class="fas fa-chart-line"></i> Análisis en Progreso</h2>
                     <div class="analysis-status" id="analysisStatus">
-                        <div class="spinner"></div>
-                        <p>Procesando datos con Machine Learning...</p>
-                        <div class="analysis-steps">
-                            <div class="step active" id="step1">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Validando datos</span>
+                        <!-- Spinner principal -->
+                        <div class="analysis-spinner-wrapper">
+                            <div class="analysis-spinner-ring"></div>
+                            <div class="analysis-spinner-icon">
+                                <i class="fas fa-brain"></i>
                             </div>
-                            <div class="step" id="step2">
-                                <i class="fas fa-cog fa-spin"></i>
-                                <span>Entrenando modelo ML</span>
-                            </div>
-                            <div class="step" id="step3">
-                                <i class="fas fa-chart-bar"></i>
-                                <span>Generando gráficos</span>
-                            </div>
-                            <div class="step" id="step4">
-                                <i class="fas fa-file-pdf"></i>
-                                <span>Creando reporte PDF</span>
-                            </div>
+                        </div>
+
+                        <!-- Texto animado -->
+                        <h3 class="analysis-title">Analizando datos...</h3>
+                        <p class="analysis-subtitle" id="analysisSubtitle">Iniciando análisis con Machine Learning</p>
+
+                        <!-- Barra de progreso simple -->
+                        <div class="analysis-progress-container">
+                            <div class="analysis-progress-bar" id="analysisProgressBar"></div>
+                        </div>
+
+                        <!-- Indicador de paso actual -->
+                        <div class="analysis-current-step" id="analysisCurrentStep">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Preparando análisis...</span>
                         </div>
                     </div>
                 </div>
@@ -131,6 +134,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js"></script>
+    <script src="/static/script.js?v=3.3"></script>
 </body>
 </html>
