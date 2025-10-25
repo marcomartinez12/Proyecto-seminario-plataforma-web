@@ -467,8 +467,8 @@ function renderFilesList() {
                         <button class="btn btn-success" onclick="analyzeWithAI('${file.id}')">
                             <i class="fas fa-brain"></i> Análisis IA
                         </button>
-                        <button class="btn btn-primary" onclick="downloadReport('${file.id}')">
-                            <i class="fas fa-download"></i> Descargar Reporte
+                        <button class="btn btn-primary" onclick="viewReport('${file.id}')">
+                            <i class="fas fa-file-pdf"></i> Reporte
                         </button>
                     ` : ''}
                     <button class="btn btn-danger" onclick="deleteFile('${file.id}')">
@@ -515,6 +515,142 @@ async function downloadReport(analysisId, isAutoDownload = false) {
         showToast(`Error al descargar: ${error.message}`, 'error');
         console.error('Error downloading report:', error);
     }
+}
+
+// VISTA PREVIA DEL REPORTE
+let currentReportUrl = null;
+
+async function viewReport(fileId) {
+    try {
+        showToast('Cargando vista previa...', 'info');
+
+        const response = await fetch(`${API_BASE_URL}/analysis/results/${fileId}`);
+        if (!response.ok) throw new Error('No se encontró el análisis');
+
+        const analyses = await response.json();
+        if (analyses.length === 0) throw new Error('No hay análisis disponibles');
+
+        const latestAnalysis = analyses[analyses.length - 1];
+        const viewUrl = `${API_BASE_URL}/analysis/view/${latestAnalysis.id}`;
+        currentReportUrl = `${API_BASE_URL}/analysis/download/${latestAnalysis.id}`;
+
+        // Crear modal desde cero con JavaScript
+        createPDFModal(viewUrl);
+
+        showToast('Vista previa cargada', 'success');
+
+    } catch (error) {
+        showToast(`Error: ${error.message}`, 'error');
+        console.error('Error loading report:', error);
+    }
+}
+
+function createPDFModal(pdfUrl) {
+    // Eliminar modal anterior si existe
+    const oldModal = document.getElementById('pdfModalDynamic');
+    if (oldModal) oldModal.remove();
+
+    // Crear modal completamente nuevo
+    const modal = document.createElement('div');
+    modal.id = 'pdfModalDynamic';
+    modal.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        ">
+            <div style="
+                width: 95%;
+                max-width: 1400px;
+                height: 95%;
+                background: #1a1a1a;
+                border-radius: 12px;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+            ">
+                <div style="
+                    background: #0a0a0a;
+                    padding: 1rem 1.5rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    border-bottom: 1px solid #333;
+                    border-radius: 12px 12px 0 0;
+                ">
+                    <h3 style="margin: 0; color: #fff; font-size: 1.3rem;">
+                        <i class="fas fa-file-pdf"></i> Vista Previa del Reporte
+                    </h3>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button onclick="downloadCurrentReport()" style="
+                            background: linear-gradient(135deg, #2563eb, #1e40af);
+                            color: white;
+                            border: none;
+                            padding: 0.6rem 1.2rem;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-weight: 500;
+                        ">
+                            <i class="fas fa-download"></i> Descargar PDF
+                        </button>
+                        <span onclick="closePDFModal()" style="
+                            color: #999;
+                            font-size: 32px;
+                            cursor: pointer;
+                            line-height: 1;
+                        ">&times;</span>
+                    </div>
+                </div>
+                <div style="flex: 1; background: #525659; overflow: hidden;">
+                    <iframe src="${pdfUrl}" style="
+                        width: 100%;
+                        height: 100%;
+                        border: none;
+                    "></iframe>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    console.log('✅ Modal PDF creado dinámicamente');
+}
+
+function closePDFModal() {
+    const modal = document.getElementById('pdfModalDynamic');
+    if (modal) {
+        modal.remove();
+        console.log('🗑️ Modal PDF cerrado');
+    }
+    currentReportUrl = null;
+}
+
+function hideReportModal() {
+    closePDFModal();
+}
+
+function downloadCurrentReport() {
+    if (!currentReportUrl) {
+        showToast('No hay reporte para descargar', 'error');
+        return;
+    }
+
+    const link = document.createElement('a');
+    link.href = currentReportUrl;
+    link.download = `reporte_medico_${new Date().toISOString().split('T')[0]}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast('Descarga iniciada', 'success');
 }
 
 // VER GRÁFICAS
@@ -1041,7 +1177,7 @@ function showAIModal(data) {
 
         <div style="background: #222; padding: 25px; border-radius: 12px;">
             <h4 style="color: #22c55e; margin-bottom: 20px; font-size: 1.3rem;">
-                <i class="fas fa-robot"></i> Explicación del Especialista en IA
+                <i class="fas fa-robot"></i> Explicación de la Inteligencia Artificial
             </h4>
             <div id="aiExplanationText" style="
                 background: #1a1a1a;
@@ -1123,6 +1259,11 @@ function viewDetailedAnalysis(fileId) {
 // FUNCIONES GLOBALES
 window.analyzeFile = analyzeFile;
 window.downloadReport = downloadReport;
+window.viewReport = viewReport;
+window.createPDFModal = createPDFModal;
+window.closePDFModal = closePDFModal;
+window.hideReportModal = hideReportModal;
+window.downloadCurrentReport = downloadCurrentReport;
 window.deleteFile = deleteFile;
 window.viewCharts = viewCharts;
 window.analyzeWithAI = analyzeWithAI;

@@ -1940,6 +1940,24 @@ async def get_charts_data(file_id: str):
         print(f"Error getting charts data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error al obtener datos de gráficas: {str(e)}")
 
+@router.get("/view/{analysis_id}")
+async def view_report(analysis_id: str):
+    """Ver reporte PDF en el navegador (sin forzar descarga)"""
+
+    analysis_data = storage.get_analysis(analysis_id)
+    if not analysis_data:
+        raise HTTPException(status_code=404, detail="Análisis no encontrado")
+
+    report_path = analysis_data["report_path"]
+    if not os.path.exists(report_path):
+        raise HTTPException(status_code=404, detail="Reporte no encontrado")
+
+    return FileResponse(
+        path=report_path,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline"}
+    )
+
 @router.get("/download/{analysis_id}")
 async def download_report(analysis_id: str):
     """Descargar reporte PDF generado"""
@@ -1985,6 +2003,24 @@ def load_large_excel(file_path, chunk_size=10000):
     except:
         # Fallback a carga normal
         return pd.read_excel(file_path)
+
+@router.get("/view/{analysis_id}")
+async def view_report(analysis_id: str):
+    """Ver reporte PDF en el navegador (sin forzar descarga)"""
+
+    analysis_data = storage.get_analysis(analysis_id)
+    if not analysis_data:
+        raise HTTPException(status_code=404, detail="Análisis no encontrado")
+
+    report_path = analysis_data["report_path"]
+    if not os.path.exists(report_path):
+        raise HTTPException(status_code=404, detail="Reporte no encontrado")
+
+    return FileResponse(
+        path=report_path,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline"}
+    )
 
 @router.get("/download/{analysis_id}")
 async def download_report(analysis_id: str):
@@ -2129,6 +2165,24 @@ def analyze_file_with_monitoring(request: AnalysisRequest):
         error_detail = f"Error en el análisis: {str(e)}"
         print(f"Analysis error for file {request.file_id}: {error_detail}")  # Para debugging
         raise HTTPException(status_code=500, detail=error_detail)
+
+@router.get("/view/{analysis_id}")
+async def view_report(analysis_id: str):
+    """Ver reporte PDF en el navegador (sin forzar descarga)"""
+
+    analysis_data = storage.get_analysis(analysis_id)
+    if not analysis_data:
+        raise HTTPException(status_code=404, detail="Análisis no encontrado")
+
+    report_path = analysis_data["report_path"]
+    if not os.path.exists(report_path):
+        raise HTTPException(status_code=404, detail="Reporte no encontrado")
+
+    return FileResponse(
+        path=report_path,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline"}
+    )
 
 @router.get("/download/{analysis_id}")
 async def download_report(analysis_id: str):

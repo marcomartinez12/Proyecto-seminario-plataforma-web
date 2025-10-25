@@ -2551,3 +2551,24 @@ header p {
         font-size: 1.5rem;
     }
 }
+
+/* ========================================
+   MODAL DE VISTA PREVIA DEL REPORTE PDF
+   ======================================== */
+
+#reportModal {
+    display: none !important;
+    position: fixed !important;
+    z-index: 10000 !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(0, 0, 0, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    overflow: auto !important;
+}
+
+#reportModal.show {
+    display: block !important;
+}
