@@ -456,6 +456,9 @@ function renderFilesList() {
                         <button class="btn btn-secondary" onclick="viewCharts('${file.id}')">
                             <i class="fas fa-chart-bar"></i> Ver Gráficas
                         </button>
+                        <button class="btn btn-info" onclick="viewDetailedAnalysis('${file.id}')" style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;">
+                            <i class="fas fa-microscope"></i> Análisis Detallado
+                        </button>
                         <button class="btn btn-success" onclick="analyzeWithAI('${file.id}')">
                             <i class="fas fa-brain"></i> Análisis IA
                         </button>
@@ -1104,6 +1107,14 @@ function hideAIModal() {
     hideAIModalCustom();
 }
 
+// VER ANÁLISIS DETALLADO
+function viewDetailedAnalysis(fileId) {
+    // Abrir en nueva pestaña el análisis educativo paso a paso
+    const url = `${API_BASE_URL}/detailed-analysis/${fileId}`;
+    window.open(url, '_blank');
+    showToast('Abriendo análisis detallado en nueva pestaña...', 'info');
+}
+
 // FUNCIONES GLOBALES
 window.analyzeFile = analyzeFile;
 window.downloadReport = downloadReport;
@@ -1111,3 +1122,4 @@ window.deleteFile = deleteFile;
 window.viewCharts = viewCharts;
 window.analyzeWithAI = analyzeWithAI;
 window.hideAIModalCustom = hideAIModalCustom;
+window.viewDetailedAnalysis = viewDetailedAnalysis;
