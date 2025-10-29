@@ -392,125 +392,7 @@ def generate_educational_html(file_name, total_records, columns_count, columns_l
                 font-size: 2rem;
             }}
         }}
-
-        /* XGBOOST PROCEDIMIENTO ANIMADO */
-        .xgboost-btn{{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:16px 32px;font-size:1.1rem;border-radius:12px;cursor:pointer;margin-top:24px;transition:all .3s;font-weight:600;box-shadow:0 8px 16px rgba(102,126,234,.3)}}
-        .xgboost-btn:hover{{transform:translateY(-2px);box-shadow:0 12px 24px rgba(102,126,234,.4)}}
-        .xgboost-process-container{{background:#141414;border-radius:16px;padding:40px;margin:30px 0;border:1px solid #2a2a2a}}
-        .process-header{{text-align:center;margin-bottom:50px}}
-        .process-header h2{{font-size:2.2rem;color:#fff;margin-bottom:10px}}
-        .process-header p{{color:#a0a0a0;font-size:1.1rem}}
-        .animated-step{{background:#1a1a1a;border-radius:12px;padding:30px;margin:30px 0;border:1px solid #2a2a2a;animation:fadeInUp .6s ease-out}}
-        @keyframes fadeInUp{{from{{opacity:0;transform:translateY(30px)}}to{{opacity:1;transform:translateY(0)}}}}
-        .step-visual{{display:flex;align-items:center;justify-content:center;padding:40px;background:#0d0d0d;border-radius:12px;margin-bottom:20px;min-height:180px;flex-wrap:wrap;gap:20px}}
-        .step-explanation{{padding:20px}}
-        .step-explanation h3{{color:#667eea;font-size:1.5rem;margin-bottom:12px}}
-        .step-explanation p{{color:#d0d0d0;font-size:1.05rem;line-height:1.7}}
-        .data-input{{display:flex;gap:12px}}
-        .data-point{{width:30px;height:30px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;animation:pulse 2s ease-in-out infinite}}
-        @keyframes pulse{{0%,100%{{transform:scale(1);opacity:1}}50%{{transform:scale(1.3);opacity:.6}}}}
-        .arrow-flow{{font-size:2.5rem;color:#667eea;margin:0 20px;animation:slideRight 1.5s ease-in-out infinite}}
-        @keyframes slideRight{{0%,100%{{transform:translateX(0)}}50%{{transform:translateX(10px)}}}}
-        .process-box{{background:#1e1e1e;padding:25px 35px;border-radius:12px;border:2px solid #667eea;text-align:center;color:#fff;font-weight:600}}
-        .process-box i{{font-size:2.5rem;color:#667eea;display:block;margin-bottom:10px}}
-        .formula-box{{background:#0d0d0d;padding:30px;border-radius:12px;border:2px solid #667eea}}
-        .formula-line{{display:flex;align-items:center;gap:15px;margin:15px 0;font-size:1.3rem}}
-        .formula-label{{color:#a0a0a0;font-weight:500}}
-        .formula-value{{color:#fff;font-family:'Courier New',monospace;font-size:1.4rem;font-weight:600}}
-        .trees-container{{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:15px}}
-        .tree-item{{display:flex;flex-direction:column;align-items:center;animation:treeGrow 1s ease-out}}
-        @keyframes treeGrow{{from{{transform:scale(0) rotate(-180deg);opacity:0}}to{{transform:scale(1) rotate(0);opacity:1}}}}
-        .tree-icon{{font-size:3rem;animation:sway 3s ease-in-out infinite}}
-        @keyframes sway{{0%,100%{{transform:rotate(-5deg)}}50%{{transform:rotate(5deg)}}}}
-        .tree-label{{color:#fff;font-weight:600;margin-top:8px}}
-        .tree-weight{{color:#667eea;font-size:1.2rem;font-family:'Courier New',monospace}}
-        .plus-symbol{{font-size:2rem;color:#667eea;font-weight:bold}}
-        .ellipsis{{font-size:2rem;color:#a0a0a0;letter-spacing:5px}}
-        .gradient-visual{{display:flex;flex-direction:column;align-items:center;gap:20px}}
-        .gradient-curve{{background:#0d0d0d;border-radius:12px;padding:20px}}
-        .gradient-label{{color:#fff;font-size:1.2rem;display:flex;align-items:center;gap:10px}}
-        .gradient-label i{{color:#f5576c;animation:bounce 1.5s ease-in-out infinite}}
-        @keyframes bounce{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-10px)}}}}
-        .regularization-demo{{display:flex;align-items:center;gap:30px;flex-wrap:wrap;justify-content:center}}
-        .overfitting-tree,.balanced-tree{{text-align:center;padding:20px;border-radius:12px;min-width:150px}}
-        .overfitting-tree{{background:rgba(239,68,68,.1);border:2px solid #ef4444}}
-        .balanced-tree{{background:rgba(34,197,94,.1);border:2px solid #22c55e}}
-        .tree-complex,.tree-simple{{font-size:1.5rem;margin-bottom:10px}}
-        .complexity-indicator{{color:#a0a0a0;font-size:.9rem}}
-        .arrow-transform{{font-size:1.5rem;color:#667eea;font-weight:bold}}
-        .prediction-flow{{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:20px}}
-        .input-box,.ensemble-box,.voting-box,.output-box{{background:#1e1e1e;padding:20px 30px;border-radius:12px;border:2px solid #667eea;text-align:center;color:#fff;display:flex;flex-direction:column;align-items:center;gap:10px}}
-        .input-box i,.voting-box i,.output-box i{{font-size:2.5rem;color:#667eea}}
-        .ensemble-box{{display:flex;flex-direction:column;align-items:center}}
-        .mini-tree{{font-size:1.5rem;display:inline-block;margin:0 5px;animation:sway 3s ease-in-out infinite}}
-        .ensemble-label{{color:#a0a0a0;font-size:.9rem;margin-top:8px}}
-        .pulsing{{animation:pulseGlow 2s ease-in-out infinite}}
-        @keyframes pulseGlow{{0%,100%{{box-shadow:0 0 10px #667eea;border-color:#667eea}}50%{{box-shadow:0 0 30px #667eea,0 0 50px #764ba2;border-color:#764ba2}}}}
-        .mini-formula{{background:#0d0d0d;padding:15px 20px;border-radius:8px;font-family:'Courier New',monospace;color:#fff;font-size:1.2rem;margin-top:15px;border:1px solid #667eea;text-align:center}}
-        .process-footer{{text-align:center;margin-top:50px}}
-        .close-process-btn{{background:#2a2a2a;color:#fff;border:1px solid #3a3a3a;padding:12px 32px;font-size:1rem;border-radius:8px;cursor:pointer;transition:all .3s}}
-        .close-process-btn:hover{{background:#3a3a3a;transform:translateY(-2px)}}
-        @media (max-width:768px){{.step-visual,.trees-container,.prediction-flow{{flex-direction:column}}.arrow-flow{{transform:rotate(90deg)}}}}
-
-        /* ANIMACIÓN PROCESAMIENTO REAL */
-        .processing-stage{{background:#1a1a1a;border-radius:12px;padding:40px;margin:20px 0;border:1px solid #2a2a2a}}
-        .stage-title{{font-size:1.8rem;color:#fff;margin-bottom:30px;text-align:center}}
-        .stage-title.success{{color:#22c55e}}
-        .close-btn-top{{position:absolute;right:20px;top:20px;background:#2a2a2a;border:none;color:#fff;padding:10px 15px;border-radius:8px;cursor:pointer}}
-        .data-stream{{height:100px;background:linear-gradient(90deg,transparent,rgba(102,126,234,.3),transparent);animation:dataFlow 2s infinite}}
-        @keyframes dataFlow{{0%,100%{{transform:translateX(-100%)}}50%{{transform:translateX(100%)}}}}
-        .data-particles{{width:100%;height:100%;background-image:radial-gradient(circle,#667eea 2px,transparent 2px);background-size:50px 50px;animation:particleMove 3s linear infinite}}
-        @keyframes particleMove{{0%{{background-position:0 0}}100%{{background-position:50px 50px}}}}
-        .stat-counter{{text-align:center;margin:30px 0}}
-        .counter-value{{font-size:4rem;color:#667eea;font-weight:700}}
-        .counter-label{{font-size:1.2rem;color:#a0a0a0;margin-left:10px}}
-        .progress-bar-container{{width:100%;height:20px;background:#0d0d0d;border-radius:10px;overflow:hidden;margin:20px 0}}
-        .progress-bar-fill{{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);transition:width .3s;border-radius:10px}}
-        .gradient-green{{background:linear-gradient(90deg,#22c55e,#16a34a)!important}}
-        .feature-flow{{display:flex;gap:15px;justify-content:center;flex-wrap:wrap;margin:30px 0}}
-        .feature-box{{background:#2a2a2a;padding:15px 25px;border-radius:8px;color:#fff;animation:slideIn .5s ease-out forwards;opacity:0}}
-        @keyframes slideIn{{from{{opacity:0;transform:translateY(-20px)}}to{{opacity:1;transform:translateY(0)}}}}
-        .transformation-display{{text-align:center;margin:30px 0;font-size:1.5rem}}
-        .transform-item{{display:inline-flex;align-items:center;gap:20px}}
-        .before{{color:#ef4444}}
-        .after{{color:#22c55e}}
-        .split-visual{{display:flex;align-items:center;justify-content:center;gap:40px;margin:40px 0}}
-        .split-group{{text-align:center;padding:30px;border-radius:12px;min-width:200px}}
-        .train-group{{background:rgba(34,197,94,.1);border:2px solid #22c55e}}
-        .test-group{{background:rgba(239,68,68,.1);border:2px solid #ef4444}}
-        .split-label{{font-size:1.2rem;color:#a0a0a0;margin-bottom:10px}}
-        .split-count{{font-size:3rem;color:#fff;font-weight:700;margin:10px 0}}
-        .split-percent{{font-size:1.5rem;color:#667eea}}
-        .split-arrow{{font-size:3rem;color:#667eea}}
-        .trees-building{{text-align:center}}
-        .tree-counter{{margin:30px 0}}
-        .big-number{{font-size:5rem;color:#22c55e;font-weight:700}}
-        .trees-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:10px;margin:30px auto;max-width:600px}}
-        .tree-mini{{font-size:2rem;opacity:.3;transition:opacity .2s}}
-        .tree-mini.active{{opacity:1;animation:treePopthis .3s}}
-        @keyframes treePop{{0%{{transform:scale(0)}}50%{{transform:scale(1.2)}}100%{{transform:scale(1)}}}}
-        .predictions-flow{{text-align:center}}
-        .prediction-counter{{margin:30px 0}}
-        .predictions-visual{{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:30px 0}}
-        .prediction-item{{background:#2a2a2a;padding:20px 30px;border-radius:12px;font-size:1.3rem;animation:predPop .5s ease-out infinite}}
-        @keyframes predPop{{0%,100%{{transform:scale(1)}}50%{{transform:scale(1.05)}}}}
-        .final-results{{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;margin:40px 0}}
-        .result-card{{background:#2a2a2a;padding:40px;border-radius:12px;text-align:center;border:2px solid #667eea}}
-        .result-card.pulse-glow{{animation:resultGlow 2s ease-in-out infinite}}
-        @keyframes resultGlow{{0%,100%{{box-shadow:0 0 20px rgba(102,126,234,.5)}}50%{{box-shadow:0 0 40px rgba(102,126,234,.8)}}}}
-        .result-label{{font-size:1.1rem;color:#a0a0a0;margin-bottom:15px}}
-        .result-value{{font-size:3.5rem;color:#fff;font-weight:700}}
-        .restart-btn{{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;padding:15px 40px;font-size:1.1rem;border-radius:12px;cursor:pointer;margin-top:30px}}
     </style>
-    <script>
-        let currentStage=0;const totalRecords={total_records};const totalTrees=300;const testRecords=Math.floor(totalRecords*.2);
-        function startProcessingAnimation(){{document.getElementById('xgboostProcess').style.display='block';document.getElementById('xgboostProcess').scrollIntoView({{behavior:'smooth'}});currentStage=0;setTimeout(()=>showStage(1),500)}}
-        function closeProcessing(){{document.getElementById('xgboostProcess').style.display='none';for(let i=1;i<=6;i++)document.getElementById('stage'+i).style.display='none';currentStage=0}}
-        function showStage(n){{if(currentStage>0)document.getElementById('stage'+currentStage).style.display='none';document.getElementById('stage'+n).style.display='block';currentStage=n;if(n===1)animateLoad();else if(n===2)setTimeout(()=>showStage(3),3000);else if(n===3)setTimeout(()=>showStage(4),3000);else if(n===4)animateTrees();else if(n===5)animatePredictions();else if(n===6)setTimeout(()=>{{document.getElementById('stage6').style.display='block'}},500)}}
-        function animateLoad(){{let count=0;const interval=setInterval(()=>{{count+=Math.floor(totalRecords/50);if(count>=totalRecords){{count=totalRecords;clearInterval(interval);setTimeout(()=>showStage(2),1000)}}document.getElementById('loadCounter').textContent=count.toLocaleString();document.getElementById('loadProgress').style.width=(count/totalRecords*100)+'%'}},50)}}
-        function animateTrees(){{const grid=document.getElementById('treesGrid');grid.innerHTML='';for(let i=0;i<30;i++){{const tree=document.createElement('div');tree.className='tree-mini';tree.innerHTML='<i class=\"fas fa-tree\"></i>';grid.appendChild(tree)}}let count=0;const interval=setInterval(()=>{{count+=5;if(count>=totalTrees){{count=totalTrees;clearInterval(interval);setTimeout(()=>showStage(5),1000)}}document.getElementById('treeCounter').textContent=count;document.getElementById('treeProgress').style.width=(count/totalTrees*100)+'%';const activeIndex=Math.floor(count/totalTrees*30);for(let i=0;i<activeIndex;i++)if(grid.children[i])grid.children[i].classList.add('active')}},30)}}
-        function animatePredictions(){{let count=0;const interval=setInterval(()=>{{count+=Math.floor(testRecords/40);if(count>=testRecords){{count=testRecords;clearInterval(interval);setTimeout(()=>showStage(6),1000)}}document.getElementById('predCounter').textContent=count.toLocaleString()}},50)}}
-    </script>
 </head>
 <body>
     <div class="container">
@@ -519,139 +401,16 @@ def generate_educational_html(file_name, total_records, columns_count, columns_l
             <p>Entendiendo el proceso paso a paso - Estilo educativo</p>
             <p style="font-size: 1rem; margin-top: 10px; opacity: 0.8;">Archivo: <strong>{file_name}</strong></p>
 
-            <button onclick="startProcessingAnimation()" class="xgboost-btn" id="xgboostBtn">
-                <i class="fas fa-play-circle"></i> Ver Cómo se Procesó Este Archivo
+            <button onclick="toggleXGBoostProcess()" class="xgboost-btn" id="xgboostBtn">
+                <i class="fas fa-play-circle"></i> Ver Procedimiento XGBoost Animado
             </button>
         </div>
 
-        <!-- VISUALIZACIÓN ANIMADA DEL PROCESAMIENTO REAL -->
+        <!-- SECCIÓN ANIMADA DEL PROCEDIMIENTO XGBOOST -->
         <div id="xgboostProcess" class="xgboost-process-container" style="display: none;">
             <div class="process-header">
-                <h2><i class="fas fa-robot"></i> Procesamiento en Tiempo Real</h2>
-                <p>Visualiza cómo XGBoost procesó tus {total_records:,} registros</p>
-                <button onclick="closeProcessing()" class="close-btn-top">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <!-- STAGE 1: CARGA DE DATOS -->
-            <div class="processing-stage" id="stage1" style="display: none;">
-                <div class="stage-title">
-                    <i class="fas fa-download"></i> Etapa 1: Cargando Datos
-                </div>
-                <div class="data-stream">
-                    <div class="data-particles"></div>
-                </div>
-                <div class="stage-stats">
-                    <div class="stat-counter">
-                        <span class="counter-value" id="loadCounter">0</span>
-                        <span class="counter-label">/ {total_records:,} registros cargados</span>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill" id="loadProgress"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STAGE 2: PREPROCESAMIENTO -->
-            <div class="processing-stage" id="stage2" style="display: none;">
-                <div class="stage-title">
-                    <i class="fas fa-cogs"></i> Etapa 2: Preprocesando {columns_count} Características
-                </div>
-                <div class="feature-flow">
-                    <div class="feature-box" style="animation-delay: 0s;">Edad</div>
-                    <div class="feature-box" style="animation-delay: 0.1s;">Glucosa</div>
-                    <div class="feature-box" style="animation-delay: 0.2s;">Presión</div>
-                    <div class="feature-box" style="animation-delay: 0.3s;">IMC</div>
-                    <div class="feature-box" style="animation-delay: 0.4s;">...</div>
-                </div>
-                <div class="transformation-display">
-                    <div class="transform-item">
-                        <span class="before">Texto</span>
-                        <i class="fas fa-arrow-right"></i>
-                        <span class="after">Números</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STAGE 3: DIVISIÓN TRAIN/TEST -->
-            <div class="processing-stage" id="stage3" style="display: none;">
-                <div class="stage-title">
-                    <i class="fas fa-cut"></i> Etapa 3: División de Datos
-                </div>
-                <div class="split-visual">
-                    <div class="split-group train-group">
-                        <div class="split-label">Entrenamiento</div>
-                        <div class="split-count">{int(total_records * 0.8):,}</div>
-                        <div class="split-percent">80%</div>
-                    </div>
-                    <div class="split-arrow">→</div>
-                    <div class="split-group test-group">
-                        <div class="split-label">Prueba</div>
-                        <div class="split-count">{int(total_records * 0.2):,}</div>
-                        <div class="split-percent">20%</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STAGE 4: ENTRENAMIENTO DE ÁRBOLES -->
-            <div class="processing-stage" id="stage4" style="display: none;">
-                <div class="stage-title">
-                    <i class="fas fa-tree"></i> Etapa 4: Construyendo 300 Árboles de Decisión
-                </div>
-                <div class="trees-building">
-                    <div class="tree-counter">
-                        <span class="big-number" id="treeCounter">0</span>
-                        <span class="counter-label">/ 300 árboles</span>
-                    </div>
-                    <div class="trees-grid" id="treesGrid"></div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill gradient-green" id="treeProgress"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STAGE 5: PREDICCIONES -->
-            <div class="processing-stage" id="stage5" style="display: none;">
-                <div class="stage-title">
-                    <i class="fas fa-magic"></i> Etapa 5: Generando Predicciones
-                </div>
-                <div class="predictions-flow">
-                    <div class="prediction-counter">
-                        <span class="big-number" id="predCounter">0</span>
-                        <span class="counter-label">/ {int(total_records * 0.2):,} predicciones</span>
-                    </div>
-                    <div class="predictions-visual">
-                        <div class="prediction-item">[OK] Normal</div>
-                        <div class="prediction-item">[!] Prediabetes</div>
-                        <div class="prediction-item">[X] Diabetes</div>
-                        <div class="prediction-item">[!] Hipertensión</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STAGE 6: RESULTADOS FINALES -->
-            <div class="processing-stage" id="stage6" style="display: none;">
-                <div class="stage-title success">
-                    <i class="fas fa-check-circle"></i> ¡Procesamiento Completado!
-                </div>
-                <div class="final-results">
-                    <div class="result-card pulse-glow">
-                        <div class="result-label">Precisión Final</div>
-                        <div class="result-value">{accuracy:.1f}%</div>
-                    </div>
-                    <div class="result-card pulse-glow">
-                        <div class="result-label">F1-Score</div>
-                        <div class="result-value">{f1_score:.1f}%</div>
-                    </div>
-                    <div class="result-card pulse-glow">
-                        <div class="result-label">Registros Procesados</div>
-                        <div class="result-value">{total_records:,}</div>
-                    </div>
-                </div>
-                <button onclick="closeProcessing()" class="restart-btn">
-                    <i class="fas fa-redo"></i> Cerrar Visualización
-                </button>
+                <h2><i class="fas fa-code-branch"></i> Proceso Interno de XGBoost</h2>
+                <p>Visualización paso a paso del algoritmo de Gradient Boosting</p>
             </div>
 
             <!-- PASO 1: ENTRADA DE DATOS -->
@@ -701,19 +460,19 @@ def generate_educational_html(file_name, total_records, columns_count, columns_l
                 <div class="step-visual">
                     <div class="trees-container">
                         <div class="tree-item" style="animation-delay: 0s;">
-                            <div class="tree-icon">[TREE]</div>
+                            <div class="tree-icon">🌳</div>
                             <div class="tree-label">Árbol 1</div>
                             <div class="tree-weight">α₁</div>
                         </div>
                         <div class="plus-symbol">+</div>
                         <div class="tree-item" style="animation-delay: 0.5s;">
-                            <div class="tree-icon">[TREE]</div>
+                            <div class="tree-icon">🌳</div>
                             <div class="tree-label">Árbol 2</div>
                             <div class="tree-weight">α₂</div>
                         </div>
                         <div class="plus-symbol">+</div>
                         <div class="tree-item" style="animation-delay: 1s;">
-                            <div class="tree-icon">[TREE]</div>
+                            <div class="tree-icon">🌳</div>
                             <div class="tree-label">Árbol 3</div>
                             <div class="tree-weight">α₃</div>
                         </div>
@@ -721,7 +480,7 @@ def generate_educational_html(file_name, total_records, columns_count, columns_l
                         <div class="ellipsis">...</div>
                         <div class="plus-symbol">+</div>
                         <div class="tree-item" style="animation-delay: 1.5s;">
-                            <div class="tree-icon">[TREE]</div>
+                            <div class="tree-icon">🌳</div>
                             <div class="tree-label">Árbol 300</div>
                             <div class="tree-weight">α₃₀₀</div>
                         </div>
@@ -770,12 +529,12 @@ def generate_educational_html(file_name, total_records, columns_count, columns_l
                 <div class="step-visual">
                     <div class="regularization-demo">
                         <div class="overfitting-tree">
-                            <div class="tree-complex">[X] Sobreajuste</div>
+                            <div class="tree-complex">❌ Sobreajuste</div>
                             <div class="complexity-indicator">Alta complejidad</div>
                         </div>
                         <div class="arrow-transform">→ Regularización →</div>
                         <div class="balanced-tree">
-                            <div class="tree-simple">[OK] Balanceado</div>
+                            <div class="tree-simple">✅ Balanceado</div>
                             <div class="complexity-indicator">Complejidad óptima</div>
                         </div>
                     </div>
@@ -799,9 +558,9 @@ def generate_educational_html(file_name, total_records, columns_count, columns_l
                         </div>
                         <div class="arrow-flow">→</div>
                         <div class="ensemble-box">
-                            <div class="mini-tree">[TREE]</div>
-                            <div class="mini-tree">[TREE]</div>
-                            <div class="mini-tree">[TREE]</div>
+                            <div class="mini-tree">🌳</div>
+                            <div class="mini-tree">🌳</div>
+                            <div class="mini-tree">🌳</div>
                             <div class="ensemble-label">300 árboles</div>
                         </div>
                         <div class="arrow-flow">→</div>

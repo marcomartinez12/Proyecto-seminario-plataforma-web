@@ -6,6 +6,24 @@ echo  VERSION MEJORADA CON ML OPTIMIZADO
 echo ========================================
 echo.
 
+REM Limpiar puerto 8000 si esta ocupado
+echo [0/4] Verificando puerto 8000...
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000 ^| findstr LISTENING') do (
+    set PORT_PID=%%a
+    if not "%%a"=="0" (
+        echo    - Puerto 8000 ocupado por proceso %%a
+        echo    - Liberando puerto...
+        taskkill /F /PID %%a >nul 2>&1
+        if !errorlevel! equ 0 (
+            echo    - Puerto liberado correctamente
+        ) else (
+            echo    - Proceso ya no existe
+        )
+    )
+)
+echo    OK: Puerto 8000 disponible
+echo.
+
 REM Verificar si existe el entorno virtual
 if not exist "venv\Scripts\activate.bat" (
     echo [!] ERROR: No se encontro el entorno virtual
@@ -49,6 +67,9 @@ if errorlevel 1 (
     pip install xgboost imbalanced-learn scipy
 )
 
+REM Esperar a que el puerto se libere completamente
+timeout /t 2 /nobreak >nul
+
 REM Iniciar servidor
 echo.
 echo [4/4] Iniciando servidor...
@@ -65,6 +86,7 @@ echo  - SMOTE para balance de clases
 echo  - 15 nuevas features clinicas
 echo  - Validacion cruzada estratificada
 echo  - Precision esperada: 85-92%%
+echo  - Generador de datos sinteticos
 echo.
 echo  Presiona Ctrl+C para detener el servidor
 echo ========================================

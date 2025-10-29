@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plataforma de Detección de Enfermedades Crónicas</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3.8">
+    <link rel="stylesheet" href="/static/styles.css?v=4.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -18,8 +18,15 @@
             <!-- Sección de subida de archivos -->
             <section class="upload-section">
                 <div class="upload-card">
-                    <h2><i class="fas fa-upload"></i> Subir Archivo Excel</h2>
-                    <p>Sube un archivo Excel con los datos médicos para análisis</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div>
+                            <h2><i class="fas fa-upload"></i> Subir Archivo Excel</h2>
+                            <p>Sube un archivo Excel con los datos médicos para análisis</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openSyntheticDataModal()" style="background: linear-gradient(135deg, #10b981, #059669); white-space: nowrap;">
+                            <i class="fas fa-random"></i> Generar Datos
+                        </button>
+                    </div>
                     
                     <div class="upload-area" id="uploadArea">
                         <div class="upload-content">
@@ -153,7 +160,101 @@
         </div>
     </div>
 
+    <!-- Modal de Generación de Datos Sintéticos -->
+    <div id="syntheticDataModal" class="synthetic-modal">
+        <div class="modal-content" style="max-width: 600px; z-index: 10000;">
+            <span class="close" onclick="closeSyntheticDataModal()">&times;</span>
+            <h3><i class="fas fa-random"></i> Generar Dataset Sintético</h3>
+            <p style="color: #999; margin-bottom: 2rem;">Genera datos médicos aleatorios para pruebas y análisis</p>
+
+            <div class="synthetic-form">
+                <div class="form-group">
+                    <label for="numRecords">
+                        <i class="fas fa-database"></i> Cantidad de Registros
+                        <span style="color: #10b981; font-size: 0.9rem;">(100 - 50,000)</span>
+                    </label>
+                    <input type="number" id="numRecords" min="100" max="50000" value="1000"
+                           style="background: #222; border: 1px solid #444; color: #fff; padding: 0.8rem; border-radius: 8px; width: 100%;">
+                    <small style="color: #666; display: block; margin-top: 0.5rem;">Registros a generar</small>
+                </div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label>
+                        <i class="fas fa-columns"></i> Nivel de Columnas
+                    </label>
+                    <div style="display: flex; gap: 1rem; margin-top: 0.8rem;">
+                        <label class="radio-card" style="flex: 1;">
+                            <input type="radio" name="dataLevel" value="MINIMO">
+                            <div class="radio-content">
+                                <strong>Mínimo</strong>
+                                <small>7 columnas básicas</small>
+                            </div>
+                        </label>
+                        <label class="radio-card" style="flex: 1;">
+                            <input type="radio" name="dataLevel" value="ESTANDAR">
+                            <div class="radio-content">
+                                <strong>Estándar</strong>
+                                <small>13 columnas</small>
+                            </div>
+                        </label>
+                        <label class="radio-card" style="flex: 1;">
+                            <input type="radio" name="dataLevel" value="COMPLETO" checked>
+                            <div class="radio-content">
+                                <strong>Completo</strong>
+                                <small>24 columnas</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label>
+                        <i class="fas fa-file-export"></i> Formato de Salida
+                    </label>
+                    <div style="display: flex; gap: 1rem; margin-top: 0.8rem;">
+                        <label class="radio-card" style="flex: 1;">
+                            <input type="radio" name="dataFormat" value="excel" checked>
+                            <div class="radio-content">
+                                <i class="fas fa-file-excel" style="color: #10b981; font-size: 1.5rem;"></i>
+                                <strong>Excel</strong>
+                            </div>
+                        </label>
+                        <label class="radio-card" style="flex: 1;">
+                            <input type="radio" name="dataFormat" value="csv">
+                            <div class="radio-content">
+                                <i class="fas fa-file-csv" style="color: #3b82f6; font-size: 1.5rem;"></i>
+                                <strong>CSV</strong>
+                            </div>
+                        </label>
+                        <label class="radio-card" style="flex: 1;">
+                            <input type="radio" name="dataFormat" value="json">
+                            <div class="radio-content">
+                                <i class="fas fa-file-code" style="color: #f59e0b; font-size: 1.5rem;"></i>
+                                <strong>JSON</strong>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="closeSyntheticDataModal()" style="flex: 1;">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn btn-primary" onclick="generateSyntheticData()" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-download"></i> Generar y Descargar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress indicator -->
+            <div id="syntheticProgress" style="display: none; text-align: center; padding: 2rem 0;">
+                <div class="spinner" style="width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.3); border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                <p style="color: #10b981;">Generando dataset...</p>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/static/script.js?v=5.0"></script>
+    <script src="/static/script.js?v=6.3"></script>
 </body>
 </html>

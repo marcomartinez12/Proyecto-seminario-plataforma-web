@@ -90,6 +90,14 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Aplicación iniciada');
     initializeEventListeners();
     loadUploadedFiles(); // ÚNICA llamada inicial
+
+    // MOVER EL MODAL AL BODY para evitar problemas de stacking context
+    const modal = document.getElementById('syntheticDataModal');
+    if (modal && modal.parentElement !== document.body) {
+        console.log('📦 Moviendo modal al body...');
+        document.body.appendChild(modal);
+        console.log('✅ Modal movido al body');
+    }
 });
 
 // EVENT LISTENERS ÚNICOS
@@ -127,6 +135,9 @@ function initializeEventListeners() {
 
         const aiModal = document.getElementById('aiModal');
         if (e.target === aiModal) hideAIModal();
+
+        const syntheticModal = document.getElementById('syntheticDataModal');
+        if (e.target === syntheticModal) closeSyntheticDataModal();
     });
 }
 
@@ -1256,6 +1267,177 @@ function viewDetailedAnalysis(fileId) {
     showToast('Abriendo análisis detallado en nueva pestaña...', 'info');
 }
 
+// ========================================
+// GENERACIÓN DE DATOS SINTÉTICOS
+// ========================================
+
+function openSyntheticDataModal() {
+    console.log('🔴 ABRIENDO MODAL - Inicio');
+    const modal = document.getElementById('syntheticDataModal');
+
+    if (!modal) {
+        console.error('❌ Modal NO encontrado en el DOM!');
+        alert('Error: No se encontró el modal');
+        return;
+    }
+
+    console.log('✅ Modal encontrado:', modal);
+
+    // REMOVER TODAS LAS CLASES que puedan interferir
+    modal.className = '';
+
+    // Forzar estilos inline con máxima prioridad para el MODAL
+    modal.style.cssText = `
+        display: block !important;
+        position: fixed !important;
+        z-index: 2147483647 !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background-color: rgba(0, 0, 0, 0.9) !important;
+        backdrop-filter: blur(10px) !important;
+        overflow: auto !important;
+        isolation: isolate !important;
+    `;
+
+    // Forzar estilos para el CONTENIDO del modal
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        // Remover clases del contenido también
+        modalContent.className = 'modal-content';
+
+        modalContent.style.cssText = `
+            display: block !important;
+            position: relative !important;
+            background: #111111 !important;
+            margin: 5% auto !important;
+            padding: 2rem !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 12px !important;
+            width: 90% !important;
+            max-width: 600px !important;
+            z-index: 2147483647 !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) scale(1) !important;
+            pointer-events: auto !important;
+            color: white !important;
+        `;
+        console.log('✅ Estilos aplicados al modal-content');
+        console.log('Modal content visible:', window.getComputedStyle(modalContent).visibility);
+        console.log('Modal content opacity:', window.getComputedStyle(modalContent).opacity);
+    }
+
+    // Asegurar que todos los elementos hijos sean visibles
+    const allElements = modal.querySelectorAll('*');
+    allElements.forEach(el => {
+        if (el.style) {
+            el.style.visibility = 'visible';
+            el.style.opacity = '1';
+        }
+    });
+
+    console.log('🔴 MODAL ABIERTO - Estilos aplicados');
+    console.log('Display:', modal.style.display);
+    console.log('Z-index:', modal.style.zIndex);
+    console.log('Computed visibility:', window.getComputedStyle(modal).visibility);
+    console.log('Computed opacity:', window.getComputedStyle(modal).opacity);
+}
+
+function closeSyntheticDataModal() {
+    console.log('🔵 CERRANDO MODAL');
+    const modal = document.getElementById('syntheticDataModal');
+
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+        console.log('🔵 MODAL CERRADO');
+    }
+}
+
+async function generateSyntheticData() {
+    try {
+        // Obtener valores del formulario
+        const numRecords = parseInt(document.getElementById('numRecords').value);
+        const level = document.querySelector('input[name="dataLevel"]:checked').value;
+        const format = document.querySelector('input[name="dataFormat"]:checked').value;
+
+        // Validar cantidad de registros
+        if (numRecords < 100 || numRecords > 50000) {
+            showToast('La cantidad de registros debe estar entre 100 y 50,000', 'error');
+            return;
+        }
+
+        // Mostrar indicador de progreso
+        document.querySelector('.synthetic-form').style.display = 'none';
+        document.getElementById('syntheticProgress').style.display = 'block';
+
+        console.log('🔄 Generando dataset sintético...', { numRecords, level, format });
+
+        // Hacer solicitud al backend
+        const response = await fetch(`${API_BASE_URL}/synthetic/generate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                num_records: numRecords,
+                level: level,
+                format: format,
+                seed: 42
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Error al generar dataset');
+        }
+
+        // Descargar archivo
+        const blob = await response.blob();
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `dataset_medico_${level.toLowerCase()}_${numRecords}.${format === 'excel' ? 'xlsx' : format}`;
+
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+            if (filenameMatch) {
+                filename = filenameMatch[1];
+            }
+        }
+
+        // Crear link de descarga
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        console.log('✅ Dataset generado y descargado:', filename);
+        showToast('Dataset generado y descargado exitosamente', 'success');
+
+        // Cerrar modal después de un breve delay
+        setTimeout(() => {
+            closeSyntheticDataModal();
+            // Resetear formulario
+            document.querySelector('.synthetic-form').style.display = 'block';
+            document.getElementById('syntheticProgress').style.display = 'none';
+            document.getElementById('numRecords').value = 1000;
+        }, 1500);
+
+    } catch (error) {
+        console.error('❌ Error al generar dataset:', error);
+        showToast(`Error: ${error.message}`, 'error');
+
+        // Resetear modal en caso de error
+        document.querySelector('.synthetic-form').style.display = 'block';
+        document.getElementById('syntheticProgress').style.display = 'none';
+    }
+}
+
 // FUNCIONES GLOBALES
 window.analyzeFile = analyzeFile;
 window.downloadReport = downloadReport;
@@ -1269,3 +1451,6 @@ window.viewCharts = viewCharts;
 window.analyzeWithAI = analyzeWithAI;
 window.hideAIModalCustom = hideAIModalCustom;
 window.viewDetailedAnalysis = viewDetailedAnalysis;
+window.openSyntheticDataModal = openSyntheticDataModal;
+window.closeSyntheticDataModal = closeSyntheticDataModal;
+window.generateSyntheticData = generateSyntheticData;

@@ -1,13 +1,13 @@
 [
   {
-    "id": "186bee15-301f-40d9-97dc-59ee073e4d83",
-    "file_id": "0da36e45-f20e-4306-8c90-43f783d1c50f",
-    "analysis_date": "2025-10-25T15:58:00.133697",
-    "report_path": "downloads\\reporte_0da36e45-f20e-4306-8c90-43f783d1c50f_20251025_155800.pdf",
-    "hypertension_cases": 1009,
-    "diabetes_cases": 1458,
-    "total_records": 4998,
-    "accuracy_score": 0.9783526334771004,
-    "summary": "Análisis completado con 97.84% de precisión. Se identificaron 1009 casos de hipertensión y 1458 casos de diabetes."
+    "id": "d165cfe8-e02f-4938-bfb9-d4d505864601",
+    "file_id": "2340918e-0f39-4ddc-b0ca-d1bca47cca7b",
+    "analysis_date": "2025-10-29T11:11:58.232644",
+    "report_path": "downloads\\reporte_2340918e-0f39-4ddc-b0ca-d1bca47cca7b_20251029_111158.pdf",
+    "hypertension_cases": 176,
+    "diabetes_cases": 317,
+    "total_records": 998,
+    "accuracy_score": 0.9647477178915638,
+    "summary": "Análisis completado con 96.47% de precisión. Se identificaron 176 casos de hipertensión y 317 casos de diabetes."
   }
 ]

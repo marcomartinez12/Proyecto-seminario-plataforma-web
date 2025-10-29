@@ -1,0 +1,11 @@
+
+
+Este contenido debe agregarse antes del cierre de </body> en el HTML generado.
+Los estilos CSS y JavaScript para las animaciones están listos.
+
+El archivo ya tiene:
+- Botón "Ver Procedimiento XGBoost Animado" en el header
+- 6 pasos animados del proceso interno de XGBoost
+- Visualizaciones con emojis de árboles, fórmulas, gradientes
+
+Ahora solo falta agregar el CSS y JS al archivo Python
