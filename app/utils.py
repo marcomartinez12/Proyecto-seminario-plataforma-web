@@ -67,11 +67,12 @@ class JSONStorage:
                 break
         self._save_json(self.files_db, files)
     
-    def add_analysis(self, file_id: str, report_path: str, hypertension_cases: int, 
-                    diabetes_cases: int, total_records: int, accuracy_score: float, summary: str) -> str:
+    def add_analysis(self, file_id: str, report_path: str, hypertension_cases: int,
+                    diabetes_cases: int, total_records: int, accuracy_score: float, summary: str,
+                    f1_score: float = None) -> str:
         analyses = self._load_json(self.analysis_db)
         analysis_id = str(uuid.uuid4())
-        
+
         analysis_data = {
             "id": analysis_id,
             "file_id": file_id,
@@ -81,6 +82,7 @@ class JSONStorage:
             "diabetes_cases": diabetes_cases,
             "total_records": total_records,
             "accuracy_score": accuracy_score,
+            "f1_score": f1_score if f1_score is not None else accuracy_score,
             "summary": summary
         }
         

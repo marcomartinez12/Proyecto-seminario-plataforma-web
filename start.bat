@@ -6,22 +6,34 @@ echo  VERSION MEJORADA CON ML OPTIMIZADO
 echo ========================================
 echo.
 
-REM Limpiar puerto 8000 si esta ocupado
-echo [0/4] Verificando puerto 8000...
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000 ^| findstr LISTENING') do (
-    set PORT_PID=%%a
+REM Limpiar puerto 8000 - MATAR TODOS LOS PROCESOS
+echo [0/4] Limpiando puerto 8000...
+echo    - Buscando procesos en puerto 8000...
+
+REM Metodo 1: Matar por netstat
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000') do (
     if not "%%a"=="0" (
-        echo    - Puerto 8000 ocupado por proceso %%a
-        echo    - Liberando puerto...
+        echo    - Matando proceso %%a
         taskkill /F /PID %%a >nul 2>&1
-        if !errorlevel! equ 0 (
-            echo    - Puerto liberado correctamente
-        ) else (
-            echo    - Proceso ya no existe
-        )
     )
 )
-echo    OK: Puerto 8000 disponible
+
+REM Metodo 2: Matar todos los procesos python.exe y uvicorn
+echo    - Matando procesos Python y Uvicorn...
+taskkill /F /IM python.exe >nul 2>&1
+taskkill /F /IM uvicorn.exe >nul 2>&1
+
+REM Esperar a que se liberen los procesos
+timeout /t 2 /nobreak >nul
+
+REM Verificar que el puerto este libre
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8000 ^| findstr LISTENING') do (
+    echo    [!] ADVERTENCIA: Puerto 8000 todavia ocupado por %%a
+    echo    - Intentando forzar cierre...
+    taskkill /F /PID %%a >nul 2>&1
+)
+
+echo    OK: Puerto 8000 limpio
 echo.
 
 REM Verificar si existe el entorno virtual

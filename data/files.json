@@ -1,12 +1,32 @@
 [
   {
-    "id": "2340918e-0f39-4ddc-b0ca-d1bca47cca7b",
-    "filename": "c228e22d-e1d7-4718-b5fe-74c82f9df4bb.xlsx",
-    "original_filename": "dataset_medico_completo_1000.xlsx",
-    "file_path": "uploads\\c228e22d-e1d7-4718-b5fe-74c82f9df4bb.xlsx",
-    "upload_date": "2025-10-29T11:11:42.506130",
+    "id": "326da788-29d6-42de-8d1d-13cd88c28465",
+    "filename": "72756c19-1544-408d-be94-bfc64a3f5aa1.xlsx",
+    "original_filename": "dataset_medico_completo_9000.xlsx",
+    "file_path": "uploads\\72756c19-1544-408d-be94-bfc64a3f5aa1.xlsx",
+    "upload_date": "2025-10-29T15:45:55.852907",
+    "file_size": 1079777,
+    "status": "completed",
+    "records_count": 9000
+  },
+  {
+    "id": "a983a901-f7ca-4bfa-a482-740e687856e3",
+    "filename": "914d2e16-02b4-4be3-9ac9-c5d824854260.xlsx",
+    "original_filename": "dataset_medico_completo_1000 (1).xlsx",
+    "file_path": "uploads\\914d2e16-02b4-4be3-9ac9-c5d824854260.xlsx",
+    "upload_date": "2025-10-29T20:26:50.668465",
     "file_size": 123221,
     "status": "completed",
     "records_count": 1000
+  },
+  {
+    "id": "e12409d7-fe76-404d-926f-71f14125efba",
+    "filename": "0b8f24c1-a3c6-4ed9-87b5-c46638b3eed9.xlsx",
+    "original_filename": "dataset_medico_completo_20000.xlsx",
+    "file_path": "uploads\\0b8f24c1-a3c6-4ed9-87b5-c46638b3eed9.xlsx",
+    "upload_date": "2025-10-29T21:12:33.404505",
+    "file_size": 2391832,
+    "status": "completed",
+    "records_count": 20000
   }
 ]

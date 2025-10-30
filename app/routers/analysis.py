@@ -1814,6 +1814,7 @@ async def analyze_file(request: AnalysisRequest, background_tasks: BackgroundTas
         summary = f"Análisis completado con {accuracy:.2%} de precisión. Se identificaron {hypertension_cases} casos de hipertensión y {diabetes_cases} casos de diabetes."
         
         # Guardar resultado del análisis
+        f1 = detailed_metrics.get('f1_score', accuracy)
         analysis_id = storage.add_analysis(
             file_id=request.file_id,
             report_path=report_path,
@@ -1821,6 +1822,7 @@ async def analyze_file(request: AnalysisRequest, background_tasks: BackgroundTas
             diabetes_cases=diabetes_cases,
             total_records=len(processed_data),
             accuracy_score=accuracy,
+            f1_score=f1,
             summary=summary
         )
         
@@ -2133,6 +2135,7 @@ def analyze_file_with_monitoring(request: AnalysisRequest):
         summary = f"Análisis completado con {accuracy:.2%} de precisión. Se identificaron {hypertension_cases} casos de hipertensión y {diabetes_cases} casos de diabetes."
         
         # Guardar resultado del análisis
+        f1 = detailed_metrics.get('f1_score', accuracy)
         analysis_id = storage.add_analysis(
             file_id=request.file_id,
             report_path=report_path,
@@ -2140,6 +2143,7 @@ def analyze_file_with_monitoring(request: AnalysisRequest):
             diabetes_cases=diabetes_cases,
             total_records=len(processed_data),
             accuracy_score=accuracy,
+            f1_score=f1,
             summary=summary
         )
         
