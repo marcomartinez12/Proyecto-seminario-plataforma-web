@@ -1253,6 +1253,683 @@ def generate_educational_html(file_name, total_records, columns_count, columns_l
             }}
         </script>
 
+        <!-- SIMULADOR MONTE CARLO -->
+        <div class="step-card">
+            <div class="step-number">9</div>
+            <div class="step-content">
+                <h2 class="step-title">
+                    <i class="fas fa-dice"></i>
+                    Simulación Monte Carlo
+                </h2>
+
+                <div class="explanation">
+                    <strong>¿Cuáles son todos los futuros posibles?</strong><br>
+                    Ejecuta 10,000 simulaciones probabilísticas para explorar múltiples escenarios
+                    y visualizar la distribución de riesgos. Esta técnica predice la incertidumbre
+                    del futuro considerando variabilidad genética, adherencia al tratamiento, y factores aleatorios.
+                </div>
+
+                <div class="analogy">
+                    <div class="analogy-title">
+                        <i class="fas fa-lightbulb"></i>
+                        Analogía:
+                    </div>
+                    <p>
+                        Imagina lanzar una moneda 10,000 veces para saber si sale más cara o cruz.
+                        Monte Carlo hace lo mismo pero con la salud: simula 10,000 futuros diferentes
+                        para ver en cuántos desarrollas diabetes, en cuántos mejoras, y en cuántos te mantienes igual.
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button id="openMonteCarloBtn" onclick="openMonteCarloModal()" style="
+                        background: linear-gradient(135deg, #f093fb, #f5576c);
+                        color: white;
+                        border: none;
+                        padding: 20px 50px;
+                        font-size: 18px;
+                        font-weight: 600;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        box-shadow: 0 10px 30px rgba(240, 147, 251, 0.4);
+                        transition: all 0.3s ease;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 15px;
+                        font-family: 'Inter', sans-serif;
+                    ">
+                        <i class="fas fa-dice" style="font-size: 24px;"></i>
+                        <span>Ejecutar Simulación Monte Carlo</span>
+                    </button>
+                </div>
+
+                <div class="success-box" style="margin-top: 30px;">
+                    <strong><i class="fas fa-info-circle"></i> Información:</strong><br>
+                    La simulación Monte Carlo utiliza aleatoriedad para modelar la incertidumbre del futuro.
+                    Los resultados muestran probabilidades basadas en <strong>10,000 escenarios diferentes</strong>,
+                    considerando variaciones en IMC, glucosa, presión arterial, adherencia al tratamiento,
+                    factores genéticos y eventos aleatorios de la vida.
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL MONTE CARLO -->
+        <div id="monteCarloModal" style="
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        ">
+            <div style="
+                background: #1a1a1a;
+                margin: 2% auto;
+                padding: 0;
+                border-radius: 20px;
+                width: 90%;
+                max-width: 1400px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+                animation: slideDown 0.4s ease;
+                max-height: 95vh;
+                overflow-y: auto;
+            ">
+                <!-- Header del Modal -->
+                <div style="
+                    background: linear-gradient(135deg, #f093fb, #f5576c);
+                    padding: 25px 40px;
+                    border-radius: 20px 20px 0 0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-dice" style="font-size: 32px; color: white;"></i>
+                        <h2 style="margin: 0; color: white; font-size: 24px; font-weight: 600;">
+                            Simulación Monte Carlo - 10,000 Escenarios
+                        </h2>
+                    </div>
+                    <button onclick="closeMonteCarloModal()" style="
+                        background: rgba(255,255,255,0.2);
+                        border: none;
+                        color: white;
+                        font-size: 28px;
+                        cursor: pointer;
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.2s ease;
+                    " onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Contenido del Modal -->
+                <div style="padding: 40px;">
+                    <!-- Loading State -->
+                    <div id="monteCarloLoading" style="text-align: center; padding: 60px 20px;">
+                        <div style="display: inline-block; position: relative; width: 80px; height: 80px;">
+                            <div style="
+                                box-sizing: border-box;
+                                display: block;
+                                position: absolute;
+                                width: 64px;
+                                height: 64px;
+                                margin: 8px;
+                                border: 8px solid;
+                                border-radius: 50%;
+                                animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+                                border-color: #f093fb transparent transparent transparent;
+                            "></div>
+                        </div>
+                        <p style="color: #f093fb; font-size: 18px; margin-top: 20px; font-weight: 500;">
+                            Ejecutando 10,000 simulaciones...
+                        </p>
+                        <p style="color: #888; font-size: 14px;">
+                            Esto puede tomar unos segundos
+                        </p>
+                    </div>
+
+                    <!-- Results Content -->
+                    <div id="monteCarloResults" style="display: none;">
+                        <!-- Nota informativa -->
+                        <div style="
+                            background: linear-gradient(135deg, #667eea22, #764ba222);
+                            border-left: 4px solid #667eea;
+                            padding: 20px;
+                            border-radius: 8px;
+                            margin-bottom: 30px;
+                        ">
+                            <div style="display: flex; align-items: start; gap: 15px;">
+                                <i class="fas fa-info-circle" style="color: #667eea; font-size: 24px; margin-top: 3px;"></i>
+                                <div>
+                                    <strong style="color: #667eea; font-size: 16px; display: block; margin-bottom: 8px;">
+                                        ¿Qué es Monte Carlo?
+                                    </strong>
+                                    <p style="color: #bbb; margin: 0; line-height: 1.6; font-size: 14px;">
+                                        Monte Carlo es una técnica que simula <strong>miles de futuros posibles</strong> usando aleatoriedad.
+                                        En lugar de dar una sola predicción, te muestra un <strong>rango de probabilidades</strong>:
+                                        el mejor caso, el peor caso, y lo más probable. Es como ver todas las líneas temporales posibles de tu salud.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Probabilidades por Diagnóstico -->
+                        <div style="margin-bottom: 40px;">
+                            <h3 style="color: white; font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-chart-pie"></i>
+                                Probabilidades Promedio por Diagnóstico
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                                <div style="background: linear-gradient(135deg, #e74c3c, #c0392b); padding: 25px; border-radius: 12px; color: white;">
+                                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Diabetes</div>
+                                    <div style="font-size: 36px; font-weight: 700;" id="probDiabetes">--%</div>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #e67e22, #d35400); padding: 25px; border-radius: 12px; color: white;">
+                                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Hipertensión</div>
+                                    <div style="font-size: 36px; font-weight: 700;" id="probHipertension">--%</div>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #9b59b6, #8e44ad); padding: 25px; border-radius: 12px; color: white;">
+                                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Obesidad</div>
+                                    <div style="font-size: 36px; font-weight: 700;" id="probObesidad">--%</div>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #27ae60, #229954); padding: 25px; border-radius: 12px; color: white;">
+                                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Normal/Saludable</div>
+                                    <div style="font-size: 36px; font-weight: 700;" id="probNormal">--%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Percentiles de Riesgo -->
+                        <div style="margin-bottom: 40px;">
+                            <h3 style="color: white; font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-chart-line"></i>
+                                Análisis de Percentiles (Riesgo Total)
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                <div style="background: #2a2a2a; padding: 20px; border-radius: 10px; border-left: 4px solid #27ae60;">
+                                    <div style="color: #888; font-size: 13px; margin-bottom: 5px;">Mejor Caso (10%)</div>
+                                    <div style="color: #27ae60; font-size: 28px; font-weight: 700;" id="percentil10">--%</div>
+                                    <div style="color: #aaa; font-size: 12px; margin-top: 5px;">Escenario optimista</div>
+                                </div>
+                                <div style="background: #2a2a2a; padding: 20px; border-radius: 10px; border-left: 4px solid #f39c12;">
+                                    <div style="color: #888; font-size: 13px; margin-bottom: 5px;">Caso Promedio (50%)</div>
+                                    <div style="color: #f39c12; font-size: 28px; font-weight: 700;" id="percentil50">--%</div>
+                                    <div style="color: #aaa; font-size: 12px; margin-top: 5px;">Más probable</div>
+                                </div>
+                                <div style="background: #2a2a2a; padding: 20px; border-radius: 10px; border-left: 4px solid #e74c3c;">
+                                    <div style="color: #888; font-size: 13px; margin-bottom: 5px;">Peor Caso (90%)</div>
+                                    <div style="color: #e74c3c; font-size: 28px; font-weight: 700;" id="percentil90">--%</div>
+                                    <div style="color: #aaa; font-size: 12px; margin-top: 5px;">Escenario pesimista</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Distribución de Probabilidad -->
+                        <div style="margin-bottom: 40px;">
+                            <h3 style="color: white; font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-chart-area"></i>
+                                Distribución de Probabilidad de Riesgo
+                            </h3>
+                            <div style="background: #2a2a2a; padding: 30px; border-radius: 12px;">
+                                <div style="height: 400px; position: relative;">
+                                    <canvas id="monteCarloHistogram"></canvas>
+                                </div>
+                            </div>
+                            <div style="color: #888; font-size: 13px; margin-top: 15px; text-align: center; line-height: 1.6;">
+                                Esta gráfica muestra cuántas de las 10,000 simulaciones resultaron en cada nivel de riesgo.<br>
+                                <strong style="color: #27ae60;">Verde</strong> = Bajo riesgo (&lt;30%) ·
+                                <strong style="color: #f39c12;">Naranja</strong> = Riesgo medio (30-60%) ·
+                                <strong style="color: #e74c3c;">Rojo</strong> = Alto riesgo (&gt;60%)
+                            </div>
+                        </div>
+
+                        <!-- Timeline de Proyección -->
+                        <div style="margin-bottom: 40px;">
+                            <h3 style="color: white; font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-clock"></i>
+                                Proyección Temporal (5 años)
+                            </h3>
+                            <div style="background: #2a2a2a; padding: 30px; border-radius: 12px;">
+                                <canvas id="monteCarloTimeline" style="max-height: 300px;"></canvas>
+                            </div>
+                            <div style="color: #888; font-size: 13px; margin-top: 15px; text-align: center;">
+                                Cono de incertidumbre: muestra cómo evoluciona el riesgo en los próximos 5 años
+                                en el mejor caso, caso promedio, y peor caso.
+                            </div>
+                        </div>
+
+                        <!-- Interpretación Final -->
+                        <div style="
+                            background: linear-gradient(135deg, #2c3e50, #34495e);
+                            padding: 30px;
+                            border-radius: 12px;
+                            border-left: 4px solid #3498db;
+                        ">
+                            <h4 style="color: white; font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-lightbulb"></i>
+                                Interpretación de Resultados
+                            </h4>
+                            <div id="monteCarloInterpretation" style="color: #bbb; line-height: 1.8; font-size: 15px;">
+                                <!-- Se llenará dinámicamente con JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error State -->
+                    <div id="monteCarloError" style="display: none; text-align: center; padding: 60px 20px;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 64px; color: #e74c3c; margin-bottom: 20px;"></i>
+                        <h3 style="color: white; margin-bottom: 10px;">Error en la simulación</h3>
+                        <p style="color: #888;" id="monteCarloErrorMessage">Ocurrió un error al ejecutar la simulación</p>
+                        <button onclick="loadMonteCarlo()" style="
+                            background: #e74c3c;
+                            color: white;
+                            border: none;
+                            padding: 12px 30px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            margin-top: 20px;
+                            transition: all 0.2s ease;
+                        " onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e74c3c'">
+                            <i class="fas fa-redo"></i> Reintentar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            let monteCarloDataCache = null;
+            let histogramChart = null;
+            let timelineChart = null;
+
+            function openMonteCarloModal() {{
+                const modal = document.getElementById('monteCarloModal');
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+
+                if (monteCarloDataCache) {{
+                    displayMonteCarlo(monteCarloDataCache);
+                }} else {{
+                    loadMonteCarlo();
+                }}
+            }}
+
+            function closeMonteCarloModal() {{
+                const modal = document.getElementById('monteCarloModal');
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }}
+
+            // Cerrar con tecla ESC
+            document.addEventListener('keydown', function(event) {{
+                if (event.key === 'Escape') {{
+                    closeMonteCarloModal();
+                }}
+            }});
+
+            async function loadMonteCarlo() {{
+                const loadingDiv = document.getElementById('monteCarloLoading');
+                const resultsDiv = document.getElementById('monteCarloResults');
+                const errorDiv = document.getElementById('monteCarloError');
+
+                loadingDiv.style.display = 'block';
+                resultsDiv.style.display = 'none';
+                errorDiv.style.display = 'none';
+
+                try {{
+                    const fileId = window.location.pathname.split('/').pop();
+                    const response = await fetch('/api/montecarlo/simulate', {{
+                        method: 'POST',
+                        headers: {{
+                            'Content-Type': 'application/json',
+                        }},
+                        body: JSON.stringify({{
+                            file_id: fileId,
+                            num_simulaciones: 10000,
+                            años: 5
+                        }})
+                    }});
+
+                    if (!response.ok) {{
+                        const error = await response.json();
+                        throw new Error(error.detail || 'Error en la simulación');
+                    }}
+
+                    const data = await response.json();
+                    monteCarloDataCache = data;
+                    displayMonteCarlo(data);
+
+                }} catch (error) {{
+                    console.error('Error:', error);
+                    loadingDiv.style.display = 'none';
+                    errorDiv.style.display = 'block';
+                    document.getElementById('monteCarloErrorMessage').textContent = error.message;
+                }}
+            }}
+
+            function displayMonteCarlo(data) {{
+                const loadingDiv = document.getElementById('monteCarloLoading');
+                const resultsDiv = document.getElementById('monteCarloResults');
+
+                loadingDiv.style.display = 'none';
+                resultsDiv.style.display = 'block';
+
+                // Actualizar probabilidades por diagnóstico
+                document.getElementById('probDiabetes').textContent = (data.probabilidad_diabetes * 100).toFixed(1) + '%';
+                document.getElementById('probHipertension').textContent = (data.probabilidad_hipertension * 100).toFixed(1) + '%';
+                document.getElementById('probObesidad').textContent = (data.probabilidad_obesidad * 100).toFixed(1) + '%';
+                document.getElementById('probNormal').textContent = (data.probabilidad_normal * 100).toFixed(1) + '%';
+
+                // Actualizar percentiles
+                document.getElementById('percentil10').textContent = (data.percentil_10 * 100).toFixed(1) + '%';
+                document.getElementById('percentil50').textContent = (data.percentil_50 * 100).toFixed(1) + '%';
+                document.getElementById('percentil90').textContent = (data.percentil_90 * 100).toFixed(1) + '%';
+
+                // Crear histograma
+                createHistogram(data.distribuciones);
+
+                // Crear timeline
+                createTimeline(data.timeline_datos);
+
+                // Generar interpretación
+                generateInterpretation(data);
+            }}
+
+            function createHistogram(distribuciones) {{
+                const ctx = document.getElementById('monteCarloHistogram').getContext('2d');
+
+                // Destruir chart anterior si existe
+                if (histogramChart) {{
+                    histogramChart.destroy();
+                }}
+
+                // Crear gradiente para las barras
+                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(240, 147, 251, 1)');
+                gradient.addColorStop(0.5, 'rgba(245, 87, 108, 0.8)');
+                gradient.addColorStop(1, 'rgba(240, 147, 251, 0.6)');
+
+                // Generar colores dinámicos basados en el riesgo
+                const backgroundColors = distribuciones.histogram_bins.map(bin => {{
+                    if (bin < 0.3) return 'rgba(39, 174, 96, 0.8)';  // Verde (bajo riesgo)
+                    if (bin < 0.6) return 'rgba(243, 156, 18, 0.8)'; // Naranja (riesgo medio)
+                    return 'rgba(231, 76, 60, 0.8)';                  // Rojo (alto riesgo)
+                }});
+
+                const borderColors = distribuciones.histogram_bins.map(bin => {{
+                    if (bin < 0.3) return 'rgba(39, 174, 96, 1)';
+                    if (bin < 0.6) return 'rgba(243, 156, 18, 1)';
+                    return 'rgba(231, 76, 60, 1)';
+                }});
+
+                // Mostrar solo cada 5ta etiqueta para mejor legibilidad
+                const labels = distribuciones.histogram_bins.map((b, idx) => {{
+                    if (idx % 5 === 0 || idx === distribuciones.histogram_bins.length - 1) {{
+                        return (b * 100).toFixed(0) + '%';
+                    }}
+                    return '';
+                }});
+
+                histogramChart = new Chart(ctx, {{
+                    type: 'bar',
+                    data: {{
+                        labels: labels,
+                        datasets: [{{
+                            label: 'Frecuencia de Simulaciones',
+                            data: distribuciones.histogram_heights,
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors,
+                            borderWidth: 2,
+                            borderRadius: 4,
+                            barPercentage: 1.0,
+                            categoryPercentage: 0.95
+                        }}]
+                    }},
+                    options: {{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {{
+                            duration: 1000,
+                            easing: 'easeInOutQuart'
+                        }},
+                        plugins: {{
+                            legend: {{
+                                display: true,
+                                labels: {{
+                                    color: '#fff',
+                                    font: {{
+                                        size: 14,
+                                        weight: '500'
+                                    }},
+                                    padding: 15
+                                }}
+                            }},
+                            tooltip: {{
+                                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: '#f093fb',
+                                borderWidth: 2,
+                                padding: 12,
+                                displayColors: true,
+                                callbacks: {{
+                                    title: function(context) {{
+                                        const binValue = distribuciones.histogram_bins[context[0].dataIndex];
+                                        return 'Riesgo: ' + (binValue * 100).toFixed(1) + '%';
+                                    }},
+                                    label: function(context) {{
+                                        const freq = (context.parsed.y * 100).toFixed(2);
+                                        const count = Math.round(context.parsed.y * 10000);
+                                        return [
+                                            'Frecuencia: ' + freq + '%',
+                                            'Simulaciones: ' + count + ' de 10,000'
+                                        ];
+                                    }}
+                                }}
+                            }}
+                        }},
+                        scales: {{
+                            x: {{
+                                title: {{
+                                    display: true,
+                                    text: 'Nivel de Riesgo de Enfermedad',
+                                    color: '#fff',
+                                    font: {{
+                                        size: 15,
+                                        weight: '600'
+                                    }},
+                                    padding: 10
+                                }},
+                                ticks: {{
+                                    color: '#aaa',
+                                    font: {{
+                                        size: 12
+                                    }},
+                                    maxRotation: 0,
+                                    minRotation: 0,
+                                    autoSkip: false
+                                }},
+                                grid: {{
+                                    color: 'rgba(255, 255, 255, 0.05)',
+                                    drawBorder: false
+                                }}
+                            }},
+                            y: {{
+                                title: {{
+                                    display: true,
+                                    text: 'Frecuencia Relativa',
+                                    color: '#fff',
+                                    font: {{
+                                        size: 15,
+                                        weight: '600'
+                                    }},
+                                    padding: 10
+                                }},
+                                ticks: {{
+                                    color: '#aaa',
+                                    font: {{
+                                        size: 12
+                                    }},
+                                    callback: function(value) {{
+                                        return (value * 100).toFixed(1) + '%';
+                                    }},
+                                    padding: 8
+                                }},
+                                grid: {{
+                                    color: 'rgba(255, 255, 255, 0.1)',
+                                    drawBorder: false
+                                }},
+                                beginAtZero: true
+                            }}
+                        }}
+                    }}
+                }});
+            }}
+
+            function createTimeline(timeline_datos) {{
+                const ctx = document.getElementById('monteCarloTimeline').getContext('2d');
+
+                // Destruir chart anterior si existe
+                if (timelineChart) {{
+                    timelineChart.destroy();
+                }}
+
+                const labels = timeline_datos.años.map(a => 'Año ' + a);
+
+                timelineChart = new Chart(ctx, {{
+                    type: 'line',
+                    data: {{
+                        labels: labels,
+                        datasets: [
+                            {{
+                                label: 'Mejor Caso',
+                                data: timeline_datos.mejor_caso.map(v => v * 100),
+                                borderColor: '#27ae60',
+                                backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                                fill: '+1',
+                                tension: 0.4
+                            }},
+                            {{
+                                label: 'Caso Promedio',
+                                data: timeline_datos.caso_promedio.map(v => v * 100),
+                                borderColor: '#f39c12',
+                                backgroundColor: 'rgba(243, 156, 18, 0.2)',
+                                fill: '+1',
+                                tension: 0.4,
+                                borderWidth: 3
+                            }},
+                            {{
+                                label: 'Peor Caso',
+                                data: timeline_datos.peor_caso.map(v => v * 100),
+                                borderColor: '#e74c3c',
+                                backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                                fill: false,
+                                tension: 0.4
+                            }}
+                        ]
+                    }},
+                    options: {{
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {{
+                            legend: {{
+                                display: true,
+                                labels: {{
+                                    color: '#fff'
+                                }}
+                            }},
+                            tooltip: {{
+                                callbacks: {{
+                                    label: function(context) {{
+                                        return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+                                    }}
+                                }}
+                            }}
+                        }},
+                        scales: {{
+                            x: {{
+                                title: {{
+                                    display: true,
+                                    text: 'Tiempo',
+                                    color: '#fff'
+                                }},
+                                ticks: {{
+                                    color: '#aaa'
+                                }},
+                                grid: {{
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }}
+                            }},
+                            y: {{
+                                title: {{
+                                    display: true,
+                                    text: 'Riesgo de Enfermedad (%)',
+                                    color: '#fff'
+                                }},
+                                ticks: {{
+                                    color: '#aaa',
+                                    callback: function(value) {{
+                                        return value + '%';
+                                    }}
+                                }},
+                                grid: {{
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }},
+                                min: 0,
+                                max: 100
+                            }}
+                        }}
+                    }}
+                }});
+            }}
+
+            function generateInterpretation(data) {{
+                const percentil50 = (data.percentil_50 * 100).toFixed(1);
+                const mejorCaso = (data.mejor_caso * 100).toFixed(1);
+                const peorCaso = (data.peor_caso * 100).toFixed(1);
+                const probDiabetes = (data.probabilidad_diabetes * 100).toFixed(1);
+                const probNormal = (data.probabilidad_normal * 100).toFixed(1);
+
+                let interpretation = `
+                    <p><strong>Análisis de 10,000 futuros posibles:</strong></p>
+                    <ul style="margin: 15px 0; padding-left: 25px;">
+                        <li style="margin-bottom: 10px;">
+                            En el <strong>50% de los escenarios</strong> (caso más probable), el riesgo de enfermedad es aproximadamente <strong>${{percentil50}}%</strong>.
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            En el <strong>mejor 10% de los casos</strong>, con cambios significativos en el estilo de vida, el riesgo puede reducirse hasta <strong>${{mejorCaso}}%</strong>.
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            En el <strong>peor 10% de los casos</strong>, sin cambios o con factores adversos, el riesgo puede alcanzar <strong>${{peorCaso}}%</strong>.
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            La probabilidad promedio de desarrollar <strong>diabetes</strong> es de <strong>${{probDiabetes}}%</strong>, mientras que la probabilidad de mantenerse <strong>saludable</strong> es de <strong>${{probNormal}}%</strong>.
+                        </li>
+                    </ul>
+                    <p style="margin-top: 20px;">
+                        <strong>Conclusión:</strong> Estos resultados muestran que el futuro no está determinado.
+                        Las decisiones que tomes hoy sobre dieta, ejercicio, y adherencia al tratamiento
+                        pueden mover tu resultado desde el peor caso hacia el mejor caso. La simulación
+                        Monte Carlo revela que <strong>tienes control sobre tu destino de salud</strong>.
+                    </p>
+                `;
+
+                document.getElementById('monteCarloInterpretation').innerHTML = interpretation;
+            }}
+        </script>
+
         <div class="step-card" style="background: #1e1e1e; color: white; border: 1px solid #2a2a2a;">
             <div class="step-content">
                 <h2 style="color: white; text-align: center; font-size: 2rem; margin-bottom: 20px; font-weight: 600;">

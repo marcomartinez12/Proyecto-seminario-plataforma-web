@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Importar módulos locales
-from app.routers import files, analysis, ai_analysis, detailed_analysis, synthetic_data, scenarios
+from app.routers import files, analysis, ai_analysis, detailed_analysis, synthetic_data, scenarios, montecarlo
 
 app = FastAPI(
     title="Plataforma de Detección de Enfermedades Crónicas",
@@ -38,6 +38,7 @@ app.include_router(ai_analysis.router, prefix="/api", tags=["ai-analysis"])
 app.include_router(detailed_analysis.router, prefix="/api", tags=["detailed-analysis"])
 app.include_router(synthetic_data.router, prefix="/api/synthetic", tags=["synthetic-data"])
 app.include_router(scenarios.router, prefix="/api", tags=["scenarios"])
+app.include_router(montecarlo.router, prefix="/api", tags=["montecarlo"])
 
 # Crear directorios necesarios
 os.makedirs("uploads", exist_ok=True)
