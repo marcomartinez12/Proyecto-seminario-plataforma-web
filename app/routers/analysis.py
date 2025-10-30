@@ -1594,7 +1594,7 @@ La presencia simultánea de hipertensión y diabetes ({ambas_condiciones:,} caso
 **Impacto Epidemiológico:** La comorbilidad incrementa el riesgo de eventos cardiovasculares mayores en 3-5 veces comparado con población general."""
     
     story.append(Paragraph(comorbilidad_text, normal_style))
-    story.append(Spacer(1, 20))
+    story.append(Spacer(1, 15))
 
     # NUEVA SECCIÓN: RESUMEN DE DATOS CLAVE PARA ARTÍCULO CIENTÍFICO (COMENTADA)
     # story.append(PageBreak())
@@ -1726,14 +1726,110 @@ La presencia simultánea de hipertensión y diabetes ({ambas_condiciones:,} caso
     # story.append(Paragraph(datos_text, normal_style))
     # story.append(Spacer(1, 20))
 
-    # 6. CONCLUSIONES Y RECOMENDACIONES
-    story.append(Paragraph("6. CONCLUSIONES Y RECOMENDACIONES", subtitle_style))
-    
-    story.append(Paragraph("6.1 Hallazgos Principales", subtitle2_style))
+    # 6. INTERPRETACIÓN Y ANÁLISIS CLÍNICO
+    story.append(Spacer(1, 15))
+    story.append(Paragraph("6. INTERPRETACIÓN Y ANÁLISIS CLÍNICO", subtitle_style))
+
+    story.append(Paragraph("6.1 Significado de los Hallazgos", subtitle2_style))
+
+    # Calcular métricas para la interpretación
+    total_pacientes = len(data)
+    pacientes_riesgo = len(data[data['Diagnostico'].isin(['Hipertension', 'Diabetes', 'Prediabetes', 'Obesidad', 'Síndrome Metabólico'])])
+    porcentaje_riesgo = (pacientes_riesgo / total_pacientes * 100) if total_pacientes > 0 else 0
+
+    interpretacion_text = f"""Los resultados del análisis revelan que <b>{pacientes_riesgo}</b> de {total_pacientes} pacientes ({porcentaje_riesgo:.1f}%) presentan diagnósticos de riesgo cardiovascular o metabólico. Este hallazgo sugiere una <b>carga significativa de enfermedad crónica</b> en la población estudiada."""
+    story.append(Paragraph(interpretacion_text, normal_style))
+    story.append(Spacer(1, 10))
+
+    # Análisis de la precisión del modelo
+    accuracy_interpretation = ""
+    if model_results['accuracy'] >= 0.90:
+        accuracy_interpretation = "excelente capacidad predictiva"
+    elif model_results['accuracy'] >= 0.85:
+        accuracy_interpretation = "muy buena capacidad predictiva"
+    elif model_results['accuracy'] >= 0.75:
+        accuracy_interpretation = "buena capacidad predictiva"
+    else:
+        accuracy_interpretation = "capacidad predictiva moderada"
+
+    modelo_text = f"""El modelo de Machine Learning desarrollado con <b>XGBoost</b> alcanzó una precisión del <b>{model_results['accuracy']:.2%}</b>, lo que indica una <b>{accuracy_interpretation}</b> para clasificar los diagnósticos. Esta precisión permite identificar patrones de riesgo de manera confiable y puede ser utilizada como herramienta de apoyo en la toma de decisiones clínicas."""
+    story.append(Paragraph(modelo_text, normal_style))
+    story.append(Spacer(1, 12))
+
+    story.append(Paragraph("6.2 Factores de Riesgo Identificados", subtitle2_style))
+
+    # Analizar las features más importantes
+    top_features = sorted(model_results['feature_importance'].items(), key=lambda x: x[1], reverse=True)[:5]
+
+    factores_text = """El análisis de importancia de características reveló los <b>factores más determinantes</b> en la predicción de diagnósticos:"""
+    story.append(Paragraph(factores_text, normal_style))
+    story.append(Spacer(1, 8))
+
+    for i, (feature, importance) in enumerate(top_features, 1):
+        # Traducir nombre técnico a lenguaje clínico
+        feature_nombre = feature.replace('_', ' ').title()
+        if 'Glucosa' in feature:
+            explicacion = "indicador clave de diabetes y prediabetes"
+        elif 'IMC' in feature or 'Peso' in feature:
+            explicacion = "factor de riesgo cardiovascular y metabólico"
+        elif 'Presion' in feature:
+            explicacion = "marcador primario de hipertensión arterial"
+        elif 'Edad' in feature:
+            explicacion = "factor de riesgo no modificable asociado a enfermedades crónicas"
+        elif 'Colesterol' in feature:
+            explicacion = "indicador de riesgo cardiovascular"
+        else:
+            explicacion = "contribuye significativamente al riesgo"
+
+        factor_item = f"<b>{i}. {feature_nombre}</b> ({importance:.1%} de importancia): {explicacion}."
+        story.append(Paragraph(factor_item, list_style))
+
+    story.append(Spacer(1, 12))
+
+    story.append(Paragraph("6.3 Implicaciones para la Salud Pública", subtitle2_style))
+
+    implicaciones_text = f"""Los hallazgos de este análisis tienen <b>importantes implicaciones para la salud pública</b>:"""
+    story.append(Paragraph(implicaciones_text, normal_style))
+    story.append(Spacer(1, 8))
+
+    implicaciones = [
+        f"<b>Alta prevalencia de riesgo:</b> Con {porcentaje_riesgo:.1f}% de la población en categorías de riesgo, se requieren intervenciones preventivas a gran escala.",
+        "<b>Detección temprana:</b> El modelo de ML puede ayudar a identificar pacientes en riesgo antes de que desarrollen complicaciones graves.",
+        "<b>Personalización del tratamiento:</b> La importancia de diferentes factores varía entre pacientes, permitiendo enfoques terapéuticos individualizados.",
+        "<b>Optimización de recursos:</b> La predicción precisa permite priorizar recursos de salud hacia poblaciones de mayor riesgo."
+    ]
+
+    for implicacion in implicaciones:
+        story.append(Paragraph(f"• {implicacion}", list_style))
+
+    story.append(Spacer(1, 12))
+
+    story.append(Paragraph("6.4 Limitaciones del Análisis", subtitle2_style))
+
+    limitaciones_text = """Es importante reconocer las <b>limitaciones</b> de este análisis:"""
+    story.append(Paragraph(limitaciones_text, normal_style))
+    story.append(Spacer(1, 8))
+
+    limitaciones = [
+        "Los resultados son específicos de la población estudiada y pueden no ser generalizables a otras poblaciones.",
+        "El modelo predice diagnósticos basándose en patrones estadísticos, pero no reemplaza el juicio clínico profesional.",
+        "Factores psicosociales y ambientales no capturados en los datos pueden influir en los resultados de salud.",
+        "La calidad de las predicciones depende de la exactitud y completitud de los datos originales."
+    ]
+
+    for i, limitacion in enumerate(limitaciones, 1):
+        story.append(Paragraph(f"{i}. {limitacion}", list_style))
+
+    story.append(Spacer(1, 20))
+
+    # 7. CONCLUSIONES Y RECOMENDACIONES
+    story.append(Paragraph("7. CONCLUSIONES Y RECOMENDACIONES", subtitle_style))
+
+    story.append(Paragraph("7.1 Hallazgos Principales", subtitle2_style))
     conclusiones_text = f"""El análisis predictivo mediante machine learning alcanzó una precisión del {model_results['accuracy']:.2%} en la detección de tendencias en enfermedades crónicas. Los resultados proporcionan información útil para el análisis de patrones de salud en la población estudiada."""
     story.append(Paragraph(conclusiones_text, normal_style))
-    
-    story.append(Paragraph("6.2 Recomendaciones Estratégicas", subtitle2_style))
+
+    story.append(Paragraph("7.2 Recomendaciones Estratégicas", subtitle2_style))
     recomendaciones = [
         "Implementar sistemas de vigilancia epidemiológica predictiva en tiempo real",
         "Desarrollar políticas de salud pública basadas en perfiles de riesgo individualizados",

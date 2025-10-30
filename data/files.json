@@ -1,12 +1,12 @@
 [
   {
-    "id": "d9462730-be82-4b5a-acad-a1f708c3d6f8",
-    "filename": "7630ff69-ab02-490f-908f-a73d7a574f1b.xlsx",
-    "original_filename": "dataset_medico_completo_1000.xlsx",
-    "file_path": "uploads\\7630ff69-ab02-490f-908f-a73d7a574f1b.xlsx",
-    "upload_date": "2025-10-30T00:02:42.077904",
-    "file_size": 123221,
+    "id": "0260c067-25ec-4ca1-a6b5-c504282fe398",
+    "filename": "9dabc532-f72a-4584-832c-8a089c1f7202.xlsx",
+    "original_filename": "dataset_medico_completo_20000.xlsx",
+    "file_path": "uploads\\9dabc532-f72a-4584-832c-8a089c1f7202.xlsx",
+    "upload_date": "2025-10-30T00:16:09.344619",
+    "file_size": 2391832,
     "status": "completed",
-    "records_count": 1000
+    "records_count": 20000
   }
 ]
