@@ -1786,15 +1786,45 @@ async def analyze_file(request: AnalysisRequest, background_tasks: BackgroundTas
             raise ValueError(f"Faltan las siguientes columnas requeridas: {', '.join(missing_columns)}")
         
         processed_data, label_encoder = preprocess_data(df)
-        
+
         # Crear modelo ML
         model, accuracy, feature_importance, y_test, y_pred, detailed_metrics = create_ml_model(processed_data)
-        
+
+        # Guardar modelo entrenado para simulaciones
+        import joblib
+        models_dir = "models"
+        os.makedirs(models_dir, exist_ok=True)
+        model_path = os.path.join(models_dir, f"model_{request.file_id}.pkl")
+
+        # Guardar modelo, features y datos de entrenamiento
+        # Solo guardar las columnas necesarias (features + Diagnostico) para evitar confusión
+        features_list = [
+            'Edad', 'Sexo_encoded', 'Peso', 'Altura', 'IMC',
+            'Presion_Sistolica', 'Presion_Diastolica', 'Glucosa',
+            'Colesterol', 'Fumador_encoded',
+            'Presion_Media', 'Presion_Pulso', 'Ratio_Colesterol_Edad',
+            'Score_Cardiovascular', 'IMC_x_Edad', 'Glucosa_x_IMC',
+            'Presion_x_Edad', 'Glucosa_x_Edad', 'Ratio_Sistolica_Diastolica',
+            'Categoria_IMC', 'Categoria_Edad', 'Categoria_Glucosa', 'Categoria_Presion'
+        ]
+
+        # Solo guardar las columnas de features + Diagnostico
+        columnas_necesarias = features_list + ['Diagnostico']
+        columnas_disponibles = [col for col in columnas_necesarias if col in processed_data.columns]
+
+        model_data = {
+            'model': model,
+            'feature_names': features_list,
+            'label_encoder': label_encoder,
+            'processed_data': processed_data[columnas_disponibles]  # Solo features relevantes
+        }
+        joblib.dump(model_data, model_path)
+
         # Generar gráficos
         charts_dir = "reports/charts"
         os.makedirs(charts_dir, exist_ok=True)
         charts = generate_charts_optimized(processed_data, charts_dir)
-        
+
         # Generar reporte PDF
         report_filename = f"reporte_{request.file_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         report_path = os.path.join("downloads", report_filename)
@@ -2107,15 +2137,45 @@ def analyze_file_with_monitoring(request: AnalysisRequest):
             raise ValueError(f"Faltan las siguientes columnas requeridas: {', '.join(missing_columns)}")
         
         processed_data, label_encoder = preprocess_data(df)
-        
+
         # Crear modelo ML
         model, accuracy, feature_importance, y_test, y_pred, detailed_metrics = create_ml_model(processed_data)
-        
+
+        # Guardar modelo entrenado para simulaciones
+        import joblib
+        models_dir = "models"
+        os.makedirs(models_dir, exist_ok=True)
+        model_path = os.path.join(models_dir, f"model_{request.file_id}.pkl")
+
+        # Guardar modelo, features y datos de entrenamiento
+        # Solo guardar las columnas necesarias (features + Diagnostico) para evitar confusión
+        features_list = [
+            'Edad', 'Sexo_encoded', 'Peso', 'Altura', 'IMC',
+            'Presion_Sistolica', 'Presion_Diastolica', 'Glucosa',
+            'Colesterol', 'Fumador_encoded',
+            'Presion_Media', 'Presion_Pulso', 'Ratio_Colesterol_Edad',
+            'Score_Cardiovascular', 'IMC_x_Edad', 'Glucosa_x_IMC',
+            'Presion_x_Edad', 'Glucosa_x_Edad', 'Ratio_Sistolica_Diastolica',
+            'Categoria_IMC', 'Categoria_Edad', 'Categoria_Glucosa', 'Categoria_Presion'
+        ]
+
+        # Solo guardar las columnas de features + Diagnostico
+        columnas_necesarias = features_list + ['Diagnostico']
+        columnas_disponibles = [col for col in columnas_necesarias if col in processed_data.columns]
+
+        model_data = {
+            'model': model,
+            'feature_names': features_list,
+            'label_encoder': label_encoder,
+            'processed_data': processed_data[columnas_disponibles]  # Solo features relevantes
+        }
+        joblib.dump(model_data, model_path)
+
         # Generar gráficos
         charts_dir = "reports/charts"
         os.makedirs(charts_dir, exist_ok=True)
         charts = generate_charts_optimized(processed_data, charts_dir)
-        
+
         # Generar reporte PDF
         report_filename = f"reporte_{request.file_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         report_path = os.path.join("downloads", report_filename)

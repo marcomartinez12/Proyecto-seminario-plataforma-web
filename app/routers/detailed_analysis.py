@@ -881,6 +881,351 @@ def generate_educational_html(file_name, total_records, columns_count, columns_l
         </div>
 
         <!-- CONCLUSIÓN -->
+        <!-- SIMULADOR DE 3 ESCENARIOS - BOTÓN -->
+        <div class="step-card">
+            <div class="step-number">8</div>
+            <div class="step-content">
+                <h2 class="step-title">
+                    <i class="fas fa-flask"></i>
+                    Simulación de Escenarios
+                </h2>
+
+                <div class="explanation">
+                    <strong>¿Qué pasaría si los pacientes cambiaran su estilo de vida?</strong><br>
+                    Simula 3 escenarios diferentes usando el modelo entrenado para predecir el impacto
+                    de cambios en los hábitos de salud.
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button id="openScenariosBtn" onclick="openScenariosModal()" style="
+                        background: linear-gradient(135deg, #667eea, #764ba2);
+                        color: white;
+                        border: none;
+                        padding: 20px 50px;
+                        font-size: 18px;
+                        font-weight: 600;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+                        transition: all 0.3s ease;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 12px;
+                    ">
+                        <i class="fas fa-play-circle" style="font-size: 24px;"></i>
+                        <span>Simular Escenarios</span>
+                    </button>
+                </div>
+
+                <div class="success-box" style="margin-top: 30px;">
+                    <strong><i class="fas fa-info-circle"></i> Información:</strong><br>
+                    La simulación calcula predicciones basadas en el perfil promedio de pacientes con riesgo
+                    y muestra cómo diferentes cambios podrían impactar la salud.
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE ESCENARIOS -->
+        <div id="scenariosModal" style="
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        ">
+            <div style="
+                max-width: 1400px;
+                margin: 50px auto;
+                background: #1a1a2e;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                position: relative;
+                animation: slideDown 0.4s ease;
+            ">
+                <!-- Header del Modal -->
+                <div style="
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    padding: 30px;
+                    border-radius: 20px 20px 0 0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <div>
+                        <h2 style="margin: 0; color: white; font-size: 28px; font-weight: 700;">
+                            <i class="fas fa-flask"></i>
+                            Simulación de Escenarios
+                        </h2>
+                        <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">
+                            ¿Qué pasaría si los pacientes cambiaran su estilo de vida?
+                        </p>
+                    </div>
+                    <button onclick="closeScenariosModal()" style="
+                        background: rgba(255, 255, 255, 0.2);
+                        border: none;
+                        color: white;
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        cursor: pointer;
+                        font-size: 20px;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Contenido del Modal -->
+                <div style="padding: 40px;">
+                    <!-- Loading State -->
+                    <div id="modal-scenarios-loading" style="text-align: center; padding: 60px 0;">
+                        <div style="display: inline-block; position: relative;">
+                            <div style="
+                                width: 80px;
+                                height: 80px;
+                                border: 8px solid #333;
+                                border-top: 8px solid #667eea;
+                                border-radius: 50%;
+                                animation: spin 1s linear infinite;
+                            "></div>
+                            <div style="
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                            ">
+                                <i class="fas fa-flask" style="font-size: 32px; color: #667eea;"></i>
+                            </div>
+                        </div>
+                        <p style="color: #999; margin-top: 25px; font-size: 18px; font-weight: 500;">Calculando escenarios...</p>
+                        <p style="color: #666; margin-top: 10px; font-size: 14px;">Esto puede tomar unos segundos</p>
+                    </div>
+
+                    <!-- Scenarios Content -->
+                    <div id="modal-scenarios-content" style="display: none;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
+
+                        <!-- ESCENARIO 1: SIN CAMBIOS -->
+                        <div class="scenario-box" style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 30px; border-radius: 12px; color: white; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.3);">
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <i class="fas fa-minus-circle" style="font-size: 48px; opacity: 0.9;"></i>
+                            </div>
+                            <h3 style="text-align: center; font-size: 22px; margin-bottom: 15px; font-weight: 700;" id="escenario1-titulo">Sin Cambios</h3>
+                            <div style="text-align: center; font-size: 48px; font-weight: 700; margin: 20px 0;" id="escenario1-riesgo">--</div>
+                            <p style="text-align: center; font-size: 14px; opacity: 0.9; margin-bottom: 20px;" id="escenario1-desc">Manteniendo el estilo de vida actual</p>
+                            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                                <div style="font-size: 13px; opacity: 0.9;" id="escenario1-cambios">
+                                    • Sin modificaciones
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ESCENARIO 2: CAMBIOS MODERADOS -->
+                        <div class="scenario-box" style="background: linear-gradient(135deg, #10b981, #059669); padding: 30px; border-radius: 12px; color: white; box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);">
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <i class="fas fa-check-circle" style="font-size: 48px; opacity: 0.9;"></i>
+                            </div>
+                            <h3 style="text-align: center; font-size: 22px; margin-bottom: 15px; font-weight: 700;" id="escenario2-titulo">Cambios Moderados</h3>
+                            <div style="text-align: center; font-size: 48px; font-weight: 700; margin: 20px 0;" id="escenario2-riesgo">--</div>
+                            <p style="text-align: center; font-size: 14px; opacity: 0.9; margin-bottom: 20px;" id="escenario2-desc">Mejoras alcanzables</p>
+                            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                                <div style="font-size: 13px; opacity: 0.9; line-height: 1.8;" id="escenario2-cambios">
+                                    Cargando...
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 6px;">
+                                <div style="font-size: 12px; opacity: 0.8;">Mejora potencial</div>
+                                <div style="font-size: 24px; font-weight: 700;" id="escenario2-mejora">--</div>
+                            </div>
+                        </div>
+
+                        <!-- ESCENARIO 3: CAMBIOS ÓPTIMOS -->
+                        <div class="scenario-box" style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 30px; border-radius: 12px; color: white; box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);">
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <i class="fas fa-star" style="font-size: 48px; opacity: 0.9;"></i>
+                            </div>
+                            <h3 style="text-align: center; font-size: 22px; margin-bottom: 15px; font-weight: 700;" id="escenario3-titulo">Cambios Óptimos</h3>
+                            <div style="text-align: center; font-size: 48px; font-weight: 700; margin: 20px 0;" id="escenario3-riesgo">--</div>
+                            <p style="text-align: center; font-size: 14px; opacity: 0.9; margin-bottom: 20px;" id="escenario3-desc">Máxima mejora posible</p>
+                            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                                <div style="font-size: 13px; opacity: 0.9; line-height: 1.8;" id="escenario3-cambios">
+                                    Cargando...
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 6px;">
+                                <div style="font-size: 12px; opacity: 0.8;">Mejora potencial</div>
+                                <div style="font-size: 24px; font-weight: 700;" id="escenario3-mejora">--</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                        <div class="success-box" style="margin-top: 30px;">
+                            <strong><i class="fas fa-lightbulb"></i> Interpretación:</strong><br>
+                            Estos escenarios muestran cómo cambios en el estilo de vida pueden impactar el riesgo de enfermedad.
+                            Los cambios moderados son más fáciles de mantener a largo plazo, mientras que los óptimos requieren
+                            mayor compromiso pero ofrecen la mejor reducción de riesgo.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            @keyframes fadeIn {{
+                from {{ opacity: 0; }}
+                to {{ opacity: 1; }}
+            }}
+
+            @keyframes slideDown {{
+                from {{
+                    opacity: 0;
+                    transform: translateY(-50px);
+                }}
+                to {{
+                    opacity: 1;
+                    transform: translateY(0);
+                }}
+            }}
+
+            @keyframes spin {{
+                0% {{ transform: rotate(0deg); }}
+                100% {{ transform: rotate(360deg); }}
+            }}
+
+            @keyframes pulse {{
+                0%, 100% {{ transform: scale(1); }}
+                50% {{ transform: scale(1.05); }}
+            }}
+
+            #openScenariosBtn:hover {{
+                transform: translateY(-2px);
+                box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+            }}
+
+            #openScenariosBtn:active {{
+                transform: translateY(0);
+            }}
+
+            .scenario-box {{
+                transition: all 0.3s ease;
+                animation: slideDown 0.5s ease;
+            }}
+
+            .scenario-box:hover {{
+                transform: translateY(-5px);
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4) !important;
+            }}
+        </style>
+
+        <script>
+            let scenariosDataCache = null;
+
+            function openScenariosModal() {{
+                const modal = document.getElementById('scenariosModal');
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden'; // Prevent background scroll
+
+                // Si ya tenemos los datos cargados, mostrarlos inmediatamente
+                if (scenariosDataCache) {{
+                    displayScenarios(scenariosDataCache);
+                }} else {{
+                    // Si no, cargar los datos
+                    loadScenarios();
+                }}
+            }}
+
+            function closeScenariosModal() {{
+                const modal = document.getElementById('scenariosModal');
+                modal.style.display = 'none';
+                document.body.style.overflow = ''; // Restore scroll
+            }}
+
+            // Cerrar modal al hacer clic fuera del contenido
+            document.addEventListener('click', function(event) {{
+                const modal = document.getElementById('scenariosModal');
+                if (event.target === modal) {{
+                    closeScenariosModal();
+                }}
+            }});
+
+            // Cerrar modal con tecla ESC
+            document.addEventListener('keydown', function(event) {{
+                if (event.key === 'Escape') {{
+                    closeScenariosModal();
+                }}
+            }});
+
+            async function loadScenarios() {{
+                try {{
+                    // Obtener file_id de la URL
+                    const urlParts = window.location.pathname.split('/');
+                    const fileId = urlParts[urlParts.length - 1];
+
+                    const response = await fetch(`/api/scenarios/${{fileId}}`);
+                    if (!response.ok) throw new Error('Error al cargar escenarios');
+
+                    const data = await response.json();
+                    scenariosDataCache = data; // Guardar en cache
+
+                    displayScenarios(data);
+
+                }} catch (error) {{
+                    console.error('Error:', error);
+                    document.getElementById('modal-scenarios-loading').innerHTML = `
+                        <div style="color: #f5576c; text-align: center; padding: 40px;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 64px;"></i>
+                            <h3 style="margin-top: 20px; font-size: 22px;">Error al cargar los escenarios</h3>
+                            <p style="color: #999; margin-top: 10px;">${{error.message}}</p>
+                            <button onclick="loadScenarios()" style="
+                                margin-top: 20px;
+                                background: #667eea;
+                                color: white;
+                                border: none;
+                                padding: 12px 30px;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                font-size: 14px;
+                                font-weight: 600;
+                            ">
+                                <i class="fas fa-redo"></i> Reintentar
+                            </button>
+                        </div>
+                    `;
+                }}
+            }}
+
+            function displayScenarios(data) {{
+                // Ocultar loading, mostrar content
+                document.getElementById('modal-scenarios-loading').style.display = 'none';
+                document.getElementById('modal-scenarios-content').style.display = 'block';
+
+                // ESCENARIO 1: Sin cambios
+                document.getElementById('escenario1-titulo').textContent = data.escenario_actual.titulo;
+                document.getElementById('escenario1-riesgo').textContent = data.escenario_actual.riesgo.toFixed(1) + '%';
+                document.getElementById('escenario1-desc').textContent = data.escenario_actual.descripcion;
+
+                // ESCENARIO 2: Cambios moderados
+                document.getElementById('escenario2-titulo').textContent = data.escenario_moderado.titulo;
+                document.getElementById('escenario2-riesgo').textContent = data.escenario_moderado.riesgo.toFixed(1) + '%';
+                document.getElementById('escenario2-desc').textContent = data.escenario_moderado.descripcion;
+                document.getElementById('escenario2-cambios').innerHTML = data.escenario_moderado.cambios.map(c => `• ${{c}}`).join('<br>');
+                document.getElementById('escenario2-mejora').textContent = '-' + data.mejora_moderada.toFixed(1) + '%';
+
+                // ESCENARIO 3: Cambios óptimos
+                document.getElementById('escenario3-titulo').textContent = data.escenario_optimo.titulo;
+                document.getElementById('escenario3-riesgo').textContent = data.escenario_optimo.riesgo.toFixed(1) + '%';
+                document.getElementById('escenario3-desc').textContent = data.escenario_optimo.descripcion;
+                document.getElementById('escenario3-cambios').innerHTML = data.escenario_optimo.cambios.map(c => `• ${{c}}`).join('<br>');
+                document.getElementById('escenario3-mejora').textContent = '-' + data.mejora_optima.toFixed(1) + '%';
+            }}
+        </script>
+
         <div class="step-card" style="background: #1e1e1e; color: white; border: 1px solid #2a2a2a;">
             <div class="step-content">
                 <h2 style="color: white; text-align: center; font-size: 2rem; margin-bottom: 20px; font-weight: 600;">

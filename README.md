@@ -110,10 +110,11 @@ Una vez completado el análisis, tienes 4 opciones:
   3. Importancia de Características
   4. Métricas de Precisión por Clase
 
-**🔬 Análisis Detallado** (NUEVO)
+**🔬 Análisis Detallado**
 - Se abre en nueva pestaña
 - Explicación educativa paso a paso de cómo funciona XGBoost
-- 10 pasos con gráficos y explicaciones sencillas
+- 8 pasos con gráficos y explicaciones sencillas
+- Simulador de escenarios con modelo ML en tiempo real
 - Diseño dark mode estilo "Grok AI"
 - Fuente Inter para mejor legibilidad
 
@@ -133,6 +134,82 @@ Una vez completado el análisis, tienes 4 opciones:
 - Confirmar eliminación
 - La lista se actualiza **automáticamente sin refrescar la página**
 - Si eliminas todos los archivos, verás el mensaje "No hay archivos subidos aún"
+
+---
+
+## 🔬 Simulador de Escenarios
+
+### ¿Qué es?
+
+Una herramienta interactiva que simula el impacto de cambios en el estilo de vida sobre el riesgo de enfermedades usando el modelo XGBoost entrenado con tus datos.
+
+### ¿Cómo funciona?
+
+1. **Accede al simulador**: En el Análisis Detallado, encontrarás el botón "Simular Escenarios"
+2. **Haz clic**: Se abrirá un modal elegante con animación de carga
+3. **Visualiza 3 escenarios**:
+   - **Sin Cambios**: Riesgo actual manteniendo el estilo de vida
+   - **Cambios Moderados**: Riesgo con mejoras alcanzables en 6-12 meses
+   - **Cambios Óptimos**: Riesgo con transformación completa del estilo de vida
+
+### Cálculos realizados
+
+**Escenario Actual (Sin Cambios)**
+- Perfil mediano de pacientes con riesgo
+- IMC, glucosa, presión, colesterol en valores actuales
+- Fumador: Estado actual
+- **Resultado**: Riesgo base (típicamente 85-100%)
+
+**Escenario Moderado (6-12 meses)**
+- IMC: -20% (pérdida de peso significativa)
+- Glucosa: -30% (control dietético y medicación)
+- Presión arterial: -15% (ejercicio y medicación)
+- Colesterol: -20% (dieta y estatinas)
+- **Resultado**: Riesgo reducido (típicamente 2-15%)
+- **Mejora potencial**: 80-98%
+
+**Escenario Óptimo (1-2 años)**
+- IMC: -35% (peso saludable alcanzado)
+- Glucosa: -50% (control estricto)
+- Presión arterial: -30% (presión óptima)
+- Colesterol: -40% (niveles óptimos)
+- Fumador: No (dejar de fumar)
+- Score cardiovascular: -60%
+- **Resultado**: Riesgo mínimo (típicamente 0.5-5%)
+- **Mejora potencial**: 95-99.5%
+
+### Interpretación de resultados
+
+**Ejemplo real de resultados:**
+
+```
+Sin Cambios:       100.0% de riesgo
+Cambios Moderados:   2.1% de riesgo  (97.8% de mejora)
+Cambios Óptimos:     0.6% de riesgo  (99.3% de mejora)
+```
+
+**¿Qué significa esto?**
+
+- **100% de riesgo**: El modelo predice con certeza que el perfil actual tiene condiciones de salud (Diabetes, Hipertensión, Obesidad)
+- **2.1% de riesgo**: Con cambios moderados, el riesgo baja a casi nada
+- **0.6% de riesgo**: Con cambios óptimos, el paciente estaría tan saludable como alguien sin antecedentes
+
+### Características técnicas
+
+- **Usa el modelo entrenado**: Las predicciones son del mismo XGBoost que analizó tus datos
+- **Actualiza features derivadas**: Recalcula IMC_x_Edad, Glucosa_x_IMC, categorías, etc.
+- **Basado en datos reales**: Toma el perfil mediano de pacientes con diagnósticos de riesgo
+- **Cache inteligente**: Si abres el modal dos veces, la segunda vez carga instantáneamente
+- **Animaciones fluidas**: Loading spinner, fade-in, slide-down
+- **Responsive**: Se adapta a diferentes tamaños de pantalla
+
+### Tecnología
+
+- **Backend**: FastAPI endpoint `/api/scenarios/{file_id}`
+- **Modelo**: XGBoost cargado desde `models/model_{file_id}.pkl`
+- **Datos**: Usa processed_data guardado (solo 24 columnas: 23 features + Diagnostico)
+- **Cálculo**: predict_proba() en tiempo real
+- **Frontend**: Modal con JavaScript vanilla, animaciones CSS
 
 ---
 
@@ -200,7 +277,9 @@ Proyecto-seminario-plataforma-web/
 │   │   ├── files.py              - Gestión de archivos multi-formato
 │   │   ├── analysis.py           - Análisis ML con XGBoost
 │   │   ├── ai_analysis.py        - Explicaciones con IA
-│   │   └── detailed_analysis.py  - Análisis educativo paso a paso (NUEVO)
+│   │   ├── detailed_analysis.py  - Análisis educativo paso a paso
+│   │   ├── scenarios.py          - Simulador de escenarios (NUEVO)
+│   │   └── synthetic_data.py     - Generación de datos sintéticos
 │   ├── schemas.py                - Modelos de datos Pydantic
 │   └── utils.py                  - JSONStorage para archivos JSON
 ├── static/
@@ -212,6 +291,7 @@ Proyecto-seminario-plataforma-web/
 │   └── analysis.json             - Base de datos de análisis
 ├── uploads/                      - Archivos subidos temporalmente
 ├── reports/                      - Reportes PDF generados
+├── models/                       - Modelos ML entrenados guardados (NUEVO)
 ├── requirements.txt              - Dependencias Python
 ├── main.py                       - Launcher del servidor FastAPI
 ├── start.bat                     - Inicio rápido (abre navegador automáticamente)
@@ -234,8 +314,11 @@ Proyecto-seminario-plataforma-web/
 - `GET /api/analysis/results/{file_id}` - Obtener resultados JSON
 - `GET /api/analysis/charts/{file_id}` - Obtener datos para gráficos
 
-### Análisis Detallado (NUEVO)
+### Análisis Detallado
 - `GET /api/detailed-analysis/{file_id}` - Página educativa paso a paso
+
+### Simulador de Escenarios (NUEVO)
+- `GET /api/scenarios/{file_id}` - Calcular 3 escenarios de cambio de estilo de vida
 
 ### IA
 - `POST /api/ai-analysis/{file_id}` - Generar explicación con IA
@@ -262,6 +345,7 @@ matplotlib           - Gráficos estáticos
 seaborn              - Visualizaciones estadísticas
 reportlab            - Generación de PDFs
 openpyxl             - Lectura de archivos Excel
+joblib               - Serialización de modelos ML
 httpx                - Cliente HTTP async para IA
 python-dotenv        - Variables de entorno
 ```
@@ -353,7 +437,15 @@ El reporte profesional incluye:
 
 ## Historial de Cambios
 
-### v3.5 (Actual)
+### v3.6 (Actual)
+- ✅ **Simulador de Escenarios** - Modal interactivo con 3 escenarios de cambio de estilo de vida
+- ✅ **Predicciones en tiempo real** - Usa el modelo XGBoost entrenado para calcular riesgo
+- ✅ **Guardado de modelos** - Los modelos ML se guardan en `models/` para reutilización
+- ✅ **Animaciones avanzadas** - Modal con fade-in, slide-down, loading spinner con icono
+- ✅ **Cache inteligente** - Los escenarios se cargan una vez y se cachean
+- ✅ **Cálculos médicos precisos** - Actualiza features derivadas (IMC_x_Edad, categorías, etc.)
+
+### v3.5
 - ✅ **Análisis Detallado** educativo paso a paso en nueva pestaña
 - ✅ **Diseño dark mode** negro mate con fuente Inter
 - ✅ **Animaciones simplificadas** con spinner, progress bar y steps
@@ -401,4 +493,4 @@ Proyecto académico - Seminario de Plataformas Web
 
 ## Versión
 
-**3.5** - Sistema profesional con XGBoost, análisis educativo detallado, gráficas interactivas y UX mejorada
+**3.6** - Sistema profesional con XGBoost, simulador de escenarios interactivo, predicciones en tiempo real y análisis educativo detallado
