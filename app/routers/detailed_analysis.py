@@ -919,8 +919,9 @@ def generate_educational_html(file_name, total_records, columns_count, columns_l
 
                 <div class="success-box" style="margin-top: 30px;">
                     <strong><i class="fas fa-info-circle"></i> Información:</strong><br>
-                    La simulación calcula predicciones basadas en el perfil promedio de pacientes con riesgo
-                    y muestra cómo diferentes cambios podrían impactar la salud.
+                    La simulación calcula predicciones basadas en el <strong>perfil promedio de pacientes con diagnósticos de riesgo</strong>
+                    (Hipertensión, Diabetes, Prediabetes, Obesidad). Los cambios mostrados son de carácter educativo y
+                    <strong>pueden no aplicar igual para todos los pacientes</strong>. Cada persona requiere evaluación médica individualizada.
                 </div>
             </div>
         </div>
@@ -1008,6 +1009,32 @@ def generate_educational_html(file_name, total_records, columns_count, columns_l
 
                     <!-- Scenarios Content -->
                     <div id="modal-scenarios-content" style="display: none;">
+
+                        <!-- Nota informativa -->
+                        <div style="
+                            background: linear-gradient(135deg, #667eea22, #764ba222);
+                            border-left: 4px solid #667eea;
+                            padding: 20px;
+                            border-radius: 8px;
+                            margin-bottom: 25px;
+                        ">
+                            <div style="display: flex; align-items: start; gap: 15px;">
+                                <i class="fas fa-info-circle" style="color: #667eea; font-size: 24px; margin-top: 3px;"></i>
+                                <div>
+                                    <strong style="color: #667eea; font-size: 16px; display: block; margin-bottom: 8px;">
+                                        Nota Importante
+                                    </strong>
+                                    <p style="color: #bbb; margin: 0; line-height: 1.6; font-size: 14px;">
+                                        Esta simulación está basada en el <strong>perfil promedio de pacientes con diagnósticos de riesgo</strong>
+                                        (Hipertensión, Diabetes, Prediabetes, Obesidad, Síndrome Metabólico). Los cambios recomendados
+                                        pueden <strong>no aplicar de la misma manera para todos los pacientes</strong>, ya que cada persona tiene
+                                        necesidades específicas según su condición particular. Esta herramienta es de carácter <strong>educativo
+                                        e informativo</strong> y no reemplaza la evaluación médica profesional.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
 
                         <!-- ESCENARIO 1: SIN CAMBIOS -->

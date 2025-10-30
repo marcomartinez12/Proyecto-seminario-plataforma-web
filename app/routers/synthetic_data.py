@@ -293,7 +293,7 @@ async def get_generation_info():
                 "count": 24
             }
         },
-        "formats": ["excel", "csv", "json"],
+        "formats": ["excel"],
         "min_records": 100,
         "max_records": 50000,
         "diagnostics": ["Normal", "Prediabetes", "Hipertension", "Diabetes", "Obesidad"]
