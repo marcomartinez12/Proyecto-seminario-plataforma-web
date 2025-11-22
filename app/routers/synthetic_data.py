@@ -19,7 +19,7 @@ router = APIRouter()
 class DatasetGenerationRequest(BaseModel):
     """Modelo para solicitud de generación de dataset"""
     num_records: int = Field(default=1000, ge=100, le=50000, description="Número de registros (100-50000)")
-    level: Literal["MINIMO", "ESTANDAR", "COMPLETO"] = Field(default="COMPLETO", description="Nivel de columnas")
+    level: Literal["ESTANDAR", "COMPLETO"] = Field(default="ESTANDAR", description="Nivel de columnas")
     format: Literal["excel", "csv", "json"] = Field(default="excel", description="Formato de salida")
     seed: int = Field(default=42, description="Semilla para reproducibilidad")
 
@@ -31,7 +31,7 @@ def generar_dataset_medico(n_registros: int = 10000, seed: int = 42, nivel: str 
     Parámetros:
     - n_registros: Número de pacientes a generar
     - seed: Semilla para reproducibilidad
-    - nivel: "MINIMO", "ESTANDAR" o "COMPLETO"
+    - nivel: "ESTANDAR" o "COMPLETO"
     """
 
     np.random.seed(seed)
@@ -212,9 +212,8 @@ def generar_dataset_medico(n_registros: int = 10000, seed: int = 42, nivel: str 
         df['Consumo_Alcohol'] = consumo_alcohol
 
     # ===== FILTRAR COLUMNAS SEGÚN NIVEL =====
-    if nivel == "MINIMO":
-        columnas_minimas = ['ID', 'Edad', 'Sexo', 'Glucosa', 'Presion_Sistolica', 'Presion_Arterial', 'Diagnostico']
-        df = df[columnas_minimas]
+    # MINIMO eliminado - solo ESTANDAR y COMPLETO disponibles
+    # Ambos niveles incluyen las 10 columnas obligatorias
 
     return df
 
@@ -277,24 +276,22 @@ async def get_generation_info():
     """
     return {
         "levels": {
-            "MINIMO": {
-                "description": "Columnas mínimas requeridas",
-                "columns": ["ID", "Edad", "Sexo", "Glucosa", "Presion_Sistolica", "Presion_Arterial", "Diagnostico"],
-                "count": 7
-            },
             "ESTANDAR": {
                 "description": "Columnas estándar (incluye antropometría básica)",
                 "columns": ["ID", "Edad", "Sexo", "Peso", "Altura", "IMC", "Presion_Sistolica", "Presion_Diastolica", "Presion_Arterial", "Glucosa", "Colesterol", "Fumador", "Diagnostico"],
-                "count": 13
+                "count": 13,
+                "note": "Incluye las 10 columnas obligatorias"
             },
             "COMPLETO": {
                 "description": "Todas las columnas disponibles",
                 "columns": ["ID", "Edad", "Sexo", "Peso", "Altura", "IMC", "Presion_Sistolica", "Presion_Diastolica", "Presion_Arterial", "Glucosa", "Colesterol", "Fumador", "Hemoglobina_A1C", "Colesterol_LDL", "Colesterol_HDL", "Trigliceridos", "Circunferencia_Cintura", "Circunferencia_Cadera", "Antecedentes_Familiares", "Creatinina", "Frecuencia_Cardiaca", "Actividad_Fisica", "Consumo_Alcohol", "Diagnostico"],
-                "count": 24
+                "count": 24,
+                "note": "Incluye las 10 columnas obligatorias"
             }
         },
         "formats": ["excel"],
         "min_records": 100,
         "max_records": 50000,
-        "diagnostics": ["Normal", "Prediabetes", "Hipertension", "Diabetes", "Obesidad"]
+        "diagnostics": ["Normal", "Prediabetes", "Hipertension", "Diabetes", "Obesidad"],
+        "required_columns": ["Edad", "Sexo", "Peso", "Altura", "Presion_Sistolica", "Presion_Diastolica", "Glucosa", "Colesterol", "Fumador", "Diagnostico"]
     }

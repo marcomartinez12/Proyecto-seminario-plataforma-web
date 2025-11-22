@@ -184,27 +184,23 @@
                     </label>
                     <div style="display: flex; gap: 1rem; margin-top: 0.8rem;">
                         <label class="radio-card" style="flex: 1;">
-                            <input type="radio" name="dataLevel" value="MINIMO">
-                            <div class="radio-content">
-                                <strong>Mínimo</strong>
-                                <small>7 columnas básicas</small>
-                            </div>
-                        </label>
-                        <label class="radio-card" style="flex: 1;">
-                            <input type="radio" name="dataLevel" value="ESTANDAR">
+                            <input type="radio" name="dataLevel" value="ESTANDAR" checked>
                             <div class="radio-content">
                                 <strong>Estándar</strong>
-                                <small>13 columnas</small>
+                                <small>13 columnas esenciales</small>
                             </div>
                         </label>
                         <label class="radio-card" style="flex: 1;">
-                            <input type="radio" name="dataLevel" value="COMPLETO" checked>
+                            <input type="radio" name="dataLevel" value="COMPLETO">
                             <div class="radio-content">
                                 <strong>Completo</strong>
-                                <small>24 columnas</small>
+                                <small>24 columnas avanzadas</small>
                             </div>
                         </label>
                     </div>
+                    <small style="color: #888; display: block; margin-top: 0.8rem;">
+                        <i class="fas fa-info-circle"></i> Ambas opciones incluyen las 10 columnas obligatorias
+                    </small>
                 </div>
 
                 <div class="form-group" style="margin-top: 1.5rem;">
