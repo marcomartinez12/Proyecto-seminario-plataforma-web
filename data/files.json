@@ -38,5 +38,25 @@
     "file_size": 71994,
     "status": "completed",
     "records_count": 1000
+  },
+  {
+    "id": "b44602fb-ff89-41e2-84f8-8a3a68df9037",
+    "filename": "f07f9a5c-cfe1-4b21-8538-64968cd56804.xlsx",
+    "original_filename": "dataset_medico_completo_50000.xlsx",
+    "file_path": "uploads\\f07f9a5c-cfe1-4b21-8538-64968cd56804.xlsx",
+    "upload_date": "2025-11-21T23:39:50.573222",
+    "file_size": 5974930,
+    "status": "completed",
+    "records_count": 50000
+  },
+  {
+    "id": "483e7b32-a69a-4744-86f2-c51898ccfa3d",
+    "filename": "f88688a8-d703-4c1d-b919-338b0ef1d1ef.xlsx",
+    "original_filename": "dataset_medico_completo_10000.xlsx",
+    "file_path": "uploads\\f88688a8-d703-4c1d-b919-338b0ef1d1ef.xlsx",
+    "upload_date": "2025-11-27T10:20:35.705750",
+    "file_size": 1199287,
+    "status": "completed",
+    "records_count": 10000
   }
 ]
